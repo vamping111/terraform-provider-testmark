@@ -2,6 +2,8 @@ module github.com/hashicorp/terraform-provider-aws
 
 go 1.17
 
+replace github.com/aws/aws-sdk-go => github.com/C2Devel/aws-sdk-go v1.44.10
+
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7
 	github.com/aws/aws-sdk-go v1.44.10

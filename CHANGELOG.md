@@ -1,3 +1,10 @@
+## 4.14.0-CROC1
+
+FEATURES:
+
+* Создание форка terraform-provider-aws
+* Ограничение доступа к неподдерживаемым в C2 API terraform ресурсам
+
 ## 4.14.0 (Unreleased)
 
 FEATURES:

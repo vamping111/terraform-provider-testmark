@@ -35,7 +35,7 @@
 ## Общая информация
 
 **Провайдер** - это плагин для [Terraform](https://www.terraform.io/), который реализует возможность управления
-ресурсами некого сервиса (например, облака или БД) через его API. Для каждого ресурса в провайдер добавляется
+ресурсами некоего сервиса (например, облака или БД) через его API. Для каждого ресурса в провайдер добавляется
 схема и CRUD операции. Информация об API предоставляется в виде отдельного модуля.
 
 **Terraform C2 Provider** реализуется на базе **Terraform AWS Provider**.
@@ -45,7 +45,7 @@
 (ранее - *aws*) форк переименован в  
 *terraform-provider-croccloud*.
 
-todo: добавить ссылку на provider в официиальном registry после регистрации
+Опубликованный провайдер: https://registry.terraform.io/providers/C2Devel/croccloud
 
 ## Начало работы
 
@@ -333,12 +333,14 @@ $ make docscheck
 **Важно!** Terraform не позволяет самостоятельно удалять опубликованный провайдер или одну из его версий.
 Не допускается обновление уже выпущенных версий.
 
+Опубликованный провайдер: https://registry.terraform.io/providers/C2Devel/croccloud
+
 ## Публикация провайдера в private terraform registry
 
 Terraform registry может быть организован в виде s3 бакета.
 
 **Важно!** У бакета должен быть настроен доступ по https
-([инструкция от croc](https://docs.cloud.croc.ru/en/services/object_storage/instructions.html#filestorage-https-for-website-buckets)).
+([инструкция от CROC](https://docs.cloud.croc.ru/en/services/object_storage/instructions.html#filestorage-https-for-website-buckets)).
 При включении web-доступа в качестве индексной страницы требуется указать `index.json`.
 
 Согласно [описанию](https://www.terraform.io/internals/provider-registry-protocol) протокола,
@@ -441,13 +443,13 @@ providers/
 **Важно!** Файл с версиями в s3 бакете будет приведен к виду официального registry.
 
 Для запуска скрипта требуется установка и настройка утилиты [s3cmd](https://s3tools.org/s3cmd)
-([инструкция от croc](https://docs.cloud.croc.ru/ru/api/tools/s3cmd.html?highlight=s3cmd))
+([инструкция от CROC](https://docs.cloud.croc.ru/ru/api/tools/s3cmd.html?highlight=s3cmd))
 и созданный s3 бакет (см. [структура s3 бакета](#структура-s3-бакета)).
 
 Переменные окружения скрипта:
 
 - `TF_REGISTRY_URL` - url terraform registry, по умолчанию: `"https://registry.terraform.io/"`
-- `S3_REGISTRY_URL` - url s3 registry, опязательно
+- `S3_REGISTRY_URL` - url s3 registry, обязательно
 - `S3_BUCKET_NAME` - имя бакета, обязательно
 - `PROVIDER_NAME` - имя провайдера, по умолчанию: `"c2devel/croccloud"`
 - `S3_BACKUP_DIR` - директория для бэкапа бакета, опционально. Если директория не указана,
@@ -463,7 +465,7 @@ $ ./update-s3-registry.sh
 
 ## Использование провайдера
 
-todo: проверить после публикации провайдера + добавить ссылку на провайдер + ссылку на документацию
+Провайдер в terraform registry: https://registry.terraform.io/providers/C2Devel/croccloud
 
 Примеры использования **Terraform** для C2: [C2Devel/terraform-examples](https://github.com/C2Devel/terraform-examples)
 
@@ -477,7 +479,7 @@ terraform {
     aws = {
       # case-insensistive
       source = "c2devel/croccloud"
-      version = "4.13.0-CROC0"
+      version = "4.14.0-CROC1"
     }
   }
 }
@@ -527,8 +529,8 @@ $ export TF_CLI_CONFIG_FILE=<path-to-dev.tfrc>
 
 1. Настройка github actions: прогон тестов, прогон линтеров, сообщения в PR
 2. Доработка acceptance тестов для запуска на C2
-3. Регистрация провайдера и добавление ссылок на terraform registry в README
-4. Использовать в `make build` команду `go build` вместо `go install` для того,
+3. Использовать в `make build` команду `go build` вместо `go install` для того,
    чтобы иметь возможность задать имя артефакта
-5. Обновить схему именования ресурсов: **aws_*** -> **croccloud_***,
-   чтобы иметь возможность использовать в конфигурации в качестве имени провайдера `croccloud`
+4. Обновить схему именования ресурсов: **aws_*** -> **croccloud_***,
+   чтобы иметь возможность использовать в конфигурации в качестве имени провайдера `croccloud`.
+   Потребуется проверка совместимости с aws конфигурациями

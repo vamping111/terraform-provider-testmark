@@ -1,3 +1,11 @@
+## 4.14.0-CROC2
+
+BUG FIXES:
+
+* Terraform VPC. Ошибки при создании VPC ресурсов: отсутствуют фильтры для describe
+* Terraform: error on parsing VPN XML tunnel config
+* fix todo and typos in docs and scripts
+
 ## 4.14.0-CROC1
 
 FEATURES:

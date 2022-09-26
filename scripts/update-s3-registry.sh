@@ -1,5 +1,5 @@
 #!/bin/bash
-#
+
 # Load new versions of specified terraform provider from official terraform registry 
 # to private s3 registry.
 
@@ -160,7 +160,7 @@ for version in $tf_provider_versions; do
   done
 
   ((new_versions_count+=1))
-  echo "  Finsih adding new version '${version}'"
+  echo "  Finish adding new version '${version}'"
 done
 
 if [[ $new_versions_count -gt 0 ]]; then

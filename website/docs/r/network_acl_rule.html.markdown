@@ -3,7 +3,7 @@ subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
 page_title: "AWS: aws_network_acl_rule"
 description: |-
-  Provides an network ACL Rule resource.
+  Provides a network ACL Rule resource.
 ---
 
 # Resource: aws_network_acl_rule
@@ -11,25 +11,29 @@ description: |-
 Creates an entry (a rule) in a network ACL with the specified rule number.
 
 ~> **NOTE on Network ACLs and Network ACL Rules:** Terraform currently
-provides both a standalone Network ACL Rule resource and a [Network ACL](network_acl.html) resource with rules
+provides both a standalone network ACL rule resource and an [aws_network_acl][tf-network-acl] resource with rules
 defined in-line. At this time you cannot use a Network ACL with in-line rules
-in conjunction with any Network ACL Rule resources. Doing so will cause
+in conjunction with any network ACL rule resources. Doing so will cause
 a conflict of rule settings and will overwrite rules.
 
 ## Example Usage
 
 ```terraform
-resource "aws_network_acl" "bar" {
-  vpc_id = aws_vpc.foo.id
+resource "aws_vpc" "example" {
+  cidr_block = "10.1.0.0/16"
 }
 
-resource "aws_network_acl_rule" "bar" {
-  network_acl_id = aws_network_acl.bar.id
+resource "aws_network_acl" "example" {
+  vpc_id = aws_vpc.example.id
+}
+
+resource "aws_network_acl_rule" "example" {
+  network_acl_id = aws_network_acl.example.id
   rule_number    = 200
   egress         = false
   protocol       = "tcp"
   rule_action    = "allow"
-  cidr_block     = aws_vpc.foo.cidr_block
+  cidr_block     = aws_vpc.example.cidr_block
   from_port      = 22
   to_port        = 22
 }
@@ -41,12 +45,12 @@ resource "aws_network_acl_rule" "bar" {
 
 The following arguments are supported:
 
-* `network_acl_id` - (Required) The ID of the network ACL.
+* `network_acl_id` - (Required) ID of the network ACL.
 * `rule_number` - (Required) The rule number for the entry (for example, 100). ACL entries are processed in ascending order by rule number.
 * `egress` - (Optional, bool) Indicates whether this is an egress rule (rule is applied to traffic leaving the subnet). Default `false`.
 * `protocol` - (Required) The protocol. A value of -1 means all protocols.
 * `rule_action` - (Required) Indicates whether to allow or deny the traffic that matches the rule. Accepted values: `allow` | `deny`
-* `cidr_block` - (Optional) The network range to allow or deny, in CIDR notation (for example 172.16.0.0/24 ).
+* `cidr_block` - (Optional) The network range to allow or deny, in CIDR notation (for example 172.16.0.0/24).
 * `ipv6_cidr_block` - (Optional) The IPv6 CIDR block to allow or deny.
 * `from_port` - (Optional) The from port to match.
 * `to_port` - (Optional) The to port to match.
@@ -63,7 +67,12 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the network ACL Rule
+* `id` - ID of the network ACL Rule
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `ipv6_cidr_block` - The IPv6 CIDR block. Always `""`.
 
 ## Import
 
@@ -74,11 +83,13 @@ For more information on protocol numbers and keywords, see here: https://www.ian
 For example, import a network ACL Rule with an argument like this:
 
 ```console
-$ terraform import aws_network_acl_rule.my_rule acl-7aaabd18:100:tcp:false
+$ terraform import aws_network_acl_rule.my_rule acl-12345678:100:tcp:false
 ```
 
-Or by the procotol's decimal value:
+Or by the protocol's decimal value:
 
 ```console
-$ terraform import aws_network_acl_rule.my_rule acl-7aaabd18:100:6:false
+$ terraform import aws_network_acl_rule.my_rule acl-12345678:100:6:false
 ```
+
+[tf-network-acl]: network_acl.html

@@ -8,13 +8,13 @@ description: |-
 
 # aws_network_interface
 
-Use this data source to get information about a Network Interface.
+Use this data source to get information about a network interface.
 
 ## Example Usage
 
 ```terraform
-data "aws_network_interface" "bar" {
-  id = "eni-01234567"
+data "aws_network_interface" "example" {
+  id = "eni-xxxxxxxx"
 }
 ```
 
@@ -23,46 +23,59 @@ data "aws_network_interface" "bar" {
 The following arguments are supported:
 
 * `id` – (Optional) The identifier for the network interface.
-* `filter` – (Optional) One or more name/value pairs to filter off of. There are several valid keys, for a full reference, check out [describe-network-interfaces](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-network-interfaces.html) in the AWS CLI reference.
+* `filter` – (Optional) One or more name/value pairs to filter.
+
+For more information about filtering, see the [EC2 API documentation][describe-network-interfaces].
 
 ## Attributes Reference
 
-See the [Network Interface](/docs/providers/aws/r/network_interface.html) for details on the returned attributes.
+See the [`aws_network_interface`][tf-network-interface] for details on the returned attributes.
 
 Additionally, the following attributes are exported:
 
 * `arn` - The ARN of the network interface.
 * `association` - The association information for an Elastic IP address (IPv4) associated with the network interface. See supported fields below.
-* `availability_zone` - The Availability Zone.
+* `availability_zone` - The availability zone.
 * `description` - Description of the network interface.
-* `interface_type` - The type of interface.
-* `ipv6_addresses` - List of IPv6 addresses to assign to the ENI.
 * `mac_address` - The MAC address.
-* `owner_id` - The AWS account ID of the owner of the network interface.
+* `owner_id` - The CROC Cloud project ID.
 * `private_dns_name` - The private DNS name.
 * `private_ip` - The private IPv4 address of the network interface within the subnet.
 * `private_ips` - The private IPv4 addresses associated with the network interface.
-* `requester_id` - The ID of the entity that launched the instance on your behalf.
 * `security_groups` - The list of security groups for the network interface.
 * `subnet_id` - The ID of the subnet.
-* `outpost_arn` - The Amazon Resource Name (ARN) of the Outpost.
 * `tags` - Any tags assigned to the network interface.
 * `vpc_id` - The ID of the VPC.
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `interface_type` - The type of interface. Always `"interface"`.
+* `ipv6_addresses` - List of IPv6 addresses to assign to the ENI. Always empty.
+* `requester_id` - The ID of the entity that launched the instance on your behalf. Always `""`.
+* `outpost_arn` - The ARN of the Outpost. Always `""`.
 
 ### `association`
 
 * `allocation_id` - The allocation ID.
 * `association_id` - The association ID.
-* `carrier_ip` - The carrier IP address associated with the network interface. This attribute is only set when the network interface is in a subnet which is associated with a Wavelength Zone.
 * `customer_owned_ip` - The customer-owned IP address.
-* `ip_owner_id` - The ID of the Elastic IP address owner.
+* `ip_owner_id` - The ID of the elastic IP address owner.
 * `public_dns_name` - The public DNS name.
-* `public_ip` - The address of the Elastic IP address bound to the network interface.
+* `public_ip` - The address of the elastic IP address bound to the network interface.
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `carrier_ip` - The carrier IP address associated with the network interface. This attribute is only set when the network interface is in a subnet which is associated with a Wavelength Zone.
 
 ## Import
 
-Elastic Network Interfaces can be imported using the `id`, e.g.,
+Elastic network interfaces can be imported using the `id`, e.g.,
 
 ```
-$ terraform import aws_network_interface.test eni-12345
+$ terraform import aws_network_interface.test eni-12345678
 ```
+
+[describe-network-interfaces]: https://docs.cloud.croc.ru/en/api/ec2/network_interfaces/DescribeNetworkInterfaces.html
+[tf-network-interface]: network_interface.html

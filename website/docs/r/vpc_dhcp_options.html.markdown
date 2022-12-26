@@ -8,7 +8,9 @@ description: |-
 
 # Resource: aws_vpc_dhcp_options
 
-Provides a VPC DHCP Options resource.
+Provides a VPC DHCP options resource.
+
+For more information, see the documentation on [DHCP options][dhcp-options].
 
 ## Example Usage
 
@@ -41,37 +43,41 @@ resource "aws_vpc_dhcp_options" "foo" {
 The following arguments are supported:
 
 * `domain_name` - (Optional) the suffix domain name to use by default when resolving non Fully Qualified Domain Names. In other words, this is what ends up being the `search` value in the `/etc/resolv.conf` file.
-* `domain_name_servers` - (Optional) List of name servers to configure in `/etc/resolv.conf`. If you want to use the default AWS nameservers you should set this to `AmazonProvidedDNS`.
-* `ntp_servers` - (Optional) List of NTP servers to configure.
-* `netbios_name_servers` - (Optional) List of NETBIOS name servers.
-* `netbios_node_type` - (Optional) The NetBIOS node type (1, 2, 4, or 8). AWS recommends to specify 2 since broadcast and multicast are not supported in their network. For more information about these node types, see [RFC 2132](http://www.ietf.org/rfc/rfc2132.txt).
-* `tags` - (Optional) A map of tags to assign to the resource. If configured with a provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block) present, tags with matching keys will overwrite those defined at the provider-level.
+* `domain_name_servers` - (Optional) List of IP addresses of domain name servers or `AmazonProvidedDNS`. We recommend using only one of the two parameters.
+* `ntp_servers` - (Optional) List of NTP servers to configure. You can specify up to four IP addresses.
+* `netbios_name_servers` - (Optional) List of NETBIOS name servers. You can specify up to four IP addresses.
+* `netbios_node_type` - (Optional) The NetBIOS node type (1, 2, 4, or 8). For more information about these node types, see [RFC 2132](http://www.ietf.org/rfc/rfc2132.txt).
+* `tags` - (Optional) A map of tags to assign to the resource. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
 
 ## Remarks
 
-* Notice that all arguments are optional but you have to specify at least one argument.
-* `domain_name_servers`, `netbios_name_servers`, `ntp_servers` are limited by AWS to maximum four servers only.
-* To actually use the DHCP Options Set you need to associate it to a VPC using [`aws_vpc_dhcp_options_association`](/docs/providers/aws/r/vpc_dhcp_options_association.html).
-* If you delete a DHCP Options Set, all VPCs using it will be associated to AWS's `default` DHCP Option Set.
+* Notice that all arguments are optional, but you have to specify at least one argument.
+* `domain_name_servers`, `netbios_name_servers`, `ntp_servers` are limited to maximum four servers only.
+* To actually use the DHCP options set you need to associate it to a VPC using [`aws_vpc_dhcp_options_association`][tf-main-route-table-association].
+* If you delete a DHCP options set, all VPCs using it will be associated to `default` DHCP Option Set.
 * In most cases unless you're configuring your own DNS you'll want to set `domain_name_servers` to `AmazonProvidedDNS`.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the DHCP Options Set.
-* `arn` - The ARN of the DHCP Options Set.
-* `owner_id` - The ID of the AWS account that owns the DHCP options set.
-* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block).
+* `id` - ID of the DHCP options Set.
+* `arn` - ARN of the DHCP options Set.
+* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
-You can find more technical documentation about DHCP Options Set in the
-official [AWS User Guide](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_DHCP_Options.html).
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
 
+* `owner_id` - ID of the CROC Cloud account that owns the DHCP options set.
 
 ## Import
 
 VPC DHCP Options can be imported using the `dhcp options id`, e.g.,
 
 ```
-$ terraform import aws_vpc_dhcp_options.my_options dopt-d9070ebb
+$ terraform import aws_vpc_dhcp_options.my_options dopt-12345678
 ```
+
+[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
+[dhcp-options]: https://docs.cloud.croc.ru/en/services/networks/dhcpattrs.html
+[tf-main-route-table-association]: main_route_table_association.html

@@ -24,7 +24,7 @@ data "aws_route_table" "selected" {
 }
 
 data "aws_route" "route" {
-  route_table_id         = aws_route_table.selected.id
+  route_table_id         = data.aws_route_table.selected.id
   destination_cidr_block = "10.0.1.0/24"
 }
 
@@ -39,24 +39,29 @@ The arguments of this data source act as filters for querying the available Rout
 
 The following arguments are required:
 
-* `route_table_id` - (Required) The ID of the specific Route Table containing the Route entry.
+* `route_table_id` - (Required) ID of the specific Route Table containing the Route entry.
 
 The following arguments are optional:
 
-* `carrier_gateway_id` - (Optional) EC2 Carrier Gateway ID of the Route belonging to the Route Table.
-* `core_network_arn` - (Optional) Core network ARN of the Route belonging to the Route Table.
 * `destination_cidr_block` - (Optional) CIDR block of the Route belonging to the Route Table.
-* `destination_ipv6_cidr_block` - (Optional) IPv6 CIDR block of the Route belonging to the Route Table.
-* `destination_prefix_list_id` - (Optional) The ID of a [managed prefix list](ec2_managed_prefix_list.html) destination of the Route belonging to the Route Table.
-* `egress_only_gateway_id` - (Optional) Egress Only Gateway ID of the Route belonging to the Route Table.
 * `gateway_id` - (Optional) Gateway ID of the Route belonging to the Route Table.
 * `instance_id` - (Optional) Instance ID of the Route belonging to the Route Table.
-* `local_gateway_id` - (Optional) Local Gateway ID of the Route belonging to the Route Table.
-* `nat_gateway_id` - (Optional) NAT Gateway ID of the Route belonging to the Route Table.
 * `network_interface_id` - (Optional) Network Interface ID of the Route belonging to the Route Table.
-* `transit_gateway_id` - (Optional) EC2 Transit Gateway ID of the Route belonging to the Route Table.
-* `vpc_peering_connection_id` - (Optional) VPC Peering Connection ID of the Route belonging to the Route Table.
+
+->  **Unsupported arguments**
+These arguments are currently unsupported by CROC Cloud:
+
+* `carrier_gateway_id` - ID of a carrier gateway. Always `""`.
+* `core_network_arn` - ARN of a core network. Always `""`.
+* `destination_ipv6_cidr_block` - The destination IPv6 CIDR block. Always `""`.
+* `destination_prefix_list_id` - ID of a managed prefix list destination of the route. Always `""`.
+* `egress_only_gateway_id` - ID of a VPC Egress Only Internet Gateway. Always `""`.
+* `local_gateway_id` - ID of an Outpost local gateway. Always `""`.
+* `nat_gateway_id` - ID of a VPC NAT gateway. Always `""`.
+* `transit_gateway_id` - ID of an EC2 Transit Gateway. Always `""`.
+* `vpc_endpoint_id` - ID of a VPC Endpoint. Always `""`.
+* `vpc_peering_connection_id` - ID of a VPC peering connection. Always `""`.
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes when there is data available. For example, the `vpc_peering_connection_id` field will be empty when the route is attached to a Network Interface.
+All the argument attributes are also exported as result attributes when there is data available. For example, the `vpc_peering_connection_id` field will be empty when the route is attached to a Network Interface.

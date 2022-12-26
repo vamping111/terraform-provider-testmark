@@ -12,17 +12,17 @@ Provides a resource to manage a VPC's default network ACL. This resource can man
 
 ~> **NOTE:** This is an advanced resource with special caveats. Please read this document in its entirety before using this resource. The `aws_default_network_acl` behaves differently from normal resources. Terraform does not _create_ this resource but instead attempts to "adopt" it into management.
 
-Every VPC has a default network ACL that can be managed but not destroyed. When Terraform first adopts the Default Network ACL, it **immediately removes all rules in the ACL**. It then proceeds to create any rules specified in the configuration. This step is required so that only the rules specified in the configuration are created.
+Every VPC has a default network ACL that can be managed but not destroyed. When Terraform first adopts the default network ACL, it **immediately removes all rules in the ACL**. It then proceeds to create any rules specified in the configuration. This step is required so that only the rules specified in the configuration are created.
 
 This resource treats its inline rules as absolute; only the rules defined inline are created, and any additions/removals external to this resource will result in diffs being shown. For these reasons, this resource is incompatible with the `aws_network_acl_rule` resource.
 
-For more information about Network ACLs, see the AWS Documentation on [Network ACLs][aws-network-acls].
+For more information about network ACLs, see the documentation on [network ACL][network-acl].
 
 ## Example Usage
 
 ### Basic Example
 
-The following config gives the Default Network ACL the same rules that AWS includes but pulls the resource under management by Terraform. This means that any ACL rules added or changed will be detected as drift.
+The following config gives the Default Network ACL the same rules that CROC Cloud includes but pulls the resource under management by Terraform. This means that any ACL rules added or changed will be detected as drift.
 
 ```terraform
 resource "aws_vpc" "mainvpc" {
@@ -54,7 +54,7 @@ resource "aws_default_network_acl" "default" {
 
 ### Example: Deny All Egress Traffic, Allow Ingress
 
-The following denies all Egress traffic by omitting any `egress` rules, while including the default `ingress` rule to allow all traffic.
+The following denies all egress traffic by omitting any `egress` rules, while including the default `ingress` rule to allow all traffic.
 
 ```terraform
 resource "aws_vpc" "mainvpc" {
@@ -68,7 +68,7 @@ resource "aws_default_network_acl" "default" {
     protocol   = -1
     rule_no    = 100
     action     = "allow"
-    cidr_block = aws_default_vpc.mainvpc.cidr_block
+    cidr_block = aws_vpc.mainvpc.cidr_block
     from_port  = 0
     to_port    = 0
   }
@@ -77,7 +77,7 @@ resource "aws_default_network_acl" "default" {
 
 ### Example: Deny All Traffic To Any Subnet In The Default Network ACL
 
-This config denies all traffic in the Default ACL. This can be useful if you want to lock down the VPC to force all resources to assign a non-default ACL.
+This config denies all traffic in the default ACL. This can be useful if you want to lock down the VPC to force all resources to assign a non-default ACL.
 
 ```terraform
 resource "aws_vpc" "mainvpc" {
@@ -113,20 +113,20 @@ resource "aws_default_network_acl" "default" {
 
 ### Removing `aws_default_network_acl` From Your Configuration
 
-Each AWS VPC comes with a Default Network ACL that cannot be deleted. The `aws_default_network_acl` allows you to manage this Network ACL, but Terraform cannot destroy it. Removing this resource from your configuration will remove it from your statefile and management, **but will not destroy the Network ACL.** All Subnets associations and ingress or egress rules will be left as they are at the time of removal. You can resume managing them via the AWS Console.
+Each VPC comes with a default network ACL that cannot be deleted. The `aws_default_network_acl` allows you to manage this Network ACL, but Terraform cannot destroy it. Removing this resource from your configuration will remove it from your statefile and management, **but will not destroy the Network ACL.** All Subnets associations and ingress or egress rules will be left as they are at the time of removal. You can resume managing them via the CROC Cloud Console.
 
 ## Argument Reference
 
 The following arguments are required:
 
-* `default_network_acl_id` - (Required) Network ACL ID to manage. This attribute is exported from `aws_vpc`, or manually found via the AWS Console.
+* `default_network_acl_id` - (Required) Network ACL ID to manage. This attribute is exported from `aws_vpc`, or manually found via the CROC Cloud Console.
 
 The following arguments are optional:
 
 * `egress` - (Optional) Configuration block for an egress rule. Detailed below.
 * `ingress` - (Optional) Configuration block for an ingress rule. Detailed below.
-* `subnet_ids` - (Optional) List of Subnet IDs to apply the ACL to. See the notes below on managing Subnets in the Default Network ACL
-* `tags` - (Optional) Map of tags to assign to the resource. If configured with a provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block) present, tags with matching keys will overwrite those defined at the provider-level.
+* `subnet_ids` - (Optional) List of Subnet IDs to apply the ACL to. See the notes below on managing Subnets in the Default Network ACL.
+* `tags` - (Optional) Map of tags to assign to the resource. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
 
 ### egress and ingress
 
@@ -145,7 +145,6 @@ The following arguments are optional:
 * `cidr_block` - (Optional) The CIDR block to match. This must be a valid network mask.
 * `icmp_code` - (Optional) The ICMP type code to be used. Default 0.
 * `icmp_type` - (Optional) The ICMP type to be used. Default 0.
-* `ipv6_cidr_block` - (Optional) The IPv6 CIDR block.
 
 -> For more information on ICMP types and codes, see [Internet Control Message Protocol (ICMP) Parameters](https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml).
 
@@ -153,18 +152,24 @@ The following arguments are optional:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `arn` - ARN of the Default Network ACL
-* `id` - ID of the Default Network ACL
-* `owner_id` - ID of the AWS account that owns the Default Network ACL
-* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block).
+* `arn` - The ARN of the default network ACL
+* `id` - ID of the default network ACL
+* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 * `vpc_id` -  ID of the associated VPC
 
-[aws-network-acls]: http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_ACLs.html
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `ipv6_cidr_block` - The IPv6 CIDR block. Always `""`.
+* `owner_id` - ID of the CROC Cloud account that owns the default network ACL. Always `""`.
 
 ## Import
 
-Default Network ACLs can be imported using the `id`, e.g.,
+Default network ACLs can be imported using the `id`, e.g.,
 
 ```
-$ terraform import aws_default_network_acl.sample acl-7aaabd18
+$ terraform import aws_default_network_acl.sample acl-12345678
 ```
+
+[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
+[network-acl]: https://docs.cloud.croc.ru/en/services/networks/networkacl.html

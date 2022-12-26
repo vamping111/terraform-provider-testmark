@@ -8,6 +8,9 @@ description: |-
 
 # Resource: aws_default_subnet
 
+-> **Unsupported resource**
+This resource is currently unsupported by CROC Cloud
+
 Provides a resource to manage a [default subnet](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html#default-vpc-basics) in the current region.
 
 **This is an advanced resource** and has special caveats to be aware of when using it. Please read this document in its entirety before using this resource.

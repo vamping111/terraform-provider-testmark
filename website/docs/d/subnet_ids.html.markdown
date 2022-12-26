@@ -3,7 +3,7 @@ subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
 page_title: "AWS: aws_subnet_ids"
 description: |-
-    Provides a set of subnet Ids for a VPC
+    Provides a set of subnet IDs for a VPC
 ---
 
 # Data Source: aws_subnet_ids
@@ -12,19 +12,22 @@ description: |-
 
 This resource can be useful for getting back a set of subnet ids for a vpc.
 
-~> **NOTE:** The `aws_subnet_ids` data source has been deprecated and will be removed in a future version. Use the [`aws_subnets`](subnets.html) data source instead.
-
 ## Example Usage
 
-The following shows outputing all cidr blocks for every subnet id in a vpc.
+The following shows all cidr blocks for every subnet id in a vpc.
 
 ```terraform
-data "aws_subnet_ids" "example" {
-  vpc_id = var.vpc_id
+variable vpc_id {}
+
+data "aws_subnets" "example" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
 }
 
 data "aws_subnet" "example" {
-  for_each = data.aws_subnet_ids.example.ids
+  for_each = toset(data.aws_subnets.example.ids)
   id       = each.value
 }
 
@@ -38,8 +41,13 @@ tag of `Tier` set to a value of "Private" so that the `aws_instance` resource
 can loop through the subnets, putting instances across availability zones.
 
 ```terraform
-data "aws_subnet_ids" "private" {
-  vpc_id = var.vpc_id
+variable vpc_id {}
+
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
 
   tags = {
     Tier = "Private"
@@ -47,9 +55,9 @@ data "aws_subnet_ids" "private" {
 }
 
 resource "aws_instance" "app" {
-  for_each      = data.aws_subnet_ids.private.ids
-  ami           = var.ami
-  instance_type = "t2.micro"
+  for_each      = toset(data.aws_subnets.example.ids)
+  ami           = "cmi-12345678" # add image id, change instance type if needed
+  instance_type = "m1.micro"
   subnet_id     = each.value
 }
 ```
@@ -57,17 +65,14 @@ resource "aws_instance" "app" {
 ## Argument Reference
 
 * `vpc_id` - (Required) The VPC ID that you want to filter from.
-
 * `filter` - (Optional) Custom filter block as described below.
-
 * `tags` - (Optional) A map of tags, each pair of which must exactly match
   a pair on the desired subnets.
 
 More complex filters can be expressed using one or more `filter` sub-blocks,
 which take the following arguments:
 
-* `name` - (Required) The name of the field to filter by, as defined by
-  [the underlying AWS API](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html).
+* `name` - (Required) The name of the field to filter by it.
   For example, if matching against tag `Name`, use:
 
 ```terraform
@@ -82,6 +87,11 @@ data "aws_subnet_ids" "selected" {
 * `values` - (Required) Set of values that are accepted for the given field.
   Subnet IDs will be selected if any one of the given values match.
 
+For more information about filtering, see the [EC2 API documentation][describe-subnets].
+
 ## Attributes Reference
 
-* `ids` - A set of all the subnet ids found. This data source will fail if none are found.
+* `ids` - A set of all the subnet ids found.
+
+[describe-subnets]: https://docs.cloud.croc.ru/en/api/ec2/subnets/DescribeSubnets.html
+[tf-subnets]: subnets.html

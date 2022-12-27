@@ -8,6 +8,9 @@ description: |-
 
 # Resource: aws_eks_cluster
 
+-> **Unsupported resource**
+This resource is currently unsupported by CROC Cloud
+
 Manages an EKS Cluster.
 
 > **Hands-on:** For an example of `aws_eks_cluster` in use, follow the [Provision an EKS Cluster](https://learn.hashicorp.com/tutorials/terraform/eks) tutorial on HashiCorp Learn.

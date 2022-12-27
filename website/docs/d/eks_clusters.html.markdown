@@ -6,7 +6,10 @@ description: |-
   Retrieve EKS Clusters list
 ---
 
-# Data Source: aws_eks_cluster
+# Data Source: aws_eks_clusters
+
+-> **Unsupported resource**
+This resource is currently unsupported by CROC Cloud
 
 Retrieve EKS Clusters list
 

@@ -42,8 +42,12 @@ The following arguments are supported:
 
 The following arguments are supported by the `filter` configuration block:
 
-* `name` - (Required) The name of the filter field. Valid values can be found in the [EC2 DescribeLaunchTemplates API Reference](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeLaunchTemplates.html).
+* `name` - (Required) The name of the filter field.
 * `values` - (Required) Set of values that are accepted for the given filter field. Results will be selected if any given value matches.
+
+For more information about filtering, see the [EC2 API documentation][describe-lts].
+
+[describe-lts]: https://docs.cloud.croc.ru/en/api/ec2/launch_templates/DescribeLaunchTemplates.html
 
 ## Attributes Reference
 
@@ -51,4 +55,4 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the launch template.
 
-This resource also exports a full set of attributes corresponding to the arguments of the [`aws_launch_template`](/docs/providers/aws/r/launch_template.html) resource.
+This resource also exports a full set of attributes corresponding to the arguments of the [`aws_launch_template`](launch_template.html) resource.

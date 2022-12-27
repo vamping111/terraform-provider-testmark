@@ -50,8 +50,12 @@ whose data will be exported as attributes.
 
 The following arguments are supported by the `filter` configuration block:
 
-* `name` - (Required) The name of the filter field. Valid values can be found in the [EC2 DescribeKeyPairs API Reference](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeKeyPairs.html).
+* `name` - (Required) The name of the filter field.
 * `values` - (Required) Set of values that are accepted for the given filter field. Results will be selected if any given value matches.
+
+For more information about filtering, see the [EC2 API documentation][describe-key-pairs].
+
+[describe-key-pairs]: https://docs.cloud.croc.ru/en/api/ec2/key_pairs/DescribeKeyPairs.html
 
 ## Attributes Reference
 

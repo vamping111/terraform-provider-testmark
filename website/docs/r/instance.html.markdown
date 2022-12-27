@@ -8,7 +8,8 @@ description: |-
 
 # Resource: aws_instance
 
-Provides an EC2 instance resource. This allows instances to be created, updated, and deleted. Instances also support [provisioning](https://www.terraform.io/docs/provisioners/index.html).
+Provides an EC2 instance resource. This allows instances to be created, updated, and deleted.
+? Instances also support [provisioning](https://www.terraform.io/docs/provisioners/index.html).
 
 ## Example Usage
 
@@ -17,6 +18,7 @@ Provides an EC2 instance resource. This allows instances to be created, updated,
 ```terraform
 data "aws_ami" "ubuntu" {
   most_recent = true
+  owners      = ["self"]
 
   filter {
     name   = "name"
@@ -27,13 +29,11 @@ data "aws_ami" "ubuntu" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-
-  owners = ["099720109477"] # Canonical
 }
 
 resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
+  instance_type = "m1.micro"
 
   tags = {
     Name = "HelloWorld"
@@ -55,7 +55,7 @@ resource "aws_vpc" "my_vpc" {
 resource "aws_subnet" "my_subnet" {
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = "172.16.10.0/24"
-  availability_zone = "us-west-2a"
+  availability_zone = "ru-msk-vol52"
 
   tags = {
     Name = "tf-example"
@@ -72,8 +72,8 @@ resource "aws_network_interface" "foo" {
 }
 
 resource "aws_instance" "foo" {
-  ami           = "ami-005e54dee72cc1d00" # us-west-2
-  instance_type = "t2.micro"
+  ami           = "cmi-12345678" # add image id, change instance type if needed
+  instance_type = "m1.micro"
 
   network_interface {
     network_interface_id = aws_network_interface.foo.id
@@ -90,7 +90,8 @@ resource "aws_instance" "foo" {
 
 The following arguments are supported:
 
-* `ami` - (Optional) AMI to use for the instance. Required unless `launch_template` is specified and the Launch Template specifes an AMI. If an AMI is specified in the Launch Template, setting `ami` will override the AMI specified in the Launch Template.
+* `ami` - (Optional) AMI to use for the instance.
+? Required unless `launch_template` is specified and the Launch Template specifies an AMI. If an AMI is specified in the Launch Template, setting `ami` will override the AMI specified in the Launch Template.
 * `associate_public_ip_address` - (Optional) Whether to associate a public IP address with an instance in a VPC.
 * `availability_zone` - (Optional) AZ to start the instance in.
 
@@ -132,7 +133,7 @@ The following arguments are supported:
 
 * `source_dest_check` - (Optional) Controls if traffic is routed to the instance when the destination address does not match the instance. Used for NAT or VPNs. Defaults true.
 * `subnet_id` - (Optional) VPC Subnet ID to launch in.
-* `tags` - (Optional) A map of tags to assign to the resource. Note that these tags apply to the instance and not block storage devices. If configured with a provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block) present, tags with matching keys will overwrite those defined at the provider-level.
+* `tags` - (Optional) A map of tags to assign to the resource. Note that these tags apply to the instance and not block storage devices. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
 * `tenancy` - (Optional) Tenancy of the instance (if the instance is running in a VPC). An instance with a tenancy of dedicated runs on single-tenant hardware. The host tenancy is not supported for the import-instance command.
 * `user_data` - (Optional) User data to provide when launching the instance. Do not pass gzip-compressed data via this argument; see `user_data_base64` instead. Updates to this field will trigger a stop/start of the EC2 instance by default. If the `user_data_replace_on_change` is set then updates to this field will trigger a destroy and recreate.
 * `user_data_base64` - (Optional) Can be used instead of `user_data` to pass base64-encoded binary data directly. Use this instead of `user_data` whenever the value is not a valid UTF-8 string. For example, gzip-encoded user data must be base64-encoded and passed via this argument to avoid corruption. Updates to this field will trigger a stop/start of the EC2 instance by default. If the `user_data_replace_on_change` is set then updates to this field will trigger a destroy and recreate.
@@ -142,14 +143,6 @@ The following arguments are supported:
 ~> **NOTE:** Do not use `volume_tags` if you plan to manage block device tags outside the `aws_instance` configuration, such as using `tags` in an [`aws_ebs_volume`](/docs/providers/aws/r/ebs_volume.html) resource attached via [`aws_volume_attachment`](/docs/providers/aws/r/volume_attachment.html). Doing so will result in resource cycling and inconsistent behavior.
 
 * `vpc_security_group_ids` - (Optional, VPC only) A list of security group IDs to associate with.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration/blocks/resources/syntax.html#operation-timeouts) for certain actions:
-
-* `create` - (Defaults to 10 mins) Used when launching the instance (until it reaches the initial `running` state)
-* `update` - (Defaults to 10 mins) Used when stopping and starting the instance when necessary during update - e.g., when changing instance type
-* `delete` - (Defaults to 20 mins) Used when terminating the instance
 
 ### Capacity Reservation Specification
 
@@ -183,18 +176,19 @@ The `credit_specification` block supports the following:
 
 ### EBS, Ephemeral, and Root Block Devices
 
-Each of the `*_block_device` attributes control a portion of the EC2 Instance's "Block Device Mapping". For more information, see the [AWS Block Device Mapping documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html).
+Each of the `*_block_device` attributes control a portion of the EC2 Instance's "Block Device Mapping".
+For more information, see the [AWS Block Device Mapping documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html).
 
 The `root_block_device` block supports the following:
 
 * `delete_on_termination` - (Optional) Whether the volume should be destroyed on instance termination. Defaults to `true`.
 * `encrypted` - (Optional) Whether to enable volume encryption. Defaults to `false`. Must be configured to perform drift detection.
-* `iops` - (Optional) Amount of provisioned [IOPS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-io-characteristics.html). Only valid for volume_type of `io1`, `io2` or `gp3`.
+* `iops` - (Optional) Amount of provisioned IOPS. Only valid for volume_type of `io2`.
 * `kms_key_id` - (Optional) Amazon Resource Name (ARN) of the KMS Key to use when encrypting the volume. Must be configured to perform drift detection.
 * `tags` - (Optional) A map of tags to assign to the device.
-* `throughput` - (Optional) Throughput to provision for a volume in mebibytes per second (MiB/s). This is only valid for `volume_type` of `gp3`.
-* `volume_size` - (Optional) Size of the volume in gibibytes (GiB).
-* `volume_type` - (Optional) Type of volume. Valid values include `standard`, `gp2`, `gp3`, `io1`, `io2`, `sc1`, or `st1`. Defaults to `gp2`.
+* `throughput` - (Optional) Throughput to provision for a volume in mebibytes per second (MiB/s).
+* `volume_size` - (Optional) Size of the volume in GiB.
+* `volume_type` - (Optional) Type of volume. Can be `st2`, `gp2` or `io2`. Defaults to `st2`.
 
 Modifying the `encrypted` or `kms_key_id` settings of the `root_block_device` requires resource replacement.
 
@@ -203,13 +197,13 @@ Each `ebs_block_device` block supports the following:
 * `delete_on_termination` - (Optional) Whether the volume should be destroyed on instance termination. Defaults to `true`.
 * `device_name` - (Required) Name of the device to mount.
 * `encrypted` - (Optional) Enables [EBS encryption](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html) on the volume. Defaults to `false`. Cannot be used with `snapshot_id`. Must be configured to perform drift detection.
-* `iops` - (Optional) Amount of provisioned [IOPS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-io-characteristics.html). Only valid for volume_type of `io1`, `io2` or `gp3`.
+* `iops` - (Optional) Amount of provisioned IOPS. Only valid for volume_type of `io2`.
 * `kms_key_id` - (Optional) Amazon Resource Name (ARN) of the KMS Key to use when encrypting the volume. Must be configured to perform drift detection.
 * `snapshot_id` - (Optional) Snapshot ID to mount.
 * `tags` - (Optional) A map of tags to assign to the device.
-* `throughput` - (Optional) Throughput to provision for a volume in mebibytes per second (MiB/s). This is only valid for `volume_type` of `gp3`.
+* `throughput` - (Optional) Throughput to provision for a volume in mebibytes per second (MiB/s).
 * `volume_size` - (Optional) Size of the volume in gibibytes (GiB).
-* `volume_type` - (Optional) Type of volume. Valid values include `standard`, `gp2`, `gp3`, `io1`, `io2`, `sc1`, or `st1`. Defaults to `gp2`.
+* `volume_type` - (Optional) Type of volume. Can be `st2`, `gp2` or `io2`. Defaults to `st2`.
 
 ~> **NOTE:** Currently, changes to the `ebs_block_device` configuration of _existing_ resources cannot be automatically detected by Terraform. To manage changes and attachments of an EBS block to an instance, use the `aws_ebs_volume` and `aws_volume_attachment` resources instead. If you use `ebs_block_device` on an `aws_instance`, Terraform will assume management over the full set of non-root EBS block devices for the instance, treating additional block devices as drift. For this reason, `ebs_block_device` cannot be mixed with external `aws_ebs_volume` and `aws_volume_attachment` resources for a given instance.
 
@@ -247,7 +241,7 @@ The `metadata_options` block supports the following:
 
 * `http_endpoint` - (Optional) Whether the metadata service is available. Valid values include `enabled` or `disabled`. Defaults to `enabled`.
 * `http_put_response_hop_limit` - (Optional) Desired HTTP PUT response hop limit for instance metadata requests. The larger the number, the further instance metadata requests can travel. Valid values are integer from `1` to `64`. Defaults to `1`.
-* `http_tokens` - (Optional) Whether or not the metadata service requires session tokens, also referred to as _Instance Metadata Service Version 2 (IMDSv2)_. Valid values include `optional` or `required`. Defaults to `optional`.
+* `http_tokens` - (Optional) Whether the metadata service requires session tokens, also referred to as _Instance Metadata Service Version 2 (IMDSv2)_. Valid values include `optional` or `required`. Defaults to `optional`.
 * `instance_metadata_tags` - (optional) Enables or disables access to instance tags from the instance metadata service. Valid values include `enabled` or `disabled`. Defaults to `disabled`.
 
 For more information, see the documentation on the [Instance Metadata Service](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html).
@@ -260,7 +254,7 @@ The `network_interface` configuration block _does_, however, allow users to supp
 
 Each `network_interface` block supports the following:
 
-* `delete_on_termination` - (Optional) Whether or not to delete the network interface on instance termination. Defaults to `false`. Currently, the only valid value is `false`, as this is only supported when creating new network interfaces when launching an instance.
+* `delete_on_termination` - (Optional) Whether to delete the network interface on instance termination. Defaults to `false`. Currently, the only valid value is `false`, as this is only supported when creating new network interfaces when launching an instance.
 * `device_index` - (Required) Integer index of the network interface attachment. Limited by instance type.
 * `network_card_index` - (Optional) Integer index of the network card. Limited by instance type. The default index is `0`.
 * `network_interface_id` - (Required) ID of the network interface to attach.
@@ -291,7 +285,7 @@ In addition to all arguments above, the following attributes are exported:
 * `private_dns` - The private DNS name assigned to the instance. Can only be used inside the Amazon EC2, and only available if you've enabled DNS hostnames for your VPC.
 * `public_dns` - The public DNS name assigned to the instance. For EC2-VPC, this is only available if you've enabled DNS hostnames for your VPC.
 * `public_ip` - The public IP address assigned to the instance, if applicable. **NOTE**: If you are using an [`aws_eip`](/docs/providers/aws/r/eip.html) with your instance, you should refer to the EIP's address directly and not use `public_ip` as this field will change after the EIP is attached.
-* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block).
+* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 For `ebs_block_device`, in addition to the arguments above, the following attribute is exported:
 
@@ -300,7 +294,19 @@ For `ebs_block_device`, in addition to the arguments above, the following attrib
 For `root_block_device`, in addition to the arguments above, the following attributes are exported:
 
 * `volume_id` - ID of the volume. For example, the ID can be accessed like this, `aws_instance.web.root_block_device.0.volume_id`.
-* `device_name` - Device name, e.g., `/dev/sdh` or `xvdh`.
+* `device_name` - Device name, e.g., `disk1`.
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+
+### Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration/blocks/resources/syntax.html#operation-timeouts) for certain actions:
+
+* `create` - (Default `10 minutes`) Used when launching the instance (until it reaches the initial `running` state).
+* `update` - (Default `10 minutes`) Used when stopping and starting the instance when necessary during update - e.g., when changing instance type.
+* `delete` - (Default `20 minutes`) Used when terminating the instance.
 
 ## Import
 
@@ -309,3 +315,5 @@ Instances can be imported using the `id`, e.g.,
 ```
 $ terraform import aws_instance.web i-12345678
 ```
+
+[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block

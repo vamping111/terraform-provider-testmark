@@ -13,86 +13,31 @@ Provides an EC2 launch template resource. Can be used to create instances or aut
 ## Example Usage
 
 ```terraform
-resource "aws_launch_template" "foo" {
-  name = "foo"
+resource "aws_launch_template" "test-lt" {
+  name = "test-lt"
 
   block_device_mappings {
-    device_name = "/dev/sda1"
+    device_name = "disk1"
 
     ebs {
       volume_size = 20
     }
   }
 
-  capacity_reservation_specification {
-    capacity_reservation_preference = "open"
-  }
-
-  cpu_options {
-    core_count       = 4
-    threads_per_core = 2
-  }
-
-  credit_specification {
-    cpu_credits = "standard"
-  }
-
   disable_api_termination = true
-
-  ebs_optimized = true
-
-  elastic_gpu_specifications {
-    type = "test"
-  }
-
-  elastic_inference_accelerator {
-    type = "eia1.medium"
-  }
-
-  iam_instance_profile {
-    name = "test"
-  }
-
-  image_id = "ami-test"
 
   instance_initiated_shutdown_behavior = "terminate"
 
-  instance_market_options {
-    market_type = "spot"
-  }
-
-  instance_type = "t2.micro"
-
-  kernel_id = "test"
-
-  key_name = "test"
-
-  license_specification {
-    license_configuration_arn = "arn:aws:license-manager:eu-west-1:123456789012:license-configuration:lic-0123456789abcdef0123456789abcdef"
-  }
-
-  metadata_options {
-    http_endpoint               = "enabled"
-    http_tokens                 = "required"
-    http_put_response_hop_limit = 1
-    instance_metadata_tags      = "enabled"
-  }
+  image_id      = "cmi-12345678" # add image id, change instance type if needed
+  instance_type = "m1.micro"
 
   monitoring {
     enabled = true
   }
 
-  network_interfaces {
-    associate_public_ip_address = true
-  }
-
   placement {
-    availability_zone = "us-west-2a"
+    availability_zone = "ru-msk-vol52"
   }
-
-  ram_disk_id = "test"
-
-  vpc_security_group_ids = ["sg-12345678"]
 
   tag_specifications {
     resource_type = "instance"
@@ -101,8 +46,6 @@ resource "aws_launch_template" "foo" {
       Name = "test"
     }
   }
-
-  user_data = filebase64("${path.module}/example.sh")
 }
 ```
 
@@ -178,15 +121,13 @@ The `ebs` block supports the following:
 * `delete_on_termination` - Whether the volume should be destroyed on instance termination. Defaults to `false` if not set. See [Preserving Amazon EBS Volumes on Instance Termination](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/terminating-instances.html#preserving-volumes-on-termination) for more information.
 * `encrypted` - Enables [EBS encryption](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html)
   on the volume (Default: `false`). Cannot be used with `snapshot_id`.
-* `iops` - The amount of provisioned
-  [IOPS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-io-characteristics.html).
-  This must be set with a `volume_type` of `"io1/io2"`.
+* `iops` - The amount of provisioned IOPS. This must be set with a `volume_type` of `"io2"`.
 * `kms_key_id` - The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume.
  `encrypted` must be set to `true` when this is set.
 * `snapshot_id` - The Snapshot ID to mount.
 * `throughput` - The throughput to provision for a `gp3` volume in MiB/s (specified as an integer, e.g., 500), with a maximum of 1,000 MiB/s.
 * `volume_size` - The size of the volume in gigabytes.
-* `volume_type` - The volume type. Can be `standard`, `gp2`, `gp3`, `io1`, `io2`, `sc1` or `st1` (Default: `gp2`).
+* `volume_type` - (Optional) Type of volume. Can be `st2`, `gp2` or `io2`. Defaults to `st2`.
 
 ### Capacity Reservation Specification
 

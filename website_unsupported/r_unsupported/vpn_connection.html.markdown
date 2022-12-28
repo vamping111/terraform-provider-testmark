@@ -8,6 +8,9 @@ description: |-
 
 # Resource: aws_vpn_connection
 
+-> **Unsupported resource**
+This resource is currently unsupported by CROC Cloud
+
 Manages a Site-to-Site VPN connection. A Site-to-Site VPN connection is an Internet Protocol security (IPsec) VPN connection between a VPC and an on-premises network.
 Any new Site-to-Site VPN connection that you create is an [AWS VPN connection](https://docs.aws.amazon.com/vpn/latest/s2svpn/vpn-categories.html).
 
@@ -17,48 +20,40 @@ Any new Site-to-Site VPN connection that you create is an [AWS VPN connection](h
 ~> **Note:** The CIDR blocks in the arguments `tunnel1_inside_cidr` and `tunnel2_inside_cidr` must have a prefix of /30 and be a part of a specific range.
 [Read more about this in the AWS documentation](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_VpnTunnelOptionsSpecification.html).
 
+-> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+
 ## Example Usage
 
-### EC2 Transit Gateway
+### EC2 Internet Gateway
 
 ```terraform
-resource "aws_ec2_transit_gateway" "example" {}
+resource "aws_vpc" "example" {
+   cidr_block         = "172.16.8.0/24"
+   enable_dns_support = true
+   
+   tags = {
+     Name = "VPC for terraform testing"
+   }
+} 
 
 resource "aws_customer_gateway" "example" {
   bgp_asn    = 65000
   ip_address = "172.0.0.1"
   type       = "ipsec.1"
+  
+  tags = {
+     Name = "Customer gateway for terraform testing"
+  }
 }
 
 resource "aws_vpn_connection" "example" {
+  vpn_gateway_id      = replace(aws_vpc.example.id, "/vpc/", "vgw")
   customer_gateway_id = aws_customer_gateway.example.id
-  transit_gateway_id  = aws_ec2_transit_gateway.example.id
   type                = aws_customer_gateway.example.type
-}
-```
-
-### Virtual Private Gateway
-
-```terraform
-resource "aws_vpc" "vpc" {
-  cidr_block = "10.0.0.0/16"
-}
-
-resource "aws_vpn_gateway" "vpn_gateway" {
-  vpc_id = aws_vpc.vpc.id
-}
-
-resource "aws_customer_gateway" "customer_gateway" {
-  bgp_asn    = 65000
-  ip_address = "172.0.0.1"
-  type       = "ipsec.1"
-}
-
-resource "aws_vpn_connection" "main" {
-  vpn_gateway_id      = aws_vpn_gateway.vpn_gateway.id
-  customer_gateway_id = aws_customer_gateway.customer_gateway.id
-  type                = "ipsec.1"
-  static_routes_only  = true
+  
+  tags = {
+     Name = "Customer gateway for terraform testing"
+  }
 }
 ```
 
@@ -170,5 +165,5 @@ In addition to all arguments above, the following attributes are exported:
 VPN Connections can be imported using the `vpn connection id`, e.g.,
 
 ```
-$ terraform import aws_vpn_connection.testvpnconnection vpn-40f41529
+$ terraform import aws_vpn_connection.testvpnconnection vpn-12345678
 ```

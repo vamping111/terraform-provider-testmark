@@ -8,10 +8,8 @@ description: |-
 
 # Resource: aws_eip_association
 
-Provides an AWS EIP Association as a top level resource, to associate and
-disassociate Elastic IPs from AWS Instances and Network Interfaces.
-
-~> **NOTE:** Do not use this resource to associate an EIP to `aws_lb` or `aws_nat_gateway` resources. Instead use the `allocation_id` available in those resources to allow AWS to manage the association, otherwise you will see `AuthFailure` errors.
+Provides an EIP Association as a top level resource, to associate and
+disassociate Elastic IPs from Instances and Network Interfaces.
 
 ~> **NOTE:** `aws_eip_association` is useful in scenarios where EIPs are either
 pre-existing or distributed to customers or users and therefore cannot be changed.
@@ -25,9 +23,9 @@ resource "aws_eip_association" "eip_assoc" {
 }
 
 resource "aws_instance" "web" {
-  ami               = "ami-21f78e11"
-  availability_zone = "us-west-2a"
-  instance_type     = "t2.micro"
+  ami               = "cmi-12345678" # add image id, change instance type if needed
+  availability_zone = "ru-msk-vol52"
+  instance_type     = "m1.micro"
 
   tags = {
     Name = "HelloWorld"
@@ -43,38 +41,28 @@ resource "aws_eip" "example" {
 
 The following arguments are supported:
 
-* `allocation_id` - (Optional) The allocation ID. This is required for EC2-VPC.
+* `allocation_id` - (Optional) The allocation ID. Required, if `public_ip` is not supplied.
 * `allow_reassociation` - (Optional, Boolean) Whether to allow an Elastic IP to
-be re-associated. Defaults to `true` in VPC.
-* `instance_id` - (Optional) The ID of the instance. This is required for
-EC2-Classic. For EC2-VPC, you can specify either the instance ID or the
-network interface ID, but not both. The operation fails if you specify an
-instance ID unless exactly one network interface is attached.
-* `network_interface_id` - (Optional) The ID of the network interface. If the
-instance has more than one network interface, you must specify a network
-interface ID.
-* `private_ip_address` - (Optional) The primary or secondary private IP address
-to associate with the Elastic IP address. If no private IP address is
-specified, the Elastic IP address is associated with the primary private IP
-address.
-* `public_ip` - (Optional) The Elastic IP address. This is required for EC2-Classic.
+be re-associated. Defaults to `true`.
+* `instance_id` - (Optional) The ID of the instance. Required, if `network_interface_id` is not supplied.
+* `network_interface_id` - (Optional) The ID of the network interface. Required, if `instance_id` is not supplied.
+* `public_ip` - (Optional) The Elastic IP address. Required, if `allocation_id` is not supplied.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `association_id` - The ID that represents the association of the Elastic IP
-address with an instance.
-* `allocation_id` - As above
-* `instance_id` - As above
-* `network_interface_id` - As above
-* `private_ip_address` - As above
-* `public_ip` - As above
+* `association_id` - The ID that represents the association of the Elastic IP address with an instance.
+* `allocation_id` - The allocation ID.
+* `instance_id` - The ID of the instance that the address is associated with.
+* `network_interface_id` - The ID of the network interface.
+* `private_ip_address` - The private IP address associated with the Elastic IP address.
+* `public_ip` - Public IP address of Elastic IP.
 
 ## Import
 
-EIP Assocations can be imported using their association ID.
+EIP Associations can be imported using their association ID.
 
 ```
-$ terraform import aws_eip_association.test eipassoc-ab12c345
+$ terraform import aws_eip_association.test eipassoc-12345678
 ```

@@ -10,16 +10,20 @@ description: |-
 
 Provides an VPC subnet resource.
 
-~> **NOTE:** Due to [AWS Lambda improved VPC networking changes that began deploying in September 2019](https://aws.amazon.com/blogs/compute/announcing-improved-vpc-networking-for-aws-lambda-functions/), subnets associated with Lambda Functions can take up to 45 minutes to successfully delete. Terraform AWS Provider version 2.31.0 and later automatically handles this increased timeout, however prior versions require setting the [customizable deletion timeout](#timeouts) to 45 minutes (`delete = "45m"`). AWS and HashiCorp are working together to reduce the amount of time required for resource deletion and updates can be tracked in this [GitHub issue](https://github.com/hashicorp/terraform-provider-aws/issues/10329).
+For more information, see the documentation on [Subnets][subnets].
 
 ## Example Usage
 
 ### Basic Usage
 
 ```terraform
-resource "aws_subnet" "main" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.1.0/24"
+resource "aws_vpc" "example" {
+  cidr_block = "10.1.0.0/16"
+}
+
+resource "aws_subnet" "example" {
+  vpc_id     = aws_vpc.example.id
+  cidr_block = "10.1.1.0/24"
 
   tags = {
     Name = "Main"
@@ -27,58 +31,39 @@ resource "aws_subnet" "main" {
 }
 ```
 
-### Subnets In Secondary VPC CIDR Blocks
-
-When managing subnets in one of a VPC's secondary CIDR blocks created using a [`aws_vpc_ipv4_cidr_block_association`](vpc_ipv4_cidr_block_association.html)
-resource, it is recommended to reference that resource's `vpc_id` attribute to ensure correct dependency ordering.
-
-```terraform
-resource "aws_vpc_ipv4_cidr_block_association" "secondary_cidr" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "172.2.0.0/16"
-}
-
-resource "aws_subnet" "in_secondary_cidr" {
-  vpc_id     = aws_vpc_ipv4_cidr_block_association.secondary_cidr.vpc_id
-  cidr_block = "172.2.0.0/24"
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
 
-* `assign_ipv6_address_on_creation` - (Optional) Specify true to indicate
-    that network interfaces created in the specified subnet should be
-    assigned an IPv6 address. Default is `false`
 * `availability_zone` - (Optional) AZ for the subnet.
-* `availability_zone_id` - (Optional) AZ ID of the subnet. This argument is not supported in all regions or partitions. If necessary, use `availability_zone` instead.
-* `cidr_block` - (Optional) The IPv4 CIDR block for the subnet.
-* `customer_owned_ipv4_pool` - (Optional) The customer owned IPv4 address pool. Typically used with the `map_customer_owned_ip_on_launch` argument. The `outpost_arn` argument must be specified when configured.
-* `enable_dns64` - (Optional) Indicates whether DNS queries made to the Amazon-provided DNS Resolver in this subnet should return synthetic IPv6 addresses for IPv4-only destinations. Default: `false`.
-* `enable_resource_name_dns_aaaa_record_on_launch` - (Optional) Indicates whether to respond to DNS queries for instance hostnames with DNS AAAA records. Default: `false`.
-* `enable_resource_name_dns_a_record_on_launch` - (Optional) Indicates whether to respond to DNS queries for instance hostnames with DNS A records. Default: `false`.
-* `ipv6_cidr_block` - (Optional) The IPv6 network range for the subnet,
-    in CIDR notation. The subnet size must use a /64 prefix length.
-* `ipv6_native` - (Optional) Indicates whether to create an IPv6-only subnet. Default: `false`.
-* `map_customer_owned_ip_on_launch` -  (Optional) Specify `true` to indicate that network interfaces created in the subnet should be assigned a customer owned IP address. The `customer_owned_ipv4_pool` and `outpost_arn` arguments must be specified when set to `true`. Default is `false`.
-* `map_public_ip_on_launch` -  (Optional) Specify true to indicate
-    that instances launched into the subnet should be assigned
-    a public IP address. Default is `false`.
-* `outpost_arn` - (Optional) The Amazon Resource Name (ARN) of the Outpost.
-* `private_dns_hostname_type_on_launch` - (Optional) The type of hostnames to assign to instances in the subnet at launch. For IPv6-only subnets, an instance DNS name must be based on the instance ID. For dual-stack and IPv4-only subnets, you can specify whether DNS names use the instance IPv4 address or the instance ID. Valid values: `ip-name`, `resource-name`.
+* `cidr_block` - (Required) The IPv4 CIDR block for the subnet.
 * `vpc_id` - (Required) The VPC ID.
-* `tags` - (Optional) A map of tags to assign to the resource. If configured with a provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block) present, tags with matching keys will overwrite those defined at the provider-level.
+* `tags` - (Optional) A map of tags to assign to the resource. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the subnet
-* `arn` - The ARN of the subnet.
-* `ipv6_cidr_block_association_id` - The association ID for the IPv6 CIDR block.
-* `owner_id` - The ID of the AWS account that owns the subnet.
-* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block).
+* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `arn` - ARN of the subnet. Always `""`.
+* `assign_ipv6_address_on_creation` - Whether an IPv6 address is assigned on creation. Always `false`.
+* `availability_zone_id` - AZ ID of the subnet. Always `""`.
+* `customer_owned_ipv4_pool` - Identifier of customer owned IPv4 address pool. Always `""`.
+* `enable_dns64` - Indicates whether DNS queries made to the Amazon-provided DNS Resolver in this subnet return synthetic IPv6 addresses for IPv4-only destinations. Always `false`.
+* `enable_resource_name_dns_aaaa_record_on_launch` - Indicates whether to respond to DNS queries for instance hostnames with DNS AAAA records. Always `false`.
+* `enable_resource_name_dns_a_record_on_launch` - Indicates whether to respond to DNS queries for instance hostnames with DNS A records. Always `false`.
+* `ipv6_cidr_block_association_id` - Association ID of the IPv6 CIDR block. Always `""`.
+* `ipv6_native` - Indicates whether this is an IPv6-only subnet. Always `false`.
+* `map_customer_owned_ip_on_launch` - Whether customer owned IP addresses are assigned on network interface creation. Always `false`.
+* `map_public_ip_on_launch` - Whether public IP addresses are assigned on instance launch. Always `false`.
+* `outpost_arn` - ARN of the Outpost. Always `""`.
+* `owner_id` - ID of the CROC Cloud account that owns the subnet. Always `""`.
+* `private_dns_hostname_type_on_launch` - The type of hostnames assigned to instances in the subnet at launch. Always `""`.
 
 ## Timeouts
 
@@ -86,12 +71,15 @@ In addition to all arguments above, the following attributes are exported:
 configuration options:
 
 - `create` - (Default `10m`) How long to wait for a subnet to be created.
-- `delete` - (Default `20m`) How long to retry on `DependencyViolation` errors during subnet deletion from lingering ENIs left by certain AWS services such as Elastic Load Balancing. NOTE: Lambda ENIs can take up to 45 minutes to delete, which is not affected by changing this customizable timeout (in version 2.31.0 and later of the Terraform AWS Provider) unless it is increased above 45 minutes.
+- `delete` - (Default `20m`) How long to wait for a subnet to be deleted.
 
 ## Import
 
 Subnets can be imported using the `subnet id`, e.g.,
 
 ```
-$ terraform import aws_subnet.public_subnet subnet-9d4a7b6c
+$ terraform import aws_subnet.public_subnet subnet-12345678
 ```
+
+[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
+[subnets]: https://docs.cloud.croc.ru/en/services/networks/subnets.html

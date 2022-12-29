@@ -8,7 +8,7 @@ description: |-
 
 # Resource: aws_ebs_snapshot_import
 
-Imports a disk image from S3 as a Snapshot.
+Imports a disk image from S3 as a snapshot.
 
 ## Example Usage
 
@@ -22,8 +22,6 @@ resource "aws_ebs_snapshot_import" "example" {
     }
   }
 
-  role_name = "disk-image-import"
-
   tags = {
     Name = "HelloWorld"
   }
@@ -35,34 +33,19 @@ resource "aws_ebs_snapshot_import" "example" {
 
 The following arguments are supported:
 
-* `client_data` - (Optional) The client-specific data. Detailed below.
 * `description` - (Optional) The description string for the import snapshot task.
 * `disk_container` - (Required) Information about the disk container. Detailed below.
-* `encrypted` - (Optional) Specifies whether the destination snapshot of the imported image should be encrypted. The default KMS key for EBS is used unless you specify a non-default KMS key using KmsKeyId.
-* `kms_key_id` - (Optional) An identifier for the symmetric KMS key to use when creating the encrypted snapshot. This parameter is only required if you want to use a non-default KMS key; if this parameter is not specified, the default KMS key for EBS is used. If a KmsKeyId is specified, the Encrypted flag must also be set.
-* `storage_tier` - (Optional) The name of the storage tier. Valid values are `archive` and `standard`. Default value is `standard`.
-* `permanent_restore` - (Optional) Indicates whether to permanently restore an archived snapshot.
-* `temporary_restore_days` - (Optional) Specifies the number of days for which to temporarily restore an archived snapshot. Required for temporary restores only. The snapshot will be automatically re-archived after this period.
-* `role_name` - (Optional) The name of the IAM Role the VM Import/Export service will assume. This role needs certain permissions. See https://docs.aws.amazon.com/vm-import/latest/userguide/vmie_prereqs.html#vmimport-role. Default: `vmimport`
 * `tags` - (Optional) A map of tags to assign to the snapshot.
-
-### client_data Configuration Block
-
-* `comment` - (Optional) A user-defined comment about the disk upload.
-* `upload_start` - (Optional) The time that the disk upload starts.
-* `upload_end` - (Optional) The time that the disk upload ends.
-* `upload_size` - (Optional) The size of the uploaded disk image, in GiB.
 
 ### disk_container Configuration Block
 
 * `description` - (Optional) The description of the disk image being imported.
-* `format` - (Required) The format of the disk image being imported. One of `VHD` or `VMDK`.
-* `url` - (Optional) The URL to the Amazon S3-based disk image being imported. It can either be a https URL (https://..) or an Amazon S3 URL (s3://..). One of `url` or `user_bucket` must be set.
-* `user_bucket` - (Optional) The Amazon S3 bucket for the disk image. One of `url` or `user_bucket` must be set. Detailed below.
+* `format` - (Required) The format of the disk image being imported. One of `VHD`, `VMDK` or `RAW`.
+* `user_bucket` - (Required) The S3 bucket for the disk image.
 
 ### user_bucket Configuration Block
 
-* `s3_bucket` - The name of the Amazon S3 bucket where the disk image is located.
+* `s3_bucket` - The name of the S3 bucket where the disk image is located.
 * `s3_key` - The file name of the disk image.
 
 ### Timeouts
@@ -77,10 +60,24 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `arn` - Amazon Resource Name (ARN) of the EBS Snapshot.
-* `id` - The snapshot ID (e.g., snap-59fcb34e).
-* `owner_id` - The AWS account ID of the EBS snapshot owner.
-* `owner_alias` - Value from an Amazon-maintained list (`amazon`, `aws-marketplace`, `microsoft`) of snapshot owners.
-* `volume_size` - The size of the drive in GiBs.
-* `data_encryption_key_id` - The data encryption key identifier for the snapshot.
-* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block](https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block).
+* `arn` - Amazon Resource Name (ARN) of the EBS snapshot.
+* `id` - The snapshot ID (e.g., snap-12345678).
+* `owner_id` - The CROC Cloud project ID.
+* `owner_alias` - The alias of the EBS snapshot owner.
+* `volume_size` - The size of the drive in GiB.
+* `tags_all` - A map of tags assigned to the resource.
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `client_data` - The client-specific data. Always empty.
+* `data_encryption_key_id` - The data encryption key identifier for the snapshot. Always `""`.
+* `disk_container`
+    * `url` - The URL to the Amazon S3-based disk image being imported. Always `""`.
+* `encrypted` - Whether the snapshot is encrypted. Always `false`.
+* `kms_key_id` - The ARN for the KMS encryption key. Always `""`.
+* `outpost_arn` - The ARN of the Outpost on which the snapshot is stored. Always `""`.
+* `permanent_restore` - Indicates whether to permanently restore an archived snapshot. Always empty.
+* `role_name` - The name of the IAM Role the VM Import/Export service will assume. Always `vmimport`.
+* `storage_tier` - The storage tier in which the snapshot is stored. Always `""`.
+* `temporary_restore_days` - The number of days for which to temporarily restore an archived snapshot. Always empty.

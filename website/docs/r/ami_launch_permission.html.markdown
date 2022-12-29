@@ -8,7 +8,7 @@ description: |-
 
 # Resource: aws_ami_launch_permission
 
-Adds a launch permission to an Amazon Machine Image (AMI).
+Adds a launch permission to an image.
 
 ## Example Usage
 
@@ -16,7 +16,7 @@ Adds a launch permission to an Amazon Machine Image (AMI).
 
 ```terraform
 resource "aws_ami_launch_permission" "example" {
-  image_id   = "ami-12345678"
+  image_id   = "cmi-12345678"
   account_id = "123456789012"
 }
 ```
@@ -24,20 +24,11 @@ resource "aws_ami_launch_permission" "example" {
 ### Public Access
 
 ```terraform
+# CROC Cloud currently restricts adding public access permissions to images. 
+# Applying the resource must throw an error.
 resource "aws_ami_launch_permission" "example" {
-  image_id = "ami-12345678"
+  image_id = "cmi-12345678"
   group    = "all"
-}
-```
-
-### Organization Access
-
-```terraform
-data "aws_organizations_organization" "current" {}
-
-resource "aws_ami_launch_permission" "example" {
-  image_id         = "ami-12345678"
-  organization_arn = data.aws_organizations_organization.current.arn
 }
 ```
 
@@ -45,11 +36,9 @@ resource "aws_ami_launch_permission" "example" {
 
 The following arguments are supported:
 
-* `account_id` - (Optional) The AWS account ID for the launch permission.
+* `account_id` - (Optional) The CROC Cloud project ID for the launch permission.
 * `group` - (Optional) The name of the group for the launch permission. Valid values: `"all"`.
-* `image_id` - (Required) The ID of the AMI.
-* `organization_arn` - (Optional) The ARN of an organization for the launch permission.
-* `organizational_unit_arn` - (Optional) The ARN of an organizational unit for the launch permission.
+* `image_id` - (Required) The ID of the image.
 
 ## Attributes Reference
 
@@ -57,10 +46,19 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - Launch permission ID.
 
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `organization_arn` - The ARN of an organization for the launch permission. Always `""`.
+* `organizational_unit_arn` - The ARN of an organizational unit for the launch permission. Always `""`.
+
 ## Import
 
-AMI Launch Permissions can be imported using `[ACCOUNT-ID|GROUP-NAME|ORGANIZATION-ARN|ORGANIZATIONAL-UNIT-ARN]/IMAGE-ID`, e.g.,
+-> **Unsupported operation**
+Import image launch permission is currently unsupported by CROC Cloud
+
+Image launch permissions can be imported using `[ACCOUNT-ID|GROUP-NAME]/IMAGE-ID`, e.g.,
 
 ```sh
-$ terraform import aws_ami_launch_permission.example 123456789012/ami-12345678
+$ terraform import aws_ami_launch_permission.example 123456789012/cmi-12345678
 ```

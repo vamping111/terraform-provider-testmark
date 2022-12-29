@@ -10,11 +10,11 @@ description: |-
 
 This resource can be useful for getting back a list of VPC Ids for a region.
 
-The following example retrieves a list of VPC Ids with a custom tag of `service` set to a value of "production".
+The following example retrieves a list of VPC IDs with a custom tag of `service` set to a value of "production".
 
 ## Example Usage
 
-The following shows outputing all VPC Ids.
+The following shows outputing all VPC IDs.
 
 ```terraform
 data "aws_vpcs" "foo" {
@@ -28,47 +28,24 @@ output "foo" {
 }
 ```
 
-An example use case would be interpolate the `aws_vpcs` output into `count` of an aws_flow_log resource.
-
-```terraform
-data "aws_vpcs" "foo" {}
-
-data "aws_vpc" "foo" {
-  count = length(data.aws_vpcs.foo.ids)
-  id    = tolist(data.aws_vpcs.foo.ids)[count.index]
-}
-
-resource "aws_flow_log" "test_flow_log" {
-  count = length(data.aws_vpcs.foo.ids)
-
-  # ...
-  vpc_id = data.aws_vpc.foo[count.index].id
-
-  # ...
-}
-
-output "foo" {
-  value = data.aws_vpcs.foo.ids
-}
-```
-
 ## Argument Reference
 
 * `tags` - (Optional) A map of tags, each pair of which must exactly match
-  a pair on the desired vpcs.
-
+  a pair on the desired VPCs.
 * `filter` - (Optional) Custom filter block as described below.
 
 More complex filters can be expressed using one or more `filter` sub-blocks,
 which take the following arguments:
 
-* `name` - (Required) The name of the field to filter by, as defined by
-  [the underlying AWS API](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html).
-
+* `name` - (Required) The name of the field to filter by it.
 * `values` - (Required) Set of values that are accepted for the given field.
   A VPC will be selected if any one of the given values matches.
 
+For more information about filtering, see the [EC2 API documentation][describe-vpcs].
+
 ## Attributes Reference
 
-* `id` - AWS Region.
-* `ids` - A list of all the VPC Ids found.
+* `id` - Region (for example, `croc`).
+* `ids` - A list of all the VPC IDs found.
+
+[describe-vpcs]: https://docs.cloud.croc.ru/en/api/ec2/vpcs/DescribeVpcs.html

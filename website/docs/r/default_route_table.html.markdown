@@ -14,22 +14,31 @@ Provides a resource to manage a default route table of a VPC. This resource can 
 
 Every VPC has a default route table that can be managed but not destroyed. When Terraform first adopts a default route table, it **immediately removes all defined routes**. It then proceeds to create any routes specified in the configuration. This step is required so that only the routes specified in the configuration exist in the default route table.
 
-For more information, see the Amazon VPC User Guide on [Route Tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html). For information about managing normal route tables in Terraform, see [`aws_route_table`](/docs/providers/aws/r/route_table.html).
+For more information, see the documentation on [route tables][route-tables]. For information about managing normal route tables in Terraform, see [`aws_route_table`][tf-route-table].
 
 ## Example Usage
 
 ```terraform
+resource "aws_vpc" "example" {
+  cidr_block = "10.1.0.0/16"
+}
+
+resource "aws_subnet" "example" {
+  availability_zone = "ru-msk-vol52"
+  vpc_id            = aws_vpc.example.id
+  cidr_block        = cidrsubnet(aws_vpc.example.cidr_block, 1, 0)
+}
+
+resource "aws_network_interface" "example" {
+  subnet_id = aws_subnet.example.id
+}
+
 resource "aws_default_route_table" "example" {
   default_route_table_id = aws_vpc.example.default_route_table_id
 
   route {
-    cidr_block = "10.0.1.0/24"
-    gateway_id = aws_internet_gateway.example.id
-  }
-
-  route {
-    ipv6_cidr_block        = "::/0"
-    egress_only_gateway_id = aws_egress_only_internet_gateway.example.id
+    cidr_block           = "10.0.1.0/24"
+    network_interface_id = aws_network_interface.example.id
   }
 
   tags = {
@@ -62,7 +71,7 @@ The following arguments are optional:
 
 * `propagating_vgws` - (Optional) List of virtual gateways for propagation.
 * `route` - (Optional) Configuration block of routes. Detailed below. This argument is processed in [attribute-as-blocks mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html). This means that omitting this argument is interpreted as ignoring any existing routes. To remove all managed routes an empty list should be specified. See the example above.
-* `tags` - (Optional) Map of tags to assign to the resource. If configured with a provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block) present, tags with matching keys will overwrite those defined at the provider-level.
+* `tags` - (Optional) Map of tags to assign to the resource. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
 
 ### route
 
@@ -71,32 +80,35 @@ This argument is processed in [attribute-as-blocks mode](https://www.terraform.i
 One of the following destination arguments must be supplied:
 
 * `cidr_block` - (Required) The CIDR block of the route.
-* `ipv6_cidr_block` - (Optional) The Ipv6 CIDR block of the route
-* `destination_prefix_list_id` - (Optional) The ID of a [managed prefix list](ec2_managed_prefix_list.html) destination of the route.
 
 One of the following target arguments must be supplied:
 
-* `core_network_arn` - (Optional) The Amazon Resource Name (ARN) of a core network.
-* `egress_only_gateway_id` - (Optional) Identifier of a VPC Egress Only Internet Gateway.
-* `gateway_id` - (Optional) Identifier of a VPC internet gateway or a virtual private gateway.
-* `instance_id` - (Optional) Identifier of an EC2 instance.
-* `nat_gateway_id` - (Optional) Identifier of a VPC NAT gateway.
-* `network_interface_id` - (Optional) Identifier of an EC2 network interface.
-* `transit_gateway_id` - (Optional) Identifier of an EC2 Transit Gateway.
-* `vpc_endpoint_id` - (Optional) Identifier of a VPC Endpoint. This route must be removed prior to VPC Endpoint deletion.
-* `vpc_peering_connection_id` - (Optional) Identifier of a VPC peering connection.
-
-Note that the default route, mapping the VPC's CIDR block to "local", is created implicitly and cannot be specified.
+* `gateway_id` - (Optional) ID of an internet gateway or virtual private gateway.
+* `instance_id` - (Optional) ID of an EC2 instance.
+* `network_interface_id` - (Optional) ID of an EC2 network interface.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - ID of the route table.
-* `arn` - The ARN of the route table.
-* `owner_id` - ID of the AWS account that owns the route table.
-* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block).
+* `arn` - The Amazon Resource Name (ARN) of the route table.
+* `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 * `vpc_id` - ID of the VPC.
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `destination_prefix_list_id` - ID of a managed prefix list destination of the route. Always `""`.
+* `ipv6_cidr_block` - The Ipv6 CIDR block of the route. Always `""`.
+* `owner_id` - ID of the CROC Cloud account that owns the Default Network ACL. Always `""`.
+* `route`
+    * `core_network_arn` - The ARN of a core network. Always `""`.
+    * `egress_only_gateway_id` - ID of a VPC Egress Only Internet Gateway. Always `""`.
+    * `nat_gateway_id` - ID of a VPC NAT gateway. Always `""`.
+    * `transit_gateway_id` - ID of an EC2 Transit Gateway. Always `""`.
+    * `vpc_endpoint_id` - ID of a VPC Endpoint. Always `""`.
+    * `vpc_peering_connection_id` - ID of a VPC peering connection. Always `""`.
 
 ## Timeouts
 
@@ -110,9 +122,10 @@ In addition to all arguments above, the following attributes are exported:
 Default VPC route tables can be imported using the `vpc_id`, e.g.,
 
 ```
-$ terraform import aws_default_route_table.example vpc-33cc44dd
+$ terraform import aws_default_route_table.example vpc-12345678
 ```
 
-[aws-route-tables]: http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Route_Tables.html#Route_Replacing_Main_Table
-[tf-route-tables]: /docs/providers/aws/r/route_table.html
-[tf-main-route-table-association]: /docs/providers/aws/r/main_route_table_association.html
+[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
+[route-tables]: https://docs.cloud.croc.ru/en/services/networks/routetables.html
+[tf-main-route-table-association]: main_route_table_association.html
+[tf-route-table]: route_table.html

@@ -16,9 +16,23 @@ propagation not explicitly listed in its value will be removed.
 
 ## Example Usage
 
+-> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+
 ```terraform
+resource "aws_vpc" "example" {
+  cidr_block = "10.1.0.0/16"
+}
+
+resource "aws_route_table" "example" {
+  vpc_id = aws_vpc.example.id
+}
+
+data "aws_vpn_gateway" "selected" {
+  id = aws_vpc.example.id # vpc_id can be used as vpn_gateway_id
+}
+
 resource "aws_vpn_gateway_route_propagation" "example" {
-  vpn_gateway_id = aws_vpn_gateway.example.id
+  vpn_gateway_id = data.aws_vpn_gateway.selected.id
   route_table_id = aws_route_table.example.id
 }
 ```
@@ -27,8 +41,8 @@ resource "aws_vpn_gateway_route_propagation" "example" {
 
 The following arguments are required:
 
-* `vpn_gateway_id` - The id of the `aws_vpn_gateway` to propagate routes from.
-* `route_table_id` - The id of the `aws_route_table` to propagate routes into.
+* `vpn_gateway_id` - ID of the VPN gateway to propagate routes from.
+* `route_table_id` - ID of the route table to propagate routes into.
 
 ## Attributes Reference
 
@@ -38,5 +52,5 @@ No additional attributes are exported.
 
 `aws_vpn_gateway_route_propagation` provides the following [Timeouts](https://www.terraform.io/docs/configuration/blocks/resources/syntax.html#operation-timeouts) configuration options:
 
-- `create` - (Default `2 minutes`) Used for propagation creation
-- `delete` - (Default `2 minutes`) Used for propagation deletion
+- `create` - (Default `2 minutes`) Used for propagation creation.
+- `delete` - (Default `2 minutes`) Used for propagation deletion.

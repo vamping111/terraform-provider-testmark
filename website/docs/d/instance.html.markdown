@@ -14,17 +14,17 @@ resources.
 ## Example Usage
 
 ```terraform
-data "aws_instance" "foo" {
-  instance_id = "i-instanceid"
+data "aws_instance" "example" {
+  instance_id = "i-12345678"
 
   filter {
     name   = "image-id"
-    values = ["ami-xxxxxxxx"]
+    values = ["cmi-12345678"]
   }
 
   filter {
     name   = "tag:Name"
-    values = ["instance-name-tag"]
+    values = ["example"]
   }
 }
 ```
@@ -32,16 +32,16 @@ data "aws_instance" "foo" {
 ## Argument Reference
 
 * `instance_id` - (Optional) Specify the exact Instance ID with which to populate the data source.
-
 * `instance_tags` - (Optional) A map of tags, each pair of which must
 exactly match a pair on the desired Instance.
 
-* `filter` - (Optional) One or more name/value pairs to use as filters. There are
-several valid keys, for a full reference, check out
-[describe-instances in the AWS CLI reference][1].
+* `filter` - (Optional) One or more name/value pairs to use as filters.
+
+For more information about filtering, see the [EC2 API documentation][describe-instances].
+
+[describe-instances]: https://docs.cloud.croc.ru/en/api/ec2/instances/DescribeInstances.html
 
 * `get_password_data` - (Optional) If true, wait for password data to become available and retrieve it. Useful for getting the administrator password for instances running Microsoft Windows. The password data is exported to the `password_data` attribute. See [GetPasswordData](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetPasswordData.html) for more information.
-
 * `get_user_data` - (Optional) Retrieve Base64 encoded User Data contents into the `user_data_base64` attribute. A SHA-1 hash of the User Data contents will always be present in the `user_data` attribute. Defaults to `false`.
 
 ~> **NOTE:** At least one of `filter`, `instance_tags`, or `instance_id` must be specified.
@@ -60,7 +60,7 @@ interpolation.
 
 * `ami` - The ID of the AMI used to launch the instance.
 * `arn` - The ARN of the instance.
-* `associate_public_ip_address` - Whether or not the Instance is associated with a public IP address or not (Boolean).
+* `associate_public_ip_address` - Whether the Instance is associated with a public IP address or not (Boolean).
 * `availability_zone` - The availability zone of the Instance.
 * `ebs_block_device` - The EBS block device mappings of the Instance.
     * `delete_on_termination` - If the EBS volume will be deleted on termination.
@@ -127,5 +127,3 @@ interpolation.
     * `enabled` - Whether Nitro Enclaves are enabled.
 * `maintenance_options` - The maintenance and recovery options for the instance.
     * `auto_recovery` - The automatic recovery behavior of the instance.
-
-[1]: http://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html

@@ -8,7 +8,7 @@ description: |-
 
 # Resource: aws_ec2_tag
 
-Manages an individual EC2 resource tag. This resource should only be used in cases where EC2 resources are created outside Terraform (e.g., AMIs), being shared via Resource Access Manager (RAM), or implicitly created by other means (e.g., Transit Gateway VPN Attachments).
+Manages an individual EC2 resource tag. This resource should only be used in cases where EC2 resources are created outside Terraform (e.g., AMIs).
 
 ~> **NOTE:** This tagging resource should not be combined with the Terraform resource for managing the parent resource. For example, using `aws_vpc` and `aws_ec2_tag` to manage tags of the same VPC will cause a perpetual difference where the `aws_vpc` resource will try to remove the tag being added by the `aws_ec2_tag` resource.
 
@@ -17,24 +17,10 @@ Manages an individual EC2 resource tag. This resource should only be used in cas
 ## Example Usage
 
 ```terraform
-resource "aws_ec2_transit_gateway" "example" {}
-
-resource "aws_customer_gateway" "example" {
-  bgp_asn    = 65000
-  ip_address = "172.0.0.1"
-  type       = "ipsec.1"
-}
-
-resource "aws_vpn_connection" "example" {
-  customer_gateway_id = aws_customer_gateway.example.id
-  transit_gateway_id  = aws_ec2_transit_gateway.example.id
-  type                = aws_customer_gateway.example.type
-}
-
 resource "aws_ec2_tag" "example" {
-  resource_id = aws_vpn_connection.example.transit_gateway_attachment_id
-  key         = "Name"
-  value       = "Hello World"
+  resource_id = "vol-12345678"
+  key         = "tag-from-tf"
+  value       = "tf-tag"
 }
 ```
 
@@ -57,5 +43,5 @@ In addition to all arguments above, the following attributes are exported:
 `aws_ec2_tag` can be imported by using the EC2 resource identifier and key, separated by a comma (`,`), e.g.,
 
 ```
-$ terraform import aws_ec2_tag.example tgw-attach-1234567890abcdef,Name
+$ terraform import aws_ec2_tag.example tgw-attach-12345678,Name
 ```

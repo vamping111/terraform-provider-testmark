@@ -8,7 +8,7 @@ description: |-
 
 # Data Source: aws_instances
 
-Use this data source to get IDs or IPs of Amazon EC2 instances to be referenced elsewhere,
+Use this data source to get IDs or IPs of EC2 instances to be referenced elsewhere,
 e.g., to allow easier migration from another management solution
 or to make it easier for an operator to connect through bastion host(s).
 
@@ -47,19 +47,16 @@ resource "aws_eip" "test" {
 
 * `instance_tags` - (Optional) A map of tags, each pair of which must
 exactly match a pair on desired instances.
-
 * `instance_state_names` - (Optional) A list of instance states that should be applicable to the desired instances. The permitted values are: `pending, running, shutting-down, stopped, stopping, terminated`. The default value is `running`.
+* `filter` - (Optional) One or more name/value pairs to use as filters.
 
-* `filter` - (Optional) One or more name/value pairs to use as filters. There are
-several valid keys, for a full reference, check out
-[describe-instances in the AWS CLI reference][1].
+For more information about filtering, see the [EC2 API documentation][describe-instances].
+
+[describe-instances]: https://docs.cloud.croc.ru/en/api/ec2/instances/DescribeInstances.html
 
 ## Attributes Reference
 
-* `id` - AWS Region.
+* `id` - Region (for example, `croc`).
 * `ids` - IDs of instances found through the filter
 * `private_ips` - Private IP addresses of instances found through the filter
 * `public_ips` - Public IP addresses of instances found through the filter
-
-
-[1]: http://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html

@@ -11,6 +11,8 @@ description: |-
 The VPN Gateway data source provides details about
 a specific VPN gateway.
 
+-> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+
 ## Example Usage
 
 ```terraform
@@ -31,30 +33,25 @@ output "vpn_gateway_id" {
 The arguments of this data source act as filters for querying the available VPN gateways.
 The given filters must match exactly one VPN gateway whose data will be exported as attributes.
 
-* `id` - (Optional) The ID of the specific VPN Gateway to retrieve.
-
-* `state` - (Optional) The state of the specific VPN Gateway to retrieve.
-
-* `availability_zone` - (Optional) The Availability Zone of the specific VPN Gateway to retrieve.
-
-* `attached_vpc_id` - (Optional) The ID of a VPC attached to the specific VPN Gateway to retrieve.
-
+* `id` - (Optional) ID of the specific VPN gateway to retrieve.
+* `state` - (Optional) The state of the specific VPN gateway to retrieve.
+* `availability_zone` - (Optional) The availability zone of the specific VPN gateway to retrieve.
+* `attached_vpc_id` - (Optional) ID of a VPC attached to the specific VPN gateway to retrieve.
 * `filter` - (Optional) Custom filter block as described below.
-
 * `tags` - (Optional) A map of tags, each pair of which must exactly match
-  a pair on the desired VPN Gateway.
-
-* `amazon_side_asn` - (Optional) The Autonomous System Number (ASN) for the Amazon side of the specific VPN Gateway to retrieve.
+  a pair on the desired VPN gateway.
 
 More complex filters can be expressed using one or more `filter` sub-blocks,
 which take the following arguments:
 
-* `name` - (Required) The name of the field to filter by, as defined by
-  [the underlying AWS API](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpnGateways.html).
-
+* `name` - (Required) The name of the field to filter by it.
 * `values` - (Required) Set of values that are accepted for the given field.
   A VPN Gateway will be selected if any one of the given values matches.
 
+For more information about filtering, see the [EC2 API documentation][describe-vpn-gateways].
+
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes.
+All the argument attributes are also exported as result attributes.
+
+[describe-vpn-gateways]: https://docs.cloud.croc.ru/en/api/ec2/vpn_gateways/DescribeVpnGateways.html

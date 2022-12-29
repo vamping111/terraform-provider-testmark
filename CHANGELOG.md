@@ -1,3 +1,9 @@
+## 4.14.0-CROC3
+
+ENHANCEMENTS:
+
+* Update provider documentation with unsupported resources
+
 ## 4.14.0-CROC2
 
 BUG FIXES:

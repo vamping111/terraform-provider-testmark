@@ -1974,9 +1974,10 @@ func expandLaunchTemplateInstanceNetworkInterfaceSpecificationRequest(tfMap map[
 		apiObject.Ipv6Prefixes = expandIPv6PrefixSpecificationRequests(v.List())
 	}
 
-	if v, ok := tfMap["network_card_index"].(int); ok {
-		apiObject.NetworkCardIndex = aws.Int64(int64(v))
-	}
+	// CROC Cloud API does not support `NetworkCardIndex` parameter
+	// if v, ok := tfMap["network_card_index"].(int); ok {
+	// 	apiObject.NetworkCardIndex = aws.Int64(int64(v))
+	// }
 
 	if v, ok := tfMap["network_interface_id"].(string); ok && v != "" {
 		apiObject.NetworkInterfaceId = aws.String(v)

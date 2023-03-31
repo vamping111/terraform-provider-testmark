@@ -1,0 +1,10 @@
+
+Auto Scaling
+CloudTrail
+CloudWatch
+EBS (EC2)
+EC2 (Elastic Compute Cloud)
+EKS (Elastic Kubernetes)
+S3 (Simple Storage)
+VPC (Virtual Private Cloud)
+VPN (Site-to-Site)

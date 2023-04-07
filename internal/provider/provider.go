@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/experimental/nullable"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/autoscaling"
-	"github.com/hashicorp/terraform-provider-aws/internal/service/cloudtrail"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/eks"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/s3"
@@ -316,7 +315,7 @@ func Provider() *schema.Provider {
 			//
 			//"aws_cloudhsm_v2_cluster": cloudhsmv2.DataSourceCluster(),
 
-			"aws_cloudtrail_service_account": cloudtrail.DataSourceServiceAccount(),
+			//"aws_cloudtrail_service_account": cloudtrail.DataSourceServiceAccount(),
 
 			//"aws_cloudwatch_event_bus":        events.DataSourceBus(),
 			//"aws_cloudwatch_event_connection": events.DataSourceConnection(),

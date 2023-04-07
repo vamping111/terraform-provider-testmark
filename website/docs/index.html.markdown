@@ -1,28 +1,38 @@
 ---
 layout: "aws"
-page_title: "Provider: AWS"
+page_title: "Provider: CROC Cloud"
 description: |-
-  Use the Amazon Web Services (AWS) provider to interact with the many resources supported by AWS. You must configure the provider with the proper credentials before you can use it.
+  Use the Terraform CROC Cloud Provider to interact with the various resources supported by CROC Cloud. You must configure the provider with the proper credentials before you can use it.
 ---
+
+[hashicorp-tutorials]: https://learn.hashicorp.com/tutorials/terraform/infrastructure-as-code?in=terraform/aws-get-started&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS
+[aws-tutorials]: https://learn.hashicorp.com/collections/terraform/aws?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS
+[c2-tutorials]: https://github.com/C2Devel/terraform-examples
+[aws-configure-files]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
+[terraform]: https://docs.cloud.croc.ru/en/api/tools/terraform.html
 
 # CROC Cloud Provider
 
-Use the CROC Cloud Provider based on the Terraform AWS Provider to interact with cloud services.
+The CROC Cloud Provider is based on the AWS Provider.
+Use it to interact with CROC Cloud services.
 The provider needs to be configured with the proper credentials before you can use it.
 
 Use the navigation to the left to read about the available resources.
 
+~> **NOTE**
+Resource names in the navigation bar have an automatically generated prefix that matches the *croccloud* name.
+For compatibility with AWS provider configurations, we retained the ``aws`` prefix in resource description and usage examples.
+
 To learn the basics of Terraform using this provider, follow the
 hands-on [get started tutorials][hashicorp-tutorials] on HashiCorp's Learn platform.
 
-Examples of using AWS services with Terraform: [AWS services tutorials][aws-tutorials].
+Examples of using CROC Cloud services with Terraform can be found in [reference test suite on GitHub][c2-tutorials].
 
-[hashicorp-tutorials]: https://learn.hashicorp.com/tutorials/terraform/infrastructure-as-code?in=terraform/aws-get-started&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS
-[aws-tutorials]: https://learn.hashicorp.com/collections/terraform/aws?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS
+CROC Cloud API is based on AWS API so you can also see examples of using AWS services with Terraform: [AWS services tutorials][aws-tutorials].
 
 ## Example Usage
 
-Terraform 0.13 and later:
+For Terraform 0.13 and later:
 
 ```terraform
 terraform {
@@ -35,7 +45,7 @@ terraform {
 }
 
 # Configure the croccloud provider.
-# Section name is `aws` due to backward compatibility.
+# The section is named `aws` for backward compatibility.
 provider "aws" {
   region = "croc"
 }
@@ -51,17 +61,17 @@ resource "aws_vpc" "example" {
 Configuration for the CROC Cloud Provider can be derived from several sources,
 which are applied in the following order:
 
-1. Parameters in the provider configuration
-2. Environment variables
-3. Shared configuration and credentials files
+1. Parameters in the provider configuration.
+2. Environment variables.
+3. Shared configuration and credentials files.
 
 ### Provider Configuration
 
 !> **Warning:** Hard-coded credentials are not recommended in any Terraform
-configuration and risks secret leakage should this file ever be committed to a
+configuration because they run the risk of secret leakage should this file ever be committed to a
 public version control system.
 
-Credentials can be provided by adding an `access_key`, `secret_key` to the `aws` provider block.
+Credentials can be provided by adding `access_key` and `secret_key` to the `aws` provider block.
 
 Usage:
 
@@ -75,7 +85,7 @@ provider "aws" {
 
 ### Environment Variables
 
-Credentials can be provided by using the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` environment variables.
+Credentials can also be provided by using the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 The region can be set using the `AWS_REGION` or `AWS_DEFAULT_REGION` environment variables.
 
 For example:
@@ -93,11 +103,9 @@ $ terraform plan
 
 ### Shared Configuration and Credentials Files
 
-CROC Cloud Provider can use [AWS shared configuration and credentials files][aws-configure-files].
+CROC Cloud Provider can use [AWS shared configuration and credentials files][aws-configure-files] and source credentials and other settings from them.
 By default, these files are located at `$HOME/.aws/config` and `$HOME/.aws/credentials` on Linux and macOS,
 and `"%USERPROFILE%\.aws\config"` and `"%USERPROFILE%\.aws\credentials"` on Windows.
-
-[aws-configure-files]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
 
 If no named profile is specified, the `default` profile is used.
 Use the `profile` parameter or `AWS_PROFILE`, `AWS_DEFAULT_PROFILE` environment variables to specify a named profile.
@@ -118,6 +126,4 @@ provider "aws" {
 
 ## CROC Cloud Provider Full Configuration
 
-For more information about CROC Cloud Provider configuration, see documentation on [using Terraform in CROC Cloud][terraform].
-
-[terraform]: https://docs.cloud.croc.ru/en/api/tools/terraform.html
+For more information about the CROC Cloud Provider configuration, see the documentation on [using Terraform in CROC Cloud][terraform].

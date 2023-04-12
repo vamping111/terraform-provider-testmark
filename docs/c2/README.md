@@ -213,6 +213,7 @@ $ make docscheck
 ### Настройка окружения
 
 1. Установка [goreleaser](https://goreleaser.com/install/)
+   - **Важно!** Для корректной работы утилиты goreleaser должен быть установлен Git как минимум 2.3 версии
 
    ```
    $ go install github.com/goreleaser/goreleaser@latest
@@ -288,7 +289,9 @@ $ make docscheck
 6. Сборка и подпись релизных артефактов. Артефакты будут размещены в директории `dist/`
 
    ```
-   $ $GOBIN/goreleaser release --rm-dist
+   $ $GOBIN/goreleaser release --clean --timeout 180m    # Для версий goreleaser выше v1.15.0
+
+   $ $GOBIN/goreleaser release --rm-dist --timeout 180m  # Для версий goreleaser ниже v1.15.0
    ```
 
 7. **Опционально.** Если на шаге 2 **не** была включена автопубликация (`release.draft: true`):

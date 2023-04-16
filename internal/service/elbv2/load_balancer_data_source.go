@@ -252,12 +252,15 @@ func dataSourceLoadBalancerRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("error setting subnet_mapping: %w", err)
 	}
 
-	attributesResp, err := conn.DescribeLoadBalancerAttributes(&elbv2.DescribeLoadBalancerAttributesInput{
-		LoadBalancerArn: aws.String(d.Id()),
-	})
-	if err != nil {
-		return fmt.Errorf("error retrieving LB Attributes: %w", err)
-	}
+	log.Printf("[WARN] DescribeLoadBalancerAttributes Request is not supported by C2")
+
+	// attributesResp, err := conn.DescribeLoadBalancerAttributes(&elbv2.DescribeLoadBalancerAttributesInput{
+	// 	LoadBalancerArn: aws.String(d.Id()),
+	// })
+	// if err != nil {
+	// 	return fmt.Errorf("error retrieving LB Attributes: %w", err)
+	// }
+	attributesResp := &elbv2.DescribeLoadBalancerAttributesOutput{}
 
 	accessLogMap := map[string]interface{}{
 		"bucket":  "",

@@ -206,12 +206,15 @@ func dataSourceTargetGroupRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("protocol_version", targetGroup.ProtocolVersion)
 	}
 
-	attrResp, err := conn.DescribeTargetGroupAttributes(&elbv2.DescribeTargetGroupAttributesInput{
-		TargetGroupArn: aws.String(d.Id()),
-	})
-	if err != nil {
-		return fmt.Errorf("error retrieving Target Group Attributes: %w", err)
-	}
+	log.Printf("[WARN] DescribeLoadBalancerAttributes Request is not supported by C2")
+
+	// attrResp, err := conn.DescribeTargetGroupAttributes(&elbv2.DescribeTargetGroupAttributesInput{
+	// 	TargetGroupArn: aws.String(d.Id()),
+	// })
+	// if err != nil {
+	// 	return fmt.Errorf("error retrieving Target Group Attributes: %w", err)
+	// }
+	attrResp := &elbv2.DescribeTargetGroupAttributesOutput{}
 
 	for _, attr := range attrResp.Attributes {
 		switch aws.StringValue(attr.Key) {

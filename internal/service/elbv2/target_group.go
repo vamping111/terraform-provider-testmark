@@ -509,11 +509,15 @@ func resourceTargetGroupCreate(d *schema.ResourceData, meta interface{}) error {
 			Attributes:     attrs,
 		}
 
-		_, err := conn.ModifyTargetGroupAttributes(params)
+		log.Printf("[DEBUG] ModifyTargetGroupAttributes Request: %#v", params)
 
-		if err != nil {
-			return fmt.Errorf("error modifying Target Group Attributes: %w", err)
-		}
+		log.Printf("[WARN] ModifyTargetGroupAttributes Request is not supported by C2")
+
+		// _, err := conn.ModifyTargetGroupAttributes(params)
+
+		// if err != nil {
+		// 	return fmt.Errorf("error modifying Target Group Attributes: %w", err)
+		// }
 	}
 
 	// Post-create tagging supported in some partitions
@@ -749,10 +753,14 @@ func resourceTargetGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 			Attributes:     attrs,
 		}
 
-		_, err := conn.ModifyTargetGroupAttributes(params)
-		if err != nil {
-			return fmt.Errorf("error modifying Target Group Attributes: %w", err)
-		}
+		log.Printf("[DEBUG] ModifyTargetGroupAttributes Request: %#v", params)
+
+		log.Printf("[WARN] ModifyTargetGroupAttributes Request is not supported by C2")
+
+		// _, err := conn.ModifyTargetGroupAttributes(params)
+		// if err != nil {
+		// 	return fmt.Errorf("error modifying Target Group Attributes: %w", err)
+		// }
 	}
 
 	if d.HasChange("tags_all") {
@@ -909,12 +917,15 @@ func flattenTargetGroupResource(d *schema.ResourceData, meta interface{}, target
 		d.Set("protocol_version", targetGroup.ProtocolVersion)
 	}
 
-	attrResp, err := conn.DescribeTargetGroupAttributes(&elbv2.DescribeTargetGroupAttributesInput{
-		TargetGroupArn: aws.String(d.Id()),
-	})
-	if err != nil {
-		return fmt.Errorf("error retrieving Target Group Attributes: %w", err)
-	}
+	log.Printf("[WARN] DescribeLoadBalancerAttributes Request is not supported by C2")
+
+	// attrResp, err := conn.DescribeTargetGroupAttributes(&elbv2.DescribeTargetGroupAttributesInput{
+	// 	TargetGroupArn: aws.String(d.Id()),
+	// })
+	// if err != nil {
+	// 	return fmt.Errorf("error retrieving Target Group Attributes: %w", err)
+	// }
+	attrResp := &elbv2.DescribeTargetGroupAttributesOutput{}
 
 	for _, attr := range attrResp.Attributes {
 		switch aws.StringValue(attr.Key) {

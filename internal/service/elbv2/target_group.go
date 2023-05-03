@@ -73,9 +73,10 @@ func ResourceTargetGroup() *schema.Resource {
 							ValidateFunc: validation.IntBetween(2, 10),
 						},
 						"interval": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  30,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      30,
+							ValidateFunc: validation.IntInSlice([]int{10, 30}),
 						},
 						"matcher": {
 							Type:     schema.TypeString,
@@ -98,14 +99,13 @@ func ResourceTargetGroup() *schema.Resource {
 						"protocol": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  elbv2.ProtocolEnumHttp,
+							Default:  elbv2.ProtocolEnumTcp,
 							StateFunc: func(v interface{}) string {
 								return strings.ToUpper(v.(string))
 							},
 							ValidateFunc: validation.StringInSlice([]string{
-								elbv2.ProtocolEnumHttp,
-								elbv2.ProtocolEnumHttps,
 								elbv2.ProtocolEnumTcp,
+								elbv2.ProtocolEnumUdp,
 							}, true),
 							DiffSuppressFunc: suppressIfTargetType(elbv2.TargetTypeEnumLambda),
 						},

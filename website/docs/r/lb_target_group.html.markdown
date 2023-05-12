@@ -102,11 +102,11 @@ The following arguments are supported:
 
 * `enabled` - (Optional) Whether health checks are enabled. Defaults to `true`.
 * `healthy_threshold` - (Optional) Number of consecutive health checks successes required before considering an unhealthy target healthy. Defaults to 3.
-* `interval` - (Optional) Approximate amount of time, in seconds, between health checks of an individual target. Minimum value 5 seconds, Maximum value 300 seconds. For `lambda` target groups, it needs to be greater as the `timeout` of the underlying `lambda`. Default 30 seconds.
+* `interval` - (Optional) Approximate amount of time, in seconds, between health checks of an individual target. Should be one of `10`, `30`. Defaults to `30`.
 * `matcher` (May be required) Response codes to use when checking for a healthy responses from a target. You can specify multiple values (for example, "200,202" for HTTP(s) or "0,12" for GRPC) or a range of values (for example, "200-299" or "0-99"). Required for HTTP/HTTPS/GRPC ALB. Only applies to Application Load Balancers (i.e., HTTP/HTTPS/GRPC) not Network Load Balancers (i.e., TCP).
 * `path` - (May be required) Destination for the health check request. Required for HTTP/HTTPS ALB and HTTP NLB. Only applies to HTTP/HTTPS.
 * `port` - (Optional) Port to use to connect with the target. Valid values are either ports 1-65535, or `traffic-port`. Defaults to `traffic-port`.
-* `protocol` - (Optional) Protocol to use to connect with the target. Defaults to `HTTP`. Not applicable when `target_type` is `lambda`.
+* `protocol` - (Optional) Protocol to use to connect with the target. Should be one of `TCP`, `UDP`. Defaults to `TCP`.
 * `timeout` - (Optional) Amount of time, in seconds, during which no response means a failed health check. For Application Load Balancers, the range is 2 to 120 seconds, and the default is 5 seconds for the `instance` target type and 30 seconds for the `lambda` target type. For Network Load Balancers, you cannot set a custom value, and the default is 10 seconds for TCP and HTTPS health checks and 6 seconds for HTTP health checks.
 * `unhealthy_threshold` - (Optional) Number of consecutive health check failures required before considering the target unhealthy. For Network Load Balancers, this value must be the same as the `healthy_threshold`. Defaults to 3.
 

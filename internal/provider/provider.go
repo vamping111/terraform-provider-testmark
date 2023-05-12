@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/internal/service/autoscaling"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/eks"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/elbv2"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/s3"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
 	"github.com/hashicorp/terraform-provider-aws/internal/verify"
@@ -481,10 +482,10 @@ func Provider() *schema.Provider {
 			//"aws_alb_listener":     elbv2.DataSourceListener(),
 			//"aws_alb_target_group": elbv2.DataSourceTargetGroup(),
 			//"aws_alb":              elbv2.DataSourceLoadBalancer(),
-			//"aws_lb_listener":      elbv2.DataSourceListener(),
-			//"aws_lb_target_group":  elbv2.DataSourceTargetGroup(),
-			//"aws_lb":               elbv2.DataSourceLoadBalancer(),
-			//
+			"aws_lb_listener":     elbv2.DataSourceListener(),
+			"aws_lb_target_group": elbv2.DataSourceTargetGroup(),
+			"aws_lb":              elbv2.DataSourceLoadBalancer(),
+
 			//"aws_emr_release_labels": emr.DataSourceReleaseLabels(),
 			//
 			//"aws_emrcontainers_virtual_cluster": emrcontainers.DataSourceVirtualCluster(),
@@ -1240,13 +1241,13 @@ func Provider() *schema.Provider {
 			//"aws_alb_listener_rule":           elbv2.ResourceListenerRule(),
 			//"aws_alb_target_group":            elbv2.ResourceTargetGroup(),
 			//"aws_alb_target_group_attachment": elbv2.ResourceTargetGroupAttachment(),
-			//"aws_lb":                          elbv2.ResourceLoadBalancer(),
-			//"aws_lb_listener":                 elbv2.ResourceListener(),
-			//"aws_lb_listener_certificate":     elbv2.ResourceListenerCertificate(),
-			//"aws_lb_listener_rule":            elbv2.ResourceListenerRule(),
-			//"aws_lb_target_group":             elbv2.ResourceTargetGroup(),
-			//"aws_lb_target_group_attachment":  elbv2.ResourceTargetGroupAttachment(),
-			//
+			"aws_lb":          elbv2.ResourceLoadBalancer(),
+			"aws_lb_listener": elbv2.ResourceListener(),
+			// "aws_lb_listener_certificate":     elbv2.ResourceListenerCertificate(),
+			// "aws_lb_listener_rule":            elbv2.ResourceListenerRule(),
+			"aws_lb_target_group":            elbv2.ResourceTargetGroup(),
+			"aws_lb_target_group_attachment": elbv2.ResourceTargetGroupAttachment(),
+
 			//"aws_emr_cluster":                emr.ResourceCluster(),
 			//"aws_emr_instance_fleet":         emr.ResourceInstanceFleet(),
 			//"aws_emr_instance_group":         emr.ResourceInstanceGroup(),

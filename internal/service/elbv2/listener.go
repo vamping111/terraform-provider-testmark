@@ -711,20 +711,20 @@ func expandLbListenerActions(l []interface{}) ([]*elbv2.Action, error) {
 	var actions []*elbv2.Action
 	var err error
 
-	for i, tfMapRaw := range l {
+	for _, tfMapRaw := range l {
 		tfMap, ok := tfMapRaw.(map[string]interface{})
 		if !ok {
 			continue
 		}
 
 		action := &elbv2.Action{
-			Order: aws.Int64(int64(i + 1)),
-			Type:  aws.String(tfMap["type"].(string)),
+			// Order: aws.Int64(int64(i + 1)),
+			Type: aws.String(tfMap["type"].(string)),
 		}
 
-		if order, ok := tfMap["order"].(int); ok && order != 0 {
-			action.Order = aws.Int64(int64(order))
-		}
+		// if order, ok := tfMap["order"].(int); ok && order != 0 {
+		// 	action.Order = aws.Int64(int64(order))
+		// }
 
 		switch tfMap["type"].(string) {
 		case elbv2.ActionTypeEnumForward:

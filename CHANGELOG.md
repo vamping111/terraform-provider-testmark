@@ -1,3 +1,17 @@
+## 4.14.0-CROC5
+
+ENHANCEMENTS:
+
+* ELB support in the provider
+
+## 4.14.0-CROC4
+
+ENHANCEMENTS:
+
+* Network interfaces support in the Launch Template
+* Update provider start page
+* Remove access to aws_cloudtrail_service_account
+
 ## 4.14.0-CROC3
 
 ENHANCEMENTS:

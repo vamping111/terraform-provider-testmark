@@ -134,9 +134,9 @@ func resourceZoneCreate(d *schema.ResourceData, meta interface{}) error {
 		},
 	}
 
-	if v, ok := d.GetOk("delegation_set_id"); ok {
-		input.DelegationSetId = aws.String(v.(string))
-	}
+	// if v, ok := d.GetOk("delegation_set_id"); ok {
+	// 	input.DelegationSetId = aws.String(v.(string))
+	// }
 
 	// Private Route53 Hosted Zones can only be created with their first VPC association,
 	// however we need to associate the remaining after creation.
@@ -209,7 +209,7 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.Set("comment", "")
-	d.Set("delegation_set_id", "")
+	// d.Set("delegation_set_id", "")
 	// To be consistent with other AWS services (e.g. ACM) that do not accept a trailing period,
 	// we remove the suffix from the Hosted Zone Name returned from the API
 	d.Set("name", TrimTrailingPeriod(aws.StringValue(output.HostedZone.Name)))
@@ -218,7 +218,7 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 	var nameServers []string
 
 	if output.DelegationSet != nil {
-		d.Set("delegation_set_id", CleanDelegationSetID(aws.StringValue(output.DelegationSet.Id)))
+		// d.Set("delegation_set_id", CleanDelegationSetID(aws.StringValue(output.DelegationSet.Id)))
 
 		nameServers = aws.StringValueSlice(output.DelegationSet.NameServers)
 	}

@@ -168,14 +168,13 @@ func resourceZoneCreate(d *schema.ResourceData, meta interface{}) error {
 
 	// Associate additional VPCs beyond the first
 	if len(vpcs) > 1 {
-		log.Printf("[WARN] AssociateVPCWithHostedZone Request is not supported by C2")
-		// for _, vpc := range vpcs[1:] {
-		// 	err := hostedZoneVPCAssociate(conn, d.Id(), vpc)
+		for _, vpc := range vpcs[1:] {
+			err := hostedZoneVPCAssociate(conn, d.Id(), vpc)
 
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// }
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return resourceZoneRead(d, meta)
@@ -275,7 +274,7 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceZoneUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).Route53Conn
-	// region := meta.(*conns.AWSClient).Region
+	region := meta.(*conns.AWSClient).Region
 
 	if d.HasChange("comment") {
 		input := route53.UpdateHostedZoneCommentInput{
@@ -299,37 +298,36 @@ func resourceZoneUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("vpc") {
-		log.Printf("[WARN] AssociateVPCWithHostedZone Request is not supported by C2")
-		// o, n := d.GetChange("vpc")
-		// oldVPCs := o.(*schema.Set)
-		// newVPCs := n.(*schema.Set)
+		o, n := d.GetChange("vpc")
+		oldVPCs := o.(*schema.Set)
+		newVPCs := n.(*schema.Set)
 
-		// // VPCs cannot be empty, so add first and then remove
-		// for _, vpcRaw := range newVPCs.Difference(oldVPCs).List() {
-		// 	if vpcRaw == nil {
-		// 		continue
-		// 	}
+		// VPCs cannot be empty, so add first and then remove
+		for _, vpcRaw := range newVPCs.Difference(oldVPCs).List() {
+			if vpcRaw == nil {
+				continue
+			}
 
-		// 	vpc := expandVPC(vpcRaw.(map[string]interface{}), region)
-		// 	err := hostedZoneVPCAssociate(conn, d.Id(), vpc)
+			vpc := expandVPC(vpcRaw.(map[string]interface{}), region)
+			err := hostedZoneVPCAssociate(conn, d.Id(), vpc)
 
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// }
+			if err != nil {
+				return err
+			}
+		}
 
-		// for _, vpcRaw := range oldVPCs.Difference(newVPCs).List() {
-		// 	if vpcRaw == nil {
-		// 		continue
-		// 	}
+		for _, vpcRaw := range oldVPCs.Difference(newVPCs).List() {
+			if vpcRaw == nil {
+				continue
+			}
 
-		// 	vpc := expandVPC(vpcRaw.(map[string]interface{}), region)
-		// 	err := hostedZoneVPCDisassociate(conn, d.Id(), vpc)
+			vpc := expandVPC(vpcRaw.(map[string]interface{}), region)
+			err := hostedZoneVPCDisassociate(conn, d.Id(), vpc)
 
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// }
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return resourceZoneRead(d, meta)
@@ -643,45 +641,49 @@ func flattenVPCs(vpcs []*route53.VPC) []interface{} {
 	return l
 }
 
-// func hostedZoneVPCAssociate(conn *route53.Route53, zoneID string, vpc *route53.VPC) error {
-// 	input := &route53.AssociateVPCWithHostedZoneInput{
-// 		HostedZoneId: aws.String(zoneID),
-// 		VPC:          vpc,
-// 	}
+func hostedZoneVPCAssociate(conn *route53.Route53, zoneID string, vpc *route53.VPC) error {
+	input := &route53.AssociateVPCWithHostedZoneInput{
+		HostedZoneId: aws.String(zoneID),
+		VPC:          vpc,
+	}
 
-// 	log.Printf("[DEBUG] Associating Route53 Hosted Zone with VPC: %s", input)
-// 	output, err := conn.AssociateVPCWithHostedZone(input)
+	log.Printf("[DEBUG] Associating Route53 Hosted Zone with VPC: %s", input)
+	log.Printf("[WARN] AssociateVPCWithHostedZone Request is not supported by C2")
+	// output, err := conn.AssociateVPCWithHostedZone(input)
+	var err error
 
-// 	if err != nil {
-// 		return fmt.Errorf("error associating Route53 Hosted Zone (%s) to VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
-// 	}
+	if err != nil {
+		return fmt.Errorf("error associating Route53 Hosted Zone (%s) to VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
+	}
 
-// 	if err := waitForChangeSynchronization(conn, CleanChangeID(aws.StringValue(output.ChangeInfo.Id))); err != nil {
-// 		return fmt.Errorf("error waiting for Route53 Hosted Zone (%s) association to VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
-// 	}
+	// if err := waitForChangeSynchronization(conn, CleanChangeID(aws.StringValue(output.ChangeInfo.Id))); err != nil {
+	// 	return fmt.Errorf("error waiting for Route53 Hosted Zone (%s) association to VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
+	// }
 
-// 	return nil
-// }
+	return nil
+}
 
-// func hostedZoneVPCDisassociate(conn *route53.Route53, zoneID string, vpc *route53.VPC) error {
-// 	input := &route53.DisassociateVPCFromHostedZoneInput{
-// 		HostedZoneId: aws.String(zoneID),
-// 		VPC:          vpc,
-// 	}
+func hostedZoneVPCDisassociate(conn *route53.Route53, zoneID string, vpc *route53.VPC) error {
+	input := &route53.DisassociateVPCFromHostedZoneInput{
+		HostedZoneId: aws.String(zoneID),
+		VPC:          vpc,
+	}
 
-// 	log.Printf("[DEBUG] Disassociating Route53 Hosted Zone with VPC: %s", input)
-// 	output, err := conn.DisassociateVPCFromHostedZone(input)
+	log.Printf("[DEBUG] Disassociating Route53 Hosted Zone with VPC: %s", input)
+	log.Printf("[WARN] DisassociateVPCFromHostedZone Request is not supported by C2")
+	// output, err := conn.DisassociateVPCFromHostedZone(input)
+	var err error
 
-// 	if err != nil {
-// 		return fmt.Errorf("error disassociating Route53 Hosted Zone (%s) from VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
-// 	}
+	if err != nil {
+		return fmt.Errorf("error disassociating Route53 Hosted Zone (%s) from VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
+	}
 
-// 	if err := waitForChangeSynchronization(conn, CleanChangeID(aws.StringValue(output.ChangeInfo.Id))); err != nil {
-// 		return fmt.Errorf("error waiting for Route53 Hosted Zone (%s) disassociation from VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
-// 	}
+	// if err := waitForChangeSynchronization(conn, CleanChangeID(aws.StringValue(output.ChangeInfo.Id))); err != nil {
+	// 	return fmt.Errorf("error waiting for Route53 Hosted Zone (%s) disassociation from VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
+	// }
 
-// 	return nil
-// }
+	return nil
+}
 
 func hostedZoneVPCHash(v interface{}) int {
 	var buf bytes.Buffer

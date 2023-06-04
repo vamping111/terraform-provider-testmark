@@ -428,15 +428,21 @@ func deleteAllRecordsInHostedZoneId(hostedZoneId, hostedZoneName string, conn *r
 }
 
 func dnsSECStatus(conn *route53.Route53, hostedZoneID string) (string, error) {
-	input := &route53.GetDNSSECInput{
-		HostedZoneId: aws.String(hostedZoneID),
-	}
+	// input := &route53.GetDNSSECInput{
+	// 	HostedZoneId: aws.String(hostedZoneID),
+	// }
 
 	var output *route53.GetDNSSECOutput
+	output = &route53.GetDNSSECOutput{
+		// FIXME: 1 = NOT_SIGNING. Remove after DNSSEC implementation.
+		Status: &route53.DNSSECStatus{ServeSignature: aws.String("1")},
+	}
+
 	err := tfresource.RetryConfigContext(context.Background(), 0*time.Millisecond, 1*time.Minute, 0*time.Millisecond, 30*time.Second, 3*time.Minute, func() *resource.RetryError {
 		var err error
 
-		output, err = conn.GetDNSSEC(input)
+		log.Printf("[WARN] GetDNSSEC Request is not supported by C2")
+		// output, err = conn.GetDNSSEC(input)
 
 		if err != nil {
 			if strings.Contains(err.Error(), "Throttling") {
@@ -450,9 +456,9 @@ func dnsSECStatus(conn *route53.Route53, hostedZoneID string) (string, error) {
 		return nil
 	})
 
-	if tfresource.TimedOut(err) {
-		output, err = conn.GetDNSSEC(input)
-	}
+	// if tfresource.TimedOut(err) {
+	// 	output, err = conn.GetDNSSEC(input)
+	// }
 
 	if tfawserr.ErrMessageContains(err, route53.ErrCodeInvalidArgument, "Operation is unsupported for private") {
 		return "NOT_SIGNING", nil
@@ -492,7 +498,8 @@ func disableDNSSECForZone(conn *route53.Route53, hostedZoneId string) error {
 	err = tfresource.RetryConfigContext(context.Background(), 0*time.Millisecond, 1*time.Minute, 0*time.Millisecond, 20*time.Second, 5*time.Minute, func() *resource.RetryError {
 		var err error
 
-		output, err = conn.DisableHostedZoneDNSSEC(input)
+		log.Printf("[WARN] DisableDNSSECForHostedZone Request is not supported by C2")
+		// output, err = conn.DisableHostedZoneDNSSEC(input)
 
 		if err != nil {
 			if tfawserr.ErrCodeEquals(err, route53.ErrCodeKeySigningKeyInParentDSRecord) {

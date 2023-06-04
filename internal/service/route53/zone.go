@@ -226,14 +226,15 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 	if output.HostedZone.Config != nil {
 		d.Set("comment", output.HostedZone.Config.Comment)
 
-		if aws.BoolValue(output.HostedZone.Config.PrivateZone) {
-			var err error
-			nameServers, err = getNameServers(d.Id(), d.Get("name").(string), conn)
+		// Private Zones in C2 don't have NS records, nameServers = []
+		// if aws.BoolValue(output.HostedZone.Config.PrivateZone) {
+		// 	var err error
+		// 	nameServers, err = getNameServers(d.Id(), d.Get("name").(string), conn)
 
-			if err != nil {
-				return fmt.Errorf("error getting Route53 Hosted Zone (%s) name servers: %s", d.Id(), err)
-			}
-		}
+		// 	if err != nil {
+		// 		return fmt.Errorf("error getting Route53 Hosted Zone (%s) name servers: %s", d.Id(), err)
+		// 	}
+		// }
 	}
 
 	sort.Strings(nameServers)

@@ -1,14 +1,14 @@
 ---
 subcategory: "Route 53"
 layout: "aws"
-page_title: "AWS: aws_route53_zone"
+page_title: "CROC Cloud: aws_route53_zone"
 description: |-
   Manages a Route53 Hosted Zone
 ---
 
 # Resource: aws_route53_zone
 
-Manages a Route53 Hosted Zone. For managing Domain Name System Security Extensions (DNSSEC), see the [`aws_route53_key_signing_key`](route53_key_signing_key.html) and [`aws_route53_hosted_zone_dnssec`](route53_hosted_zone_dnssec.html) resources.
+Manages a Route53 Hosted Zone.
 
 ## Example Usage
 
@@ -50,9 +50,7 @@ resource "aws_route53_record" "dev-ns" {
 
 ### Private Zone
 
-~> **NOTE:** Terraform provides both exclusive VPC associations defined in-line in this resource via `vpc` configuration blocks and a separate [Zone VPC Association](/docs/providers/aws/r/route53_zone_association.html) resource. At this time, you cannot use in-line VPC associations in conjunction with any `aws_route53_zone_association` resources with the same zone ID otherwise it will cause a perpetual difference in plan output. You can optionally use the generic Terraform resource [lifecycle configuration block](https://www.terraform.io/docs/configuration/meta-arguments/lifecycle.html) with `ignore_changes` to manage additional associations via the `aws_route53_zone_association` resource.
-
-~> **NOTE:** Private zones require at least one VPC association at all times.
+~> **NOTE:** Private zones require one VPC association at all times.
 
 ```terraform
 resource "aws_route53_zone" "private" {
@@ -70,15 +68,13 @@ The following arguments are supported:
 
 * `name` - (Required) This is the name of the hosted zone.
 * `comment` - (Optional) A comment for the hosted zone. Defaults to 'Managed by Terraform'.
-* `delegation_set_id` - (Optional) The ID of the reusable delegation set whose NS records you want to assign to the hosted zone. Conflicts with `vpc` as delegation sets can only be used for public zones.
 * `force_destroy` - (Optional) Whether to destroy all records (possibly managed outside of Terraform) in the zone when destroying the zone.
 * `tags` - (Optional) A map of tags to assign to the zone. If configured with a provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block) present, tags with matching keys will overwrite those defined at the provider-level.
-* `vpc` - (Optional) Configuration block(s) specifying VPC(s) to associate with a private hosted zone. Conflicts with the `delegation_set_id` argument in this resource and any [`aws_route53_zone_association` resource](/docs/providers/aws/r/route53_zone_association.html) specifying the same zone ID. Detailed below.
+* `vpc` - (Optional) Configuration block(s) specifying VPC to associate with a private hosted zone.
 
 ### vpc Argument Reference
 
 * `vpc_id` - (Required) ID of the VPC to associate.
-* `vpc_region` - (Optional) Region of the VPC to associate. Defaults to AWS provider region.
 
 ## Attributes Reference
 
@@ -90,10 +86,17 @@ In addition to all arguments above, the following attributes are exported:
   Find more about delegation sets in [AWS docs](https://docs.aws.amazon.com/Route53/latest/APIReference/actions-on-reusable-delegation-sets.html).
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block).
 
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `vpc`
+    * `vpc_region` - Region of the VPC to associate. Defaults to AWS provider region. Always `""`.
+* `delegation_set_id` - The ID of the reusable delegation set whose NS records you want to assign to the hosted zone. Always empty.
+
 ## Import
 
 Route53 Zones can be imported using the `zone id`, e.g.,
 
 ```
-$ terraform import aws_route53_zone.myzone Z1D633PJN98FT9
+$ terraform import aws_route53_zone.myzone z-xxxxxxxx
 ```

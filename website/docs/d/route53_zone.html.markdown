@@ -1,7 +1,7 @@
 ---
 subcategory: "Route 53"
 layout: "aws"
-page_title: "AWS: aws_route53_zone"
+page_title: "CROC Cloud: aws_route53_zone"
 description: |-
     Provides details about a specific Route 53 Hosted Zone
 ---
@@ -59,5 +59,9 @@ The following attribute is additionally exported:
 * `comment` - The comment field of the Hosted Zone.
 * `name_servers` - The list of DNS name servers for the Hosted Zone.
 * `resource_record_set_count` - The number of Record Set in the Hosted Zone.
-* `linked_service_principal` - The service that created the Hosted Zone (e.g., `servicediscovery.amazonaws.com`).
-* `linked_service_description` - The description provided by the service that created the Hosted Zone (e.g., `arn:aws:servicediscovery:us-east-1:1234567890:namespace/ns-xxxxxxxxxxxxxxxx`).
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `linked_service_principal` - The service that created the Hosted Zone (e.g., `servicediscovery.amazonaws.com`). Always `""`.
+* `linked_service_description` - The description provided by the service that created the Hosted Zone (e.g., `arn:aws:servicediscovery:us-east-1:1234567890:namespace/ns-xxxxxxxxxxxxxxxx`). Always `""`.

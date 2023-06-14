@@ -249,7 +249,9 @@ func ResourceAMI() *schema.Resource {
 			"sriov_net_support": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				// FIXME: Enable forced replacement on new value
+				// when CROC Cloud API supports the `SriovNetSupport` parameter
+				ForceNew: false,
 				Default:  "simple",
 			},
 			"tags":     tftags.TagsSchema(),

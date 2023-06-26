@@ -222,6 +222,12 @@ func resourceEBSVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
+type targetVolumeParameters struct {
+	size       *int64
+	iops       *int64
+	volumeType *string
+}
+
 func resourceEBSVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).EC2Conn
 
@@ -255,7 +261,14 @@ func resourceEBSVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("modifying EBS Volume(%s): %w", d.Id(), err)
 		}
 
-		if _, err := WaitVolumeUpdated(conn, d.Id(), d.Timeout(schema.TimeoutUpdate)); err != nil {
+		target := &targetVolumeParameters{
+			size:       input.Size,
+			iops:       input.Iops,
+			volumeType: input.VolumeType,
+		}
+
+		// FIXME: Use WaitVolumeModificationComplete after VolumeModification implementation in C2.
+		if _, err := WaitC2VolumeUpdated(conn, d.Id(), target, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("waiting for EBS Volume (%s) update: %w", d.Id(), err)
 		}
 	}

@@ -1667,7 +1667,14 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 				return fmt.Errorf("updating EC2 Instance (%s) volume (%s): %w", d.Id(), volumeID, err)
 			}
 
-			if _, err := WaitVolumeModificationComplete(conn, volumeID, d.Timeout(schema.TimeoutUpdate)); err != nil {
+			target := &targetVolumeParameters{
+				size:       input.Size,
+				iops:       input.Iops,
+				volumeType: input.VolumeType,
+			}
+
+			// FIXME: Use WaitVolumeModificationComplete after VolumeModification implementation in C2.
+			if _, err := WaitC2VolumeUpdated(conn, volumeID, target, d.Timeout(schema.TimeoutUpdate)); err != nil {
 				return fmt.Errorf("waiting for EC2 Instance (%s) volume (%s) update: %w", d.Id(), volumeID, err)
 			}
 		}

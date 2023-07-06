@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/create"
 	"github.com/hashicorp/terraform-provider-aws/internal/flex"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
 	"github.com/hashicorp/terraform-provider-aws/internal/verify"
@@ -56,7 +57,7 @@ func ResourceNodeGroup() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice(eks.CapacityTypes_Values(), false),
+				ValidateFunc: validation.StringInSlice([]string{eks.CapacityTypesOnDemand}, false),
 			},
 			"cluster_name": {
 				Type:         schema.TypeString,
@@ -90,6 +91,7 @@ func ResourceNodeGroup() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Computed: true, // FIXME: remove after launch_template is supported in C2 EKS API.
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -131,10 +133,9 @@ func ResourceNodeGroup() *schema.Resource {
 				ConflictsWith: []string{"node_group_name"},
 			},
 			"node_role_arn": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.NoZeroValues,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"release_version": {
 				Type:     schema.TypeString,
@@ -468,6 +469,7 @@ func resourceNodeGroupRead(ctx context.Context, d *schema.ResourceData, meta int
 
 func resourceNodeGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conn := meta.(*conns.AWSClient).EKSConn
+	connEc2 := meta.(*conns.AWSClient).EC2Conn
 
 	clusterName, nodeGroupName, err := NodeGroupParseResourceID(d.Id())
 
@@ -568,7 +570,9 @@ func resourceNodeGroupUpdate(ctx context.Context, d *schema.ResourceData, meta i
 
 	if d.HasChange("tags_all") {
 		o, n := d.GetChange("tags_all")
-		if err := UpdateTags(conn, d.Get("arn").(string), o, n); err != nil {
+		// FIXME: Use eks.UpdateTags after TagResource and UntagResource are supported in C2 EKS API.
+		// To use EC2 API arn contains the nodegroup id.
+		if err := ec2.UpdateTags(connEc2, d.Get("arn").(string), o, n); err != nil {
 			return diag.Errorf("error updating tags: %s", err)
 		}
 	}

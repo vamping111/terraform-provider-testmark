@@ -65,7 +65,6 @@ func ResourceSecurityGroup() *schema.Resource {
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				Default:      "Managed by Terraform",
 				ValidateFunc: validation.StringLenBetween(0, 255),
 			},
@@ -406,6 +405,19 @@ func resourceSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) error
 	group, err := FindSecurityGroupByID(conn, d.Id())
 	if err != nil {
 		return fmt.Errorf("error updating Security Group (%s): %w", d.Id(), err)
+	}
+
+	if d.HasChange("description") && !d.IsNewResource() {
+		_, err := conn.ModifySecurityGroupAttribute(&ec2.ModifySecurityGroupAttributeInput{
+			Description: &ec2.AttributeValue{
+				Value: aws.String(d.Get("description").(string)),
+			},
+			GroupId: aws.String(d.Id()),
+		})
+
+		if err != nil {
+			return fmt.Errorf("error updating Security Group (%s) description: %w", d.Id(), err)
+		}
 	}
 
 	err = resourceSecurityGroupUpdateRules(d, "ingress", meta, group)

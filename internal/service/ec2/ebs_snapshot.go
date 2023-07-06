@@ -47,7 +47,6 @@ func ResourceEBSSnapshot() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"encrypted": {
 				Type:     schema.TypeBool,
@@ -257,6 +256,19 @@ func resourceEBSSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
 			if err != nil {
 				return fmt.Errorf("error restoring EBS Snapshot (%s): %w", d.Id(), err)
 			}
+		}
+	}
+
+	if d.HasChange("description") {
+		_, err := conn.ModifySnapshotAttribute(&ec2.ModifySnapshotAttributeInput{
+			Description: &ec2.AttributeValue{
+				Value: aws.String(d.Get("description").(string)),
+			},
+			SnapshotId: aws.String(d.Id()),
+		})
+
+		if err != nil {
+			return fmt.Errorf("error updating EBS Snapshot (%s) description: %w", d.Id(), err)
 		}
 	}
 

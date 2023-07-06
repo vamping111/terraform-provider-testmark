@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/eks"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/elbv2"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/route53"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/s3"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
 	"github.com/hashicorp/terraform-provider-aws/internal/verify"
@@ -653,7 +654,7 @@ func Provider() *schema.Provider {
 			//
 			//"aws_route53_delegation_set":          route53.DataSourceDelegationSet(),
 			//"aws_route53_traffic_policy_document": route53.DataSourceTrafficPolicyDocument(),
-			//"aws_route53_zone":                    route53.DataSourceZone(),
+			"aws_route53_zone": route53.DataSourceZone(),
 			//
 			//"aws_route53_resolver_endpoint": route53resolver.DataSourceEndpoint(),
 			//"aws_route53_resolver_rule":     route53resolver.DataSourceRule(),
@@ -1585,11 +1586,11 @@ func Provider() *schema.Provider {
 			//"aws_route53_hosted_zone_dnssec":            route53.ResourceHostedZoneDNSSEC(),
 			//"aws_route53_key_signing_key":               route53.ResourceKeySigningKey(),
 			//"aws_route53_query_log":                     route53.ResourceQueryLog(),
-			//"aws_route53_record":                        route53.ResourceRecord(),
+			"aws_route53_record": route53.ResourceRecord(),
 			//"aws_route53_traffic_policy":                route53.ResourceTrafficPolicy(),
 			//"aws_route53_traffic_policy_instance":       route53.ResourceTrafficPolicyInstance(),
 			//"aws_route53_vpc_association_authorization": route53.ResourceVPCAssociationAuthorization(),
-			//"aws_route53_zone":                          route53.ResourceZone(),
+			"aws_route53_zone": route53.ResourceZone(),
 			//"aws_route53_zone_association":              route53.ResourceZoneAssociation(),
 			//
 			//"aws_route53domains_registered_domain": route53domains.ResourceRegisteredDomain(),

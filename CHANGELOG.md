@@ -1,3 +1,13 @@
+## 4.14.0-CROC6
+
+FEATURES:
+
+* R53 support
+
+ENHANCEMENTS:
+
+* Update description in snapshot, ami, security group w/o replacement
+
 ## 4.14.0-CROC5
 
 ENHANCEMENTS:

@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/flex"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
 	"github.com/hashicorp/terraform-provider-aws/internal/verify"
@@ -141,7 +142,7 @@ func ResourceCluster() *schema.Resource {
 							Optional:     true,
 							Computed:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice(eks.IpFamily_Values(), false),
+							ValidateFunc: validation.StringInSlice([]string{eks.IpFamilyIpv4}, false),
 						},
 						"service_ipv4_cidr": {
 							Type:     schema.TypeString,
@@ -168,7 +169,7 @@ func ResourceCluster() *schema.Resource {
 			},
 			"role_arn": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: verify.ValidARN,
 			},
@@ -180,8 +181,8 @@ func ResourceCluster() *schema.Resource {
 			"tags_all": tftags.TagsSchemaComputed(),
 			"version": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
+				ForceNew: true, // FIXME: Remove after UpdateClusterVersion is supported in C2 EKS API.
 			},
 			"vpc_config": {
 				Type:     schema.TypeList,
@@ -197,12 +198,10 @@ func ResourceCluster() *schema.Resource {
 						"endpoint_private_access": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  false,
 						},
 						"endpoint_public_access": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  true,
 						},
 						"public_access_cidrs": {
 							Type:     schema.TypeSet,
@@ -245,10 +244,24 @@ func resourceClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 	input := &eks.CreateClusterInput{
 		EncryptionConfig:   testAccClusterConfig_expandEncryption(d.Get("encryption_config").([]interface{})),
-		Logging:            expandLoggingTypes(d.Get("enabled_cluster_log_types").(*schema.Set)),
 		Name:               aws.String(name),
 		ResourcesVpcConfig: testAccClusterConfig_expandVPCRequest(d.Get("vpc_config").([]interface{})),
 		RoleArn:            aws.String(d.Get("role_arn").(string)),
+	}
+
+	// endpoint_private_access and endpoint_public_access are removed from CreateCluster input
+	// if they aren't specified in the configuration.
+	//
+	// FIXME: Remove after these parameters are supported in C2 EKS API.
+	if _, exists := d.GetOkExists("vpc_config.0.endpoint_private_access"); !exists {
+		input.ResourcesVpcConfig.EndpointPrivateAccess = nil
+	}
+	if _, exists := d.GetOkExists("vpc_config.0.endpoint_public_access"); !exists {
+		input.ResourcesVpcConfig.EndpointPublicAccess = nil
+	}
+
+	if _, ok := d.GetOk("enabled_cluster_log_types"); ok {
+		input.Logging = expandLoggingTypes(d.Get("enabled_cluster_log_types").(*schema.Set))
 	}
 
 	if _, ok := d.GetOk("kubernetes_network_config"); ok {
@@ -389,6 +402,7 @@ func resourceClusterRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).EKSConn
+	connEc2 := meta.(*conns.AWSClient).EC2Conn
 
 	// Do any version update first.
 	if d.HasChange("version") {
@@ -485,7 +499,9 @@ func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("tags_all") {
 		o, n := d.GetChange("tags_all")
-		if err := UpdateTags(conn, d.Get("arn").(string), o, n); err != nil {
+		// FIXME: Use eks.UpdateTags after TagResource and UntagResource are supported in C2 EKS API.
+		// To use EC2 API arn contains the cluster id.
+		if err := ec2.UpdateTags(connEc2, d.Get("arn").(string), o, n); err != nil {
 			return fmt.Errorf("error updating tags: %w", err)
 		}
 	}

@@ -212,7 +212,26 @@ func waitNodegroupDeleted(ctx context.Context, conn *eks.EKS, clusterName, nodeG
 	return nil, err
 }
 
-func waitNodegroupUpdateSuccessful(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName, id string, timeout time.Duration) (*eks.Update, error) { //nolint:unparam
+// This is a temporary solution for C2 Nodegroups until DescribeUpdate is implemented.
+func waitC2NodegroupUpdated(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName string, timeout time.Duration) (*eks.Nodegroup, error) {
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{eks.NodegroupStatusPending, eks.NodegroupStatusUpdating},
+		Target:  []string{eks.NodegroupStatusActive},
+		Refresh: statusNodegroup(conn, clusterName, nodeGroupName),
+		Timeout: timeout,
+	}
+
+	outputRaw, err := stateConf.WaitForStateContext(ctx)
+
+	if output, ok := outputRaw.(*eks.Nodegroup); ok {
+		return output, err
+	}
+
+	return nil, err
+}
+
+//lint:ignore U1000 Ignore unused function temporarily
+func waitNodegroupUpdateSuccessful(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName, id string, timeout time.Duration) (*eks.Update, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{eks.UpdateStatusInProgress},
 		Target:  []string{eks.UpdateStatusSuccessful},

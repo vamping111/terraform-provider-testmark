@@ -83,8 +83,8 @@ func waitAddonUpdateSuccessful(ctx context.Context, conn *eks.EKS, clusterName, 
 
 func waitClusterCreated(conn *eks.EKS, name string, timeout time.Duration) (*eks.Cluster, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.ClusterStatusCreating},
-		Target:  []string{eks.ClusterStatusActive},
+		Pending: []string{eks.ClusterStatusCreating, eks.ClusterStatusPending, eks.ClusterStatusClaimed, eks.ClusterStatusProvisioning},
+		Target:  []string{eks.ClusterStatusReady},
 		Refresh: statusCluster(conn, name),
 		Timeout: timeout,
 	}
@@ -100,8 +100,8 @@ func waitClusterCreated(conn *eks.EKS, name string, timeout time.Duration) (*eks
 
 func waitClusterDeleted(conn *eks.EKS, name string, timeout time.Duration) (*eks.Cluster, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.ClusterStatusActive, eks.ClusterStatusDeleting},
-		Target:  []string{},
+		Pending: []string{eks.ClusterStatusPending, eks.ClusterStatusDeleting},
+		Target:  []string{eks.ClusterStatusDeleted},
 		Refresh: statusCluster(conn, name),
 		Timeout: timeout,
 	}
@@ -172,7 +172,7 @@ func waitFargateProfileDeleted(conn *eks.EKS, clusterName, fargateProfileName st
 
 func waitNodegroupCreated(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName string, timeout time.Duration) (*eks.Nodegroup, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.NodegroupStatusCreating},
+		Pending: []string{eks.NodegroupStatusPending, eks.NodegroupStatusCreating},
 		Target:  []string{eks.NodegroupStatusActive},
 		Refresh: statusNodegroup(conn, clusterName, nodeGroupName),
 		Timeout: timeout,
@@ -193,8 +193,8 @@ func waitNodegroupCreated(ctx context.Context, conn *eks.EKS, clusterName, nodeG
 
 func waitNodegroupDeleted(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName string, timeout time.Duration) (*eks.Nodegroup, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.NodegroupStatusActive, eks.NodegroupStatusDeleting},
-		Target:  []string{},
+		Pending: []string{eks.NodegroupStatusPending, eks.NodegroupStatusDeleting},
+		Target:  []string{eks.NodegroupStatusDeleted},
 		Refresh: statusNodegroup(conn, clusterName, nodeGroupName),
 		Timeout: timeout,
 	}

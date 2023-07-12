@@ -1,17 +1,14 @@
 ---
 subcategory: "EKS (Elastic Kubernetes)"
 layout: "aws"
-page_title: "AWS: aws_eks_clusters"
+page_title: "CROC Cloud: aws_eks_clusters"
 description: |-
-  Retrieve EKS Clusters list
+  Retrieves the EKS clusters names.
 ---
 
 # Data Source: aws_eks_clusters
 
--> **Unsupported resource**
-This resource is currently unsupported by CROC Cloud
-
-Retrieve EKS Clusters list
+Retrieves the EKS clusters names.
 
 ## Example Usage
 
@@ -26,5 +23,5 @@ data "aws_eks_cluster" "example" {
 
 ## Attributes Reference
 
-* `id` - AWS Region.
-* `names` - Set of EKS clusters names
+* `id` - Region.
+* `names` - Set of EKS clusters names.

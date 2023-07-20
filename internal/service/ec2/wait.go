@@ -1356,6 +1356,29 @@ func WaitVolumeDeleted(conn *ec2.EC2, id string, timeout time.Duration) (*ec2.Vo
 	return nil, err
 }
 
+// WaitC2VolumeUpdated waits for a C2 Volume to reach a desired state.
+// It uses custom refresh function StatusUpdatedC2VolumeState to get state info.
+//
+// This is a temporary solution for C2 Volumes until VolumeModification is implemented.
+func WaitC2VolumeUpdated(conn *ec2.EC2, id string, target *targetVolumeParameters, timeout time.Duration) (*ec2.Volume, error) {
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{ec2.VolumeModificationStateModifying},
+		Target:     []string{ec2.VolumeStateAvailable, ec2.VolumeStateInUse, ec2.VolumeStateDetaching},
+		Refresh:    StatusUpdatedC2VolumeState(conn, id, target),
+		Timeout:    timeout,
+		Delay:      30 * time.Second,
+		MinTimeout: 30 * time.Second,
+	}
+
+	outputRaw, err := stateConf.WaitForState()
+
+	if output, ok := outputRaw.(*ec2.Volume); ok {
+		return output, err
+	}
+
+	return nil, err
+}
+
 func WaitVolumeUpdated(conn *ec2.EC2, id string, timeout time.Duration) (*ec2.Volume, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{ec2.VolumeStateCreating, ec2.VolumeModificationStateModifying},

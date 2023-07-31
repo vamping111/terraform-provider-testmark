@@ -740,6 +740,9 @@ service/organizations:
 service/outposts:
   - 'internal/service/outposts/**/*'
   - 'website/**/outposts_*'
+service/paas:
+  - 'internal/service/paas/**/*'
+  - 'website/**/paas_*'
 service/panorama:
   - 'internal/service/panorama/**/*'
   - 'website/**/panorama_*'

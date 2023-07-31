@@ -449,6 +449,8 @@ service/organizations:
   - '((\*|-)\s*`?|(data|resource)\s+"?)aws_organizations_'
 service/outposts:
   - '((\*|-)\s*`?|(data|resource)\s+"?)aws_outposts_'
+service/paas:
+  - '((\*|-)\s*`?|(data|resource)\s+"?)aws_paas_'
 service/panorama:
   - '((\*|-)\s*`?|(data|resource)\s+"?)aws_panorama_'
 service/personalize:

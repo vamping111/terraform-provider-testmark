@@ -255,6 +255,7 @@ opsworks-cm,opsworkscm,opsworkscm,opsworkscm,,opsworkscm,,,OpsWorksCM,OpsWorksCM
 organizations,organizations,organizations,organizations,,organizations,,,Organizations,Organizations,,1,,aws_organizations_,,organizations_,Organizations,AWS,,,,,
 outposts,outposts,outposts,outposts,,outposts,,,Outposts,Outposts,,1,,aws_outposts_,,outposts_,Outposts,AWS,,,,,
 ,,,,,ec2outposts,ec2,,,,,,aws_ec2_(coip_pool|local_gateway),aws_ec2outposts_,outposts_,ec2_coip_pool;ec2_local_gateway,Outposts (EC2),AWS,x,x,,,Part of EC2
+paas,paas,paas,paas,,paas,,,PaaS,PaaS,,1,,aws_paas_,,paas_,PaaS,,,,,,
 panorama,panorama,panorama,panorama,,panorama,,,Panorama,Panorama,,1,,aws_panorama_,,panorama_,Panorama,AWS,,,,,
 ,,,,,,,,,,,,,,,,ParallelCluster,AWS,x,,,,No SDK support
 personalize,personalize,personalize,personalize,,personalize,,,Personalize,Personalize,,1,,aws_personalize_,,personalize_,Personalize,Amazon,,,,,

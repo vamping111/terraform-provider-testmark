@@ -214,6 +214,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/opsworkscm"
 	"github.com/aws/aws-sdk-go/service/organizations"
 	"github.com/aws/aws-sdk-go/service/outposts"
+	"github.com/aws/aws-sdk-go/service/paas"
 	"github.com/aws/aws-sdk-go/service/panorama"
 	"github.com/aws/aws-sdk-go/service/personalize"
 	"github.com/aws/aws-sdk-go/service/personalizeevents"
@@ -508,6 +509,7 @@ func (c *Config) clientConns(sess *session.Session) *AWSClient {
 		OrganizationsConn:                organizations.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints[names.Organizations])})),
 		OutpostsConn:                     outposts.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints[names.Outposts])})),
 		PIConn:                           pi.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints[names.PI])})),
+		PaaSConn:                         paas.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints[names.PaaS])})),
 		PanoramaConn:                     panorama.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints[names.Panorama])})),
 		PersonalizeConn:                  personalize.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints[names.Personalize])})),
 		PersonalizeEventsConn:            personalizeevents.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints[names.PersonalizeEvents])})),

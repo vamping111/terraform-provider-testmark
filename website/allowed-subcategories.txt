@@ -6,6 +6,7 @@ EBS (EC2)
 EC2 (Elastic Compute Cloud)
 EKS (Elastic Kubernetes)
 ELB (Elastic Load Balancing)
+PaaS
 Route 53
 S3 (Simple Storage)
 VPC (Virtual Private Cloud)

@@ -459,11 +459,11 @@ func Provider() *schema.Provider {
 
 			//"aws_eks_addon":         eks.DataSourceAddon(),
 			//"aws_eks_addon_version": eks.DataSourceAddonVersion(),
-			//"aws_eks_cluster":      eks.DataSourceCluster(),
-			//"aws_eks_clusters":     eks.DataSourceClusters(),
+			"aws_eks_cluster":      eks.DataSourceCluster(),
+			"aws_eks_clusters":     eks.DataSourceClusters(),
 			"aws_eks_cluster_auth": eks.DataSourceClusterAuth(),
-			//"aws_eks_node_group":    eks.DataSourceNodeGroup(),
-			//"aws_eks_node_groups":   eks.DataSourceNodeGroups(),
+			"aws_eks_node_group":   eks.DataSourceNodeGroup(),
+			"aws_eks_node_groups":  eks.DataSourceNodeGroups(),
 
 			//"aws_elasticache_cluster":           elasticache.DataSourceCluster(),
 			//"aws_elasticache_replication_group": elasticache.DataSourceReplicationGroup(),
@@ -1199,10 +1199,10 @@ func Provider() *schema.Provider {
 			//"aws_efs_mount_target":       efs.ResourceMountTarget(),
 
 			//"aws_eks_addon":                    eks.ResourceAddon(),
-			//"aws_eks_cluster": eks.ResourceCluster(),
+			"aws_eks_cluster": eks.ResourceCluster(),
 			//"aws_eks_fargate_profile":          eks.ResourceFargateProfile(),
 			//"aws_eks_identity_provider_config": eks.ResourceIdentityProviderConfig(),
-			//"aws_eks_node_group":               eks.ResourceNodeGroup(),
+			"aws_eks_node_group": eks.ResourceNodeGroup(),
 
 			//"aws_elasticache_cluster":                  elasticache.ResourceCluster(),
 			//"aws_elasticache_global_replication_group": elasticache.ResourceGlobalReplicationGroup(),

@@ -1,3 +1,9 @@
+## 4.14.0-CROC8
+
+FEATURES:
+
+* EKS support
+
 ## 4.14.0-CROC7
 
 BUG FIXES:

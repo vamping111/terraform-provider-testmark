@@ -299,6 +299,7 @@ func ResourceService() *schema.Resource {
 			},
 			services.ElasticSearch.ServiceType(): services.ElasticSearch.ResourceSchema(),
 			services.Memcached.ServiceType():     services.Memcached.ResourceSchema(),
+			services.PostgreSQL.ServiceType():    services.PostgreSQL.ResourceSchema(),
 		},
 	}
 }

@@ -17,10 +17,17 @@ const (
 	ServiceClassSearch   = "search"
 )
 
+const (
+	Kilobyte = 1024
+	Megabyte = 1024 * Kilobyte
+	Gigabyte = 1024 * Megabyte
+)
+
 // Map with ServiceManager objects for each supported PaaS service.
 var managers = map[string]ServiceManager{
 	ElasticSearch.ServiceType(): ElasticSearch,
 	Memcached.ServiceType():     Memcached,
+	PostgreSQL.ServiceType():    PostgreSQL,
 }
 
 func ManagedServiceTypes() []string {

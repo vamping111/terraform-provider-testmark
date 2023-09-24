@@ -298,6 +298,7 @@ func ResourceService() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"cloud-config", "x-shellscript"}, false),
 			},
 			services.ElasticSearch.ServiceType(): services.ElasticSearch.ResourceSchema(),
+			services.Memcached.ServiceType():     services.Memcached.ResourceSchema(),
 		},
 	}
 }

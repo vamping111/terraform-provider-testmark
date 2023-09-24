@@ -20,6 +20,7 @@ const (
 // Map with ServiceManager objects for each supported PaaS service.
 var managers = map[string]ServiceManager{
 	ElasticSearch.ServiceType(): ElasticSearch,
+	Memcached.ServiceType():     Memcached,
 }
 
 func ManagedServiceTypes() []string {

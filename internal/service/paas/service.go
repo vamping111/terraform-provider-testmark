@@ -297,6 +297,7 @@ func ResourceService() *schema.Resource {
 				RequiredWith: []string{"user_data"},
 				ValidateFunc: validation.StringInSlice([]string{"cloud-config", "x-shellscript"}, false),
 			},
+			services.ElasticSearch.ServiceType(): services.ElasticSearch.ResourceSchema(),
 		},
 	}
 }

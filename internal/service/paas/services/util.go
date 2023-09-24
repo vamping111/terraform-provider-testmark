@@ -18,7 +18,9 @@ const (
 )
 
 // Map with ServiceManager objects for each supported PaaS service.
-var managers = map[string]ServiceManager{}
+var managers = map[string]ServiceManager{
+	ElasticSearch.ServiceType(): ElasticSearch,
+}
 
 func ManagedServiceTypes() []string {
 	keys := make([]string, 0, len(managers))

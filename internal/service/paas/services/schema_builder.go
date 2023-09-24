@@ -1,0 +1,272 @@
+package services
+
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+)
+
+// ResourceSchema returns a full schema of service parameters for resource.
+//
+// It includes:
+//   - common `class` parameter that holds chosen class of service
+//   - service-specific parameters
+//   - user parameters if service can hold them
+//   - database parameters if service can hold them
+func (s service) ResourceSchema() *schema.Schema {
+	serviceSchema := map[string]*schema.Schema{
+		"class": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Default:      s.defaultClass,
+			ForceNew:     true,
+			ValidateFunc: validation.StringInSlice(s.class, false),
+		},
+	}
+
+	for k, v := range s.toInterface().serviceParametersSchema() {
+		serviceSchema[k] = v
+	}
+
+	if s.usersEnabled {
+		serviceSchema["user"] = s.userSchema(s.toInterface().userParametersSchema())
+	}
+
+	if s.databasesEnabled {
+		serviceSchema["database"] = s.databaseSchema(s.toInterface().databaseParametersSchema())
+	}
+
+	var requiredWith, conflictsWith []string
+	if s.dataVolumeRequired {
+		requiredWith = append(requiredWith, "data_volume")
+	}
+
+	if !s.allowArbitrator {
+		conflictsWith = append(conflictsWith, "arbitrator_required")
+	}
+
+	if !s.allowBackup {
+		conflictsWith = append(conflictsWith, "backup_settings")
+	}
+
+	return &schema.Schema{
+		Type:          schema.TypeList,
+		MaxItems:      1,
+		Optional:      true,
+		ForceNew:      true,
+		ExactlyOneOf:  ManagedServiceTypes(),
+		ConflictsWith: conflictsWith,
+		RequiredWith:  requiredWith,
+		Elem: &schema.Resource{
+			Schema: serviceSchema,
+		},
+	}
+}
+
+// userSchema returns a schema of user parameters for resource.
+//
+// It includes:
+//   - common parameter name that holds username
+//   - service-specific user parameters, if service has them
+func (s service) userSchema(userParametersSchema map[string]*schema.Schema) *schema.Schema {
+	userSchema := map[string]*schema.Schema{
+		"name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+	}
+
+	for k, v := range userParametersSchema {
+		userSchema[k] = v
+	}
+
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1000,
+		Elem: &schema.Resource{
+			Schema: userSchema,
+		},
+	}
+}
+
+// databaseSchema returns a schema of databse parameters for resource.
+//
+// It includes:
+//   - common `backup_enabled` and `name` parameters
+//   - service-specific database user parameters if service has them
+//   - service-specific database parameters, if service has them
+func (s service) databaseSchema(databaseParametersSchema map[string]*schema.Schema) *schema.Schema {
+	databaseSchema := map[string]*schema.Schema{
+		"backup_enabled": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+	}
+
+	if s.usersEnabled {
+		databaseSchema["user"] = s.userSchema(s.toInterface().databaseUserParametersSchema())
+	}
+
+	for k, v := range databaseParametersSchema {
+		databaseSchema[k] = v
+	}
+
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1000,
+		Elem: &schema.Resource{
+			Schema: databaseSchema,
+		},
+	}
+}
+
+// serviceParametersSchema represents resource schema for service-specific parameters except for databases and users.
+//
+// If PaaS service has specific parameters, it should override this method.
+func (s service) serviceParametersSchema() map[string]*schema.Schema {
+	return nil
+}
+
+// userParametersSchema represents resource schema for service-specific user parameters.
+//
+// If PaaS service has specific user parameters, it should override this method.
+func (s service) userParametersSchema() map[string]*schema.Schema {
+	return nil
+}
+
+// databaseParametersSchema represents resource schema for service-specific database parameters.
+//
+// If PaaS service has specific database parameters, it should override this method.
+func (s service) databaseParametersSchema() map[string]*schema.Schema {
+	return nil
+}
+
+// databaseUserParametersSchema represents resource schema for service-specific database user parameters.
+//
+// If PaaS service has specific database user parameters, it should override this method.
+func (s service) databaseUserParametersSchema() map[string]*schema.Schema {
+	return nil
+}
+
+// DataSourceSchema returns a full schema of service parameters for datasource.
+//
+// It includes the same blocks as ResourceSchema.
+func (s service) DataSourceSchema() *schema.Schema {
+	serviceSchema := map[string]*schema.Schema{
+		"class": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+	}
+
+	for k, v := range s.toInterface().serviceParametersDataSourceSchema() {
+		serviceSchema[k] = v
+	}
+
+	if s.usersEnabled {
+		serviceSchema["user"] = s.userDataSourceSchema(s.toInterface().userParametersDataSourceSchema())
+	}
+
+	if s.databasesEnabled {
+		serviceSchema["database"] = s.databaseDataSourceSchema(s.toInterface().databaseParametersSchema())
+	}
+
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: serviceSchema,
+		},
+	}
+}
+
+// userDataSourceSchema returns a schema of user parameters for datasource.
+//
+// It includes the same blocks as userSchema.
+func (s service) userDataSourceSchema(userParametersSchema map[string]*schema.Schema) *schema.Schema {
+	userSchema := map[string]*schema.Schema{
+		"name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+	}
+
+	for k, v := range userParametersSchema {
+		userSchema[k] = v
+	}
+
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: userSchema,
+		},
+	}
+}
+
+// databaseSchema returns a schema of databse parameters for resource.
+//
+// It includes the same blocks as databaseSchema.
+func (s service) databaseDataSourceSchema(databaseParametersSchema map[string]*schema.Schema) *schema.Schema {
+	databaseSchema := map[string]*schema.Schema{
+		"backup_enabled": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+	}
+
+	if s.usersEnabled {
+		databaseSchema["user"] = s.userDataSourceSchema(s.toInterface().databaseUserParametersDataSourceSchema())
+	}
+
+	for k, v := range databaseParametersSchema {
+		databaseSchema[k] = v
+	}
+
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: databaseSchema,
+		},
+	}
+}
+
+// serviceParametersDataSourceSchema represents datasource schema for service-specific parameters
+// except for databases and users.
+//
+// If PaaS service has specific parameters, it should override this method.
+func (s service) serviceParametersDataSourceSchema() map[string]*schema.Schema {
+	return nil
+}
+
+// userParametersDataSourceSchema represents datasource schema for service-specific user parameters.
+//
+// If PaaS service has specific user parameters, it should override this method.
+func (s service) userParametersDataSourceSchema() map[string]*schema.Schema {
+	return nil
+}
+
+// databaseParametersDataSourceSchema represents datasource schema for service-specific database parameters.
+//
+// If PaaS service has specific database parameters, it should override this method.
+func (s service) databaseParametersDataSourceSchema() map[string]*schema.Schema {
+	return nil
+}
+
+// databaseUserParametersDataSourceSchema represents datasource schema for service-specific database user parameters.
+//
+// If PaaS service has specific database user parameters, it should override this method.
+func (s service) databaseUserParametersDataSourceSchema() map[string]*schema.Schema {
+	return nil
+}

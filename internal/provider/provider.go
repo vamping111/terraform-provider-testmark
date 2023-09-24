@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/eks"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/elbv2"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/paas"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/route53"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/s3"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
@@ -651,7 +652,9 @@ func Provider() *schema.Provider {
 			//"aws_redshift_service_account":   redshift.DataSourceServiceAccount(),
 			//
 			//"aws_resourcegroupstaggingapi_resources": resourcegroupstaggingapi.DataSourceResources(),
-			//
+
+			"aws_paas_service": paas.DataSourceService(),
+
 			//"aws_route53_delegation_set":          route53.DataSourceDelegationSet(),
 			//"aws_route53_traffic_policy_document": route53.DataSourceTrafficPolicyDocument(),
 			"aws_route53_zone": route53.DataSourceZone(),
@@ -1616,6 +1619,8 @@ func Provider() *schema.Provider {
 			//"aws_route53_resolver_query_log_config_association":    route53resolver.ResourceQueryLogConfigAssociation(),
 			//"aws_route53_resolver_rule":                            route53resolver.ResourceRule(),
 			//"aws_route53_resolver_rule_association":                route53resolver.ResourceRuleAssociation(),
+
+			"aws_paas_service": paas.ResourceService(),
 
 			"aws_s3_bucket": s3.ResourceBucket(),
 			//"aws_s3_bucket_accelerate_configuration":             s3.ResourceBucketAccelerateConfiguration(),

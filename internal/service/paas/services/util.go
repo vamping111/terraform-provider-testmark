@@ -28,6 +28,7 @@ var managers = map[string]ServiceManager{
 	ElasticSearch.ServiceType(): ElasticSearch,
 	Memcached.ServiceType():     Memcached,
 	PostgreSQL.ServiceType():    PostgreSQL,
+	Redis.ServiceType():         Redis,
 }
 
 func ManagedServiceTypes() []string {

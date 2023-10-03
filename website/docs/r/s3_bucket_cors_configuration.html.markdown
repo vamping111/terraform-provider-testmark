@@ -6,9 +6,11 @@ description: |-
   Provides an S3 bucket CORS configuration resource.
 ---
 
+[cors]: https://docs.cloud.croc.ru/en/services/object_storage/operations.html#cors
+
 # Resource: aws_s3_bucket_cors_configuration
 
-Provides an S3 bucket CORS configuration resource. For more information about CORS, go to [Enabling Cross-Origin Resource Sharing](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html) in the Amazon S3 User Guide.
+Provides an S3 bucket CORS configuration resource. For more information about CORS, go to [Cross-Origin Resource Sharing][cors].
 
 ~> **NOTE:** S3 Buckets only support a single CORS configuration. Declaring multiple `aws_s3_bucket_cors_configuration` resources to the same S3 Bucket will cause a perpetual difference in configuration.
 
@@ -16,7 +18,7 @@ Provides an S3 bucket CORS configuration resource. For more information about CO
 
 ```terraform
 resource "aws_s3_bucket" "example" {
-  bucket = "mybucket"
+  bucket = "tf-example"
 }
 
 resource "aws_s3_bucket_cors_configuration" "example" {
@@ -42,7 +44,6 @@ resource "aws_s3_bucket_cors_configuration" "example" {
 The following arguments are supported:
 
 * `bucket` - (Required, Forces new resource) The name of the bucket.
-* `expected_bucket_owner` - (Optional, Forces new resource) The account ID of the expected bucket owner.
 * `cors_rule` - (Required) Set of origins and methods (cross-origin access that you want to allow) [documented below](#cors_rule). You can configure up to 100 rules.
 
 ### cors_rule
@@ -60,22 +61,17 @@ The `cors_rule` configuration block supports the following arguments:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The `bucket` or `bucket` and `expected_bucket_owner` separated by a comma (`,`) if the latter is provided.
+* `id` - The `bucket`.
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
 
 ## Import
 
-S3 bucket CORS configuration can be imported in one of two ways.
-
-If the owner (account ID) of the source bucket is the same account used to configure the Terraform AWS Provider,
-the S3 bucket CORS configuration resource should be imported using the `bucket` e.g.,
+S3 bucket CORS configuration can be imported using the `bucket` e.g.,
 
 ```
 $ terraform import aws_s3_bucket_cors_configuration.example bucket-name
-```
-
-If the owner (account ID) of the source bucket differs from the account used to configure the Terraform AWS Provider,
-the S3 bucket CORS configuration resource should be imported using the `bucket` and `expected_bucket_owner` separated by a comma (`,`) e.g.,
-
-```
-$ terraform import aws_s3_bucket_cors_configuration.example bucket-name,123456789012
 ```

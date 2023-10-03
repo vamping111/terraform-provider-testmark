@@ -1,14 +1,18 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "AWS: aws_s3_bucket_website_configuration"
+page_title: "CROC Cloud: aws_s3_bucket_website_configuration"
 description: |-
   Provides an S3 bucket website configuration resource.
 ---
 
+[hosting-website]: https://docs.cloud.croc.ru/en/services/object_storage/operations.html#objectstoragestaticwebsitesmanual
+
 # Resource: aws_s3_bucket_website_configuration
 
-Provides an S3 bucket website configuration resource. For more information, see [Hosting Websites on S3](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html).
+Provides an S3 bucket website configuration resource.
+
+For more information about hosting websites on S3, see [user documentation][hosting-website].
 
 ## Example Usage
 
@@ -41,7 +45,6 @@ The following arguments are supported:
 
 * `bucket` - (Required, Forces new resource) The name of the bucket.
 * `error_document` - (Optional, Conflicts with `redirect_all_requests_to`) The name of the error document for the website [detailed below](#error_document).
-* `expected_bucket_owner` - (Optional, Forces new resource) The account ID of the expected bucket owner.
 * `index_document` - (Optional, Required if `redirect_all_requests_to` is not specified) The name of the index document for the website [detailed below](#index_document).
 * `redirect_all_requests_to` - (Optional, Required if `index_document` is not specified) The redirect behavior for every request to this bucket's website endpoint [detailed below](#redirect_all_requests_to). Conflicts with `error_document`, `index_document`, and `routing_rule`.
 * `routing_rule` - (Optional, Conflicts with `redirect_all_requests_to`) List of rules that define when a redirect is applied and the redirect behavior [detailed below](#routing_rule).
@@ -86,7 +89,6 @@ The `condition` configuration block supports the following arguments:
 The `redirect` configuration block supports the following arguments:
 
 * `host_name` - (Optional) The host name to use in the redirect request.
-* `http_redirect_code` - (Optional) The HTTP redirect code to use on the response.
 * `protocol` - (Optional) Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: `http`, `https`.
 * `replace_key_prefix_with` - (Optional, Conflicts with `replace_key_with`) The object key prefix to use in the redirect request. For example, to redirect requests for all pages with prefix `docs/` (objects in the `docs/` folder) to `documents/`, you can set a `condition` block with `key_prefix_equals` set to `docs/` and in the `redirect` set `replace_key_prefix_with` to `/documents`.
 * `replace_key_with` - (Optional, Conflicts with `replace_key_prefix_with`) The specific object key to use in the redirect request. For example, redirect request to `error.html`.
@@ -95,24 +97,21 @@ The `redirect` configuration block supports the following arguments:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The `bucket` or `bucket` and `expected_bucket_owner` separated by a comma (`,`) if the latter is provided.
-* `website_domain` - The domain of the website endpoint. This is used to create Route 53 alias records.
-* `website_endpoint` - The website endpoint.
+* `id` - The `bucket`.
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
+* `redirect`:
+    * `http_redirect_code` - The HTTP redirect code to use on the response. Always `""`
+* `website_domain` - The domain of the website endpoint. Contains domain based on AWS region.
+* `website_endpoint` - The website endpoint. Contains endpoint based on AWS region.
 
 ## Import
 
-S3 bucket website configuration can be imported in one of two ways.
-
-If the owner (account ID) of the source bucket is the same account used to configure the Terraform AWS Provider,
-the S3 bucket website configuration resource should be imported using the `bucket` e.g.,
+S3 bucket website configuration can be imported using the `bucket` e.g.,
 
 ```
 $ terraform import aws_s3_bucket_website_configuration.example bucket-name
-```
-
-If the owner (account ID) of the source bucket differs from the account used to configure the Terraform AWS Provider,
-the S3 bucket website configuration resource should be imported using the `bucket` and `expected_bucket_owner` separated by a comma (`,`) e.g.,
-
-```
-$ terraform import aws_s3_bucket_website_configuration.example bucket-name,123456789012
 ```

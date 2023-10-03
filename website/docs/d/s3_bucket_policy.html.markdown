@@ -1,25 +1,25 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "AWS: aws_s3_bucket_policy"
+page_title: "CROC Cloud: aws_s3_bucket_policy"
 description: |-
-    Provides IAM policy of an S3 bucket
+    Provides a policy of an S3 bucket
 ---
 
 # Data Source: aws_s3_bucket_policy
 
-The bucket policy data source returns IAM policy of an S3 bucket.
+The bucket policy data source returns a policy of an S3 bucket.
 
 ## Example Usage
 
-The following example retrieves IAM policy of a specified S3 bucket.
+The following example retrieves the policy of the specified S3 bucket.
 
 ```terraform
 data "aws_s3_bucket_policy" "example" {
-  bucket = "example-bucket-name"
+  bucket = "tf-example"
 }
 
-output "foo" {
+output "bucket_policy" {
   value = data.aws_s3_bucket_policy.example.policy
 }
 ```
@@ -34,4 +34,4 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `policy` - IAM bucket policy.
+* `policy` - The bucket policy.

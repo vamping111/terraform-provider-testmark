@@ -1,10 +1,12 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "AWS: aws_s3_bucket_policy"
+page_title: "CROC Cloud: aws_s3_bucket_policy"
 description: |-
   Attaches a policy to an S3 bucket resource.
 ---
+
+[policy-restrictions]: https://docs.cloud.croc.ru/en/api/s3/features.html#bucket-policy
 
 # Resource: aws_s3_bucket_policy
 
@@ -16,31 +18,28 @@ Attaches a policy to an S3 bucket resource.
 
 ```terraform
 resource "aws_s3_bucket" "example" {
-  bucket = "my-tf-test-bucket"
+  bucket = "tf-example"
 }
 
-resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
+resource "aws_s3_bucket_policy" "example" {
   bucket = aws_s3_bucket.example.id
-  policy = data.aws_iam_policy_document.allow_access_from_another_account.json
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "ReadFromSite",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::my-tf-test-bucket/*",
+            "Condition":{
+               "StringLike":{"aws:Referer":["http://www.site.com/*","http://site.com/*"]}
+            }
+        }
+    ]
 }
-
-data "aws_iam_policy_document" "allow_access_from_another_account" {
-  statement {
-    principals {
-      type        = "AWS"
-      identifiers = ["123456789012"]
-    }
-
-    actions = [
-      "s3:GetObject",
-      "s3:ListBucket",
-    ]
-
-    resources = [
-      aws_s3_bucket.example.arn,
-      "${aws_s3_bucket.example.arn}/*",
-    ]
-  }
+EOF
 }
 ```
 
@@ -49,7 +48,12 @@ data "aws_iam_policy_document" "allow_access_from_another_account" {
 The following arguments are supported:
 
 * `bucket` - (Required) The name of the bucket to which to apply the policy.
-* `policy` - (Required) The text of the policy. Although this is a bucket policy rather than an IAM policy, the [`aws_iam_policy_document`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) data source may be used, so long as it specifies a principal. For more information about building AWS IAM policy documents with Terraform, see the [AWS IAM Policy Document Guide](https://learn.hashicorp.com/terraform/aws/iam-policy). Note: Bucket policies are limited to 20 KB in size.
+* `policy` - (Required) The text of the policy. Bucket policies are limited to 20 KB in size.
+
+~> **Note:** CROC Cloud S3 API supports Bucket Policy with some limitations.
+In particular, you cannot specify a user as Principal, but only the project that owns the bucket.
+Accordingly, all project users will be granted the same permissions.
+For more information about Bucket Policy restrictions, see [user documentation][policy-restrictions].
 
 ## Attributes Reference
 
@@ -60,5 +64,5 @@ No additional attributes are exported.
 S3 bucket policies can be imported using the bucket name, e.g.,
 
 ```
-$ terraform import aws_s3_bucket_policy.allow_access_from_another_account my-tf-test-bucket
+$ terraform import aws_s3_bucket_policy.example tf-example
 ```

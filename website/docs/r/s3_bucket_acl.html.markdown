@@ -1,14 +1,19 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "AWS: aws_s3_bucket_acl"
+page_title: "CROC Cloud: aws_s3_bucket_acl"
 description: |-
   Provides an S3 bucket ACL resource.
 ---
 
+[access-rights]: https://docs.cloud.croc.ru/en/services/object_storage/operations.html#s3accessrules
+[canned-acl]: https://docs.cloud.croc.ru/en/api/s3/acl.html#cannedacl
+
 # Resource: aws_s3_bucket_acl
 
 Provides an S3 bucket ACL resource.
+
+For more information about access rights for buckets, see [user documentation][access-rights].
 
 ~> **Note:** `terraform destroy` does not delete the S3 Bucket ACL but does remove the resource from Terraform state.
 
@@ -18,7 +23,7 @@ Provides an S3 bucket ACL resource.
 
 ```terraform
 resource "aws_s3_bucket" "example" {
-  bucket = "my-tf-example-bucket"
+  bucket = "tf-example"
 }
 
 resource "aws_s3_bucket_acl" "example_bucket_acl" {
@@ -33,7 +38,7 @@ resource "aws_s3_bucket_acl" "example_bucket_acl" {
 data "aws_canonical_user_id" "current" {}
 
 resource "aws_s3_bucket" "example" {
-  bucket = "my-tf-example-bucket"
+  bucket = "tf-example"
 }
 
 resource "aws_s3_bucket_acl" "example" {
@@ -50,7 +55,7 @@ resource "aws_s3_bucket_acl" "example" {
     grant {
       grantee {
         type = "Group"
-        uri  = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+        uri  = "http://acs.amazonaws.com/groups/global/AllUsers"
       }
       permission = "READ_ACP"
     }
@@ -66,10 +71,9 @@ resource "aws_s3_bucket_acl" "example" {
 
 The following arguments are supported:
 
-* `acl` - (Optional, Conflicts with `access_control_policy`) The canned ACL to apply to the bucket.
+* `acl` - (Optional, Conflicts with `access_control_policy`) The [canned ACL][canned-acl] to apply to the bucket. Valid values are `private`, `public-read`, `public-read-write`, `authenticated-read`.
 * `access_control_policy` - (Optional, Conflicts with `acl`) A configuration block that sets the ACL permissions for an object per grantee [documented below](#access_control_policy).
 * `bucket` - (Required, Forces new resource) The name of the bucket.
-* `expected_bucket_owner` - (Optional, Forces new resource) The account ID of the expected bucket owner.
 
 ### access_control_policy
 
@@ -83,7 +87,7 @@ The `access_control_policy` configuration block supports the following arguments
 The `grant` configuration block supports the following arguments:
 
 * `grantee` - (Required) Configuration block for the person being granted permissions [documented below](#grantee).
-* `permission` - (Required) Logging permissions assigned to the grantee for the bucket.
+* `permission` - (Required) Logging permissions assigned to the grantee for the bucket. Valid values are `READ`, `WRITE`, `READ_ACP`, `WRITE_ACP`, `FULL_CONTROL`.
 
 ### owner
 
@@ -96,48 +100,37 @@ The `owner` configuration block supports the following arguments:
 
 The `grantee` configuration block supports the following arguments:
 
-* `email_address` - (Optional) Email address of the grantee. See [Regions and Endpoints](https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) for supported AWS regions where this argument can be specified.
-* `id` - (Optional) The canonical user ID of the grantee.
+* `email_address` - (Optional) Email address of the grantee (CROC Cloud S3 Project email). Used only when `type` is `AmazonCustomerByEmail`.
+* `id` - (Optional) The canonical user ID of the grantee (CROC Cloud S3 User ID). Used only when `type` is `CanonicalUser`.
 * `type` - (Required) Type of grantee. Valid values: `CanonicalUser`, `AmazonCustomerByEmail`, `Group`.
-* `uri` - (Optional) URI of the grantee group.
+* `uri` - (Optional) URI of the grantee group. Supported groups are `http://acs.amazonaws.com/groups/global/AllUsers` and `http://acs.amazonaws.com/groups/global/AuthenticatedUsers`. Used only when `type` is `Group`.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The `bucket`, `expected_bucket_owner` (if configured), and `acl` (if configured) separated by commas (`,`).
+* `id` - The `bucket` and `acl` (if configured) separated by commas (`,`).
+
+->  **Unsupported attributes**
+These exported attributes are currently unsupported by CROC Cloud:
+
+* `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
 
 ## Import
 
-S3 bucket ACL can be imported in one of four ways.
+S3 bucket ACL can be imported in one of two ways.
 
 
-If the owner (account ID) of the source bucket is the _same_ account used to configure the Terraform AWS Provider, and the source bucket is **not configured** with a
-[canned ACL][1] (i.e. predefined grant), the S3 bucket ACL resource should be imported using the `bucket` e.g.,
+If the source bucket is **not configured** with a [canned ACL][canned-acl] (i.e. predefined grant),
+the S3 bucket ACL resource should be imported using the `bucket` e.g.,
 
 ```
 $ terraform import aws_s3_bucket_acl.example bucket-name
 ```
 
-If the owner (account ID) of the source bucket is the _same_ account used to configure the Terraform AWS Provider, and the source bucket is **configured** with a
-[canned ACL][1] (i.e. predefined grant), the S3 bucket ACL resource should be imported using the `bucket` and `acl` separated by a comma (`,`), e.g.
+If the source bucket is **configured** with a [canned ACL][canned-acl] (i.e. predefined grant),
+the S3 bucket ACL resource should be imported using the `bucket` and `acl` separated by a comma (`,`), e.g.
 
 ```
 $ terraform import aws_s3_bucket_acl.example bucket-name,private
 ```
-
-If the owner (account ID) of the source bucket _differs_ from the account used to configure the Terraform AWS Provider, and the source bucket is **not configured** with a
-[canned ACL][1] (i.e. predefined grant), the S3 bucket ACL resource should be imported using the `bucket` and `expected_bucket_owner` separated by a comma (`,`) e.g.,
-
-```
-$ terraform import aws_s3_bucket_acl.example bucket-name,123456789012
-```
-
-If the owner (account ID) of the source bucket _differs_ from the account used to configure the Terraform AWS Provider, and the source bucket is **configured** with a
-[canned ACL][1] (i.e. predefined grant), the S3 bucket ACL resource should be imported using the `bucket`, `expected_bucket_owner`, and `acl` separated by commas (`,`), e.g.,
-
-```
-$ terraform import aws_s3_bucket_acl.example bucket-name,123456789012,private
-```
-
-[1]: https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl

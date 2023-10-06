@@ -8,6 +8,9 @@ description: |-
 
 # Resource: aws_s3_bucket_server_side_encryption_configuration
 
+->  **Unsupported resource**
+This resource is currently unsupported by CROC Cloud
+
 Provides a S3 bucket server-side encryption configuration resource.
 
 ## Example Usage

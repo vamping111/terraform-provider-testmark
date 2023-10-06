@@ -19,6 +19,10 @@ Provides an S3 bucket CORS configuration resource. For more information about CO
 ```terraform
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
+
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
 }
 
 resource "aws_s3_bucket_cors_configuration" "example" {

@@ -55,6 +55,10 @@ Configuring with both will cause inconsistencies and may overwrite configuration
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
+
   tags = {
     Name        = "tf-example"
     Environment = "Dev"
@@ -76,6 +80,10 @@ Use the resource [`aws_s3_bucket_website_configuration`](s3_bucket_website_confi
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "public-read"
+
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
 
   website {
     index_document = "index.html"
@@ -105,6 +113,10 @@ resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "public-read"
 
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
+
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["PUT", "POST"]
@@ -125,6 +137,10 @@ resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "private"
 
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
+
   versioning {
     enabled = true
   }
@@ -140,6 +156,10 @@ Use the resource [`aws_s3_bucket_lifecycle_configuration`](s3_bucket_lifecycle_c
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-example"
   acl    = "private"
+
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
 
   lifecycle_rule {
     id      = "log"
@@ -172,6 +192,10 @@ resource "aws_s3_bucket" "versioning_bucket" {
   bucket = "tf-example"
   acl    = "private"
 
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
+
   versioning {
     enabled = true
   }
@@ -197,6 +221,10 @@ data "aws_canonical_user_id" "current_user" {}
 
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
+
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
 
   grant {
     id          = data.aws_canonical_user_id.current_user.id

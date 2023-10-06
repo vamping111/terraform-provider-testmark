@@ -1,22 +1,22 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_ami"
+page_title: "CROC Cloud: aws_ami"
 description: |-
   Creates and manages a custom Amazon Machine Image (AMI).
 ---
+
+[images]: https://docs.cloud.croc.ru/en/services/instances_and_volumes/images.html
+[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
 
 # Resource: aws_ami
 
 The AMI (Amazon Machine Image) resource allows the creation and management of images.
 
 If you just want to share an existing image with another CROC Cloud account,
-it's better to use [`aws_ami_launch_permission`][tf-ami-launch-permission] instead.
+it's better to use [`aws_ami_launch_permission`](ami_launch_permission.html.markdown) instead.
 
-For more information, see the documentation on [images][images].
-
-[]
-[tf-ami-launch-permission]: ami_launch_permission.html
+For more information about images, see [user documentation][images].
 
 ## Example Usage
 
@@ -25,7 +25,7 @@ For more information, see the documentation on [images][images].
 # an EBS volume populated from a snapshot. It is assumed that such a snapshot
 # already exists with the id "snap-12345678".
 resource "aws_ami" "example" {
-  name                = "terraform-example"
+  name                = "tf-ami"
   virtualization_type = "hvm"
   root_device_name    = "disk1"
 
@@ -43,7 +43,7 @@ The following arguments are supported:
 
 * `name` - (Required) An unique name for the image.
 * `description` - (Optional) A longer, human-readable description for the image.
-* `root_device_name` - (Optional) The name of the root device. Can be `disk<N>`, `cdrom<N>`, `floppy<N>`, `menu` (N - disk number). Defaults to `disk1`.
+* `root_device_name` - (Optional) The name of the root device. Valid values are `disk<N>`, `cdrom<N>`, `floppy<N>`, `menu` (N - disk number). Defaults to `disk1`.
 * `virtualization_type` - (Optional) Keyword to choose what virtualization mode created instances will use. Valid values: `hvm`.
 * `architecture` - (Optional) Machine architecture for created instances. Defaults to `x86_64`.
 * `ebs_block_device` - (Optional) Nested block describing an EBS block device that should be
@@ -54,24 +54,23 @@ The following arguments are supported:
 
 Nested `ebs_block_device` blocks have the following structure:
 
-* `device_name` - (Required) The device name of one or more block device mapping entries. Can be `disk<N>`, `cdrom<N>`, `floppy<N>`, (N - disk number).
+* `device_name` - (Required) The device name of one or more block device mapping entries. Valid values are `disk<N>`, `cdrom<N>`, `floppy<N>`, (N - disk number).
 * `delete_on_termination` - (Optional) Boolean controlling whether the EBS volumes created to
-  support each created instance will be deleted once that instance is terminated.
+  support each created instance will be deleted once that instance is terminated. Defaults to `true`.
 * `iops` - (Required only when `volume_type` is `io2`) Number of I/O operations per second the
   created volumes will support.
 * `snapshot_id` - (Optional) The ID of an EBS snapshot that will be used to initialize the created
   EBS volumes. If set, the `volume_size` attribute must be at least as large as the referenced
   snapshot.
-* `throughput` - The throughput that the volume supports, in MiB/s.
 * `volume_size` - (Required unless `snapshot_id` is set) The size of created volumes in GiB.
   If `snapshot_id` is set and `volume_size` is omitted then the volume will have the same size
   as the selected snapshot.
-* `volume_type` - (Optional) The type of EBS volume to create. Can be `st2`, `gp2` or `io2`. Defaults to `st2`.
+* `volume_type` - (Optional) The type of EBS volume to create. Valid values are `st2`, `gp2`, `io2`.
 
 Nested `ephemeral_block_device` blocks have the following structure:
 
-* `device_name` - (Required) The device name of one or more block device mapping entries. Can be `cdrom<N>`, `floppy<N>` (N - disk number).
-* `virtual_name` - (Required) A name for the ephemeral device.
+* `device_name` - (Required) The device name of one or more block device mapping entries. Valid values are `cdrom<N>`, `floppy<N>` (N - disk number).
+* `virtual_name` - (Required) A name for the ephemeral device. Must match with the device name.
 
 ### Timeouts
 
@@ -90,7 +89,6 @@ In addition to all arguments above, the following attributes are exported:
 * `root_snapshot_id` - The Snapshot ID for the root volume (for EBS-backed images)
 * `image_owner_alias` - The owner alias (for example, `self`) or the CROC Cloud project ID.
 * `image_type` - The type of image.
-* `hypervisor` - The hypervisor type of the image.
 * `owner_id` - The CROC Cloud project ID.
 * `platform` - This value is set to windows for Windows images; otherwise, it is blank.
 * `public` - Indicates whether the image has public launch permissions.
@@ -106,6 +104,8 @@ These exported attributes are currently unsupported by CROC Cloud:
     * `encrypted` - Whether the disk is encrypted. Always `false`.
     * `kms_key_id` - The ARN for the KMS encryption key. Always `""`.
     * `outpost_arn` - The ARN of the Outpost. Always `""`.
+    * `throughput` - The throughput that the volume supports, in MiB/s. Always `0`.
+* `hypervisor` - The hypervisor type of the image. Always `""`.
 * `image_location` - Path to an S3 object containing an image manifest. Always `""`.
 * `kernel_id` - The id of the kernel image (AKI) that is used as the paravirtual kernel in created instances. Always `""`.
 * `platform_details` - The platform details associated with the billing code of the image. Always `""`.
@@ -120,5 +120,3 @@ These exported attributes are currently unsupported by CROC Cloud:
 ```
 $ terraform import aws_ami.example cmi-12345678
 ```
-
-[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block

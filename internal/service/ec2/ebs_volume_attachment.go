@@ -9,7 +9,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/create"
@@ -50,9 +49,13 @@ func ResourceVolumeAttachment() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"device_name": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The device name will be generated during attaching. The specified value is ignored.",
+			},
+			"generated_device_name": {
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"force_detach": {
 				Type:     schema.TypeBool,
@@ -82,11 +85,10 @@ func ResourceVolumeAttachment() *schema.Resource {
 
 func resourceVolumeAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).EC2Conn
-	deviceName := d.Get("device_name").(string)
 	instanceID := d.Get("instance_id").(string)
 	volumeID := d.Get("volume_id").(string)
 
-	_, err := FindEBSVolumeAttachment(conn, volumeID, instanceID, deviceName)
+	_, err := FindEBSVolumeAttachment(conn, volumeID, instanceID)
 
 	if tfresource.NotFound(err) {
 		// This handles the situation where the instance is created by
@@ -97,7 +99,6 @@ func resourceVolumeAttachmentCreate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		input := &ec2.AttachVolumeInput{
-			Device:     aws.String(deviceName),
 			InstanceId: aws.String(instanceID),
 			VolumeId:   aws.String(volumeID),
 		}
@@ -112,22 +113,22 @@ func resourceVolumeAttachmentCreate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("reading EBS Volume (%s) Attachment (%s): %w", volumeID, instanceID, err)
 	}
 
-	if _, err := WaitVolumeAttachmentCreated(conn, volumeID, instanceID, deviceName, d.Timeout(schema.TimeoutCreate)); err != nil {
+	attachment, err := WaitVolumeAttachmentCreated(conn, volumeID, instanceID, d.Timeout(schema.TimeoutCreate))
+	if err != nil {
 		return fmt.Errorf("waiting for EBS Volume (%s) Attachment (%s) create: %w", volumeID, instanceID, err)
 	}
 
-	d.SetId(volumeAttachmentID(deviceName, volumeID, instanceID))
+	d.SetId(volumeAttachmentID(aws.StringValue(attachment.Device), volumeID, instanceID))
 
 	return resourceVolumeAttachmentRead(d, meta)
 }
 
 func resourceVolumeAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).EC2Conn
-	deviceName := d.Get("device_name").(string)
 	instanceID := d.Get("instance_id").(string)
 	volumeID := d.Get("volume_id").(string)
 
-	_, err := FindEBSVolumeAttachment(conn, volumeID, instanceID, deviceName)
+	attachment, err := FindEBSVolumeAttachment(conn, volumeID, instanceID)
 
 	if !d.IsNewResource() && tfresource.NotFound(err) {
 		log.Printf("[WARN] EBS Volume Attachment %s not found, removing from state", d.Id())
@@ -139,6 +140,8 @@ func resourceVolumeAttachmentRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("reading EBS Volume (%s) Attachment (%s): %w", volumeID, instanceID, err)
 	}
 
+	d.Set("generated_device_name", attachment.Device)
+
 	return nil
 }
 
@@ -149,7 +152,6 @@ func resourceVolumeAttachmentDelete(d *schema.ResourceData, meta interface{}) er
 		return nil
 	}
 
-	deviceName := d.Get("device_name").(string)
 	instanceID := d.Get("instance_id").(string)
 	volumeID := d.Get("volume_id").(string)
 
@@ -160,7 +162,6 @@ func resourceVolumeAttachmentDelete(d *schema.ResourceData, meta interface{}) er
 	}
 
 	input := &ec2.DetachVolumeInput{
-		Device:     aws.String(deviceName),
 		Force:      aws.Bool(d.Get("force_detach").(bool)),
 		InstanceId: aws.String(instanceID),
 		VolumeId:   aws.String(volumeID),
@@ -173,45 +174,11 @@ func resourceVolumeAttachmentDelete(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("deleting EBS Volume (%s) Attachment (%s): %w", volumeID, instanceID, err)
 	}
 
-	if _, err := WaitVolumeAttachmentDeleted(conn, volumeID, instanceID, deviceName, d.Timeout(schema.TimeoutDelete)); err != nil {
+	if _, err := WaitVolumeAttachmentDeleted(conn, volumeID, instanceID, d.Timeout(schema.TimeoutDelete)); err != nil {
 		return fmt.Errorf("waiting for EBS Volume (%s) Attachment (%s) delete: %w", volumeID, instanceID, err)
 	}
 
 	return nil
-}
-
-func volumeAttachmentStateRefreshFunc(conn *ec2.EC2, name, volumeID, instanceID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		request := &ec2.DescribeVolumesInput{
-			VolumeIds: []*string{aws.String(volumeID)},
-			Filters: []*ec2.Filter{
-				{
-					Name:   aws.String("attachment.device"),
-					Values: []*string{aws.String(name)},
-				},
-				{
-					Name:   aws.String("attachment.instance-id"),
-					Values: []*string{aws.String(instanceID)},
-				},
-			},
-		}
-
-		resp, err := conn.DescribeVolumes(request)
-		if err != nil {
-			return nil, "failed", err
-		}
-
-		if len(resp.Volumes) > 0 {
-			v := resp.Volumes[0]
-			for _, a := range v.Attachments {
-				if aws.StringValue(a.InstanceId) == instanceID {
-					return a, aws.StringValue(a.State), nil
-				}
-			}
-		}
-		// assume detached if volume count is 0
-		return 42, ec2.VolumeAttachmentStateDetached, nil
-	}
 }
 
 func volumeAttachmentID(name, volumeID, instanceID string) string {

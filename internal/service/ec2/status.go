@@ -806,9 +806,9 @@ func StatusVolumeState(conn *ec2.EC2, id string) resource.StateRefreshFunc {
 	}
 }
 
-func StatusVolumeAttachmentState(conn *ec2.EC2, volumeID, instanceID, deviceName string) resource.StateRefreshFunc {
+func StatusVolumeAttachmentState(conn *ec2.EC2, volumeID, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		output, err := FindEBSVolumeAttachment(conn, volumeID, instanceID, deviceName)
+		output, err := FindEBSVolumeAttachment(conn, volumeID, instanceID)
 
 		if tfresource.NotFound(err) {
 			return nil, "", nil

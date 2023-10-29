@@ -566,33 +566,33 @@ func getServiceManagerForResource(d *schema.ResourceData) services.ServiceManage
 	return nil
 }
 
-func getUsersFromResource(d *schema.ResourceData) []*paas.User {
+func getUsersFromResource(d *schema.ResourceData) []*paas.UserCreateRequest {
 	manager := getServiceManagerForResource(d)
 	if manager == nil {
 		return nil
 	}
 
-	var users []*paas.User
+	var users []*paas.UserCreateRequest
 	if v, ok := d.GetOk(userFieldKey(d)); ok {
 		users = manager.ExpandUsers(v.([]interface{}), false)
 	} else {
-		users = []*paas.User{}
+		users = []*paas.UserCreateRequest{}
 	}
 
 	return users
 }
 
-func getDatabasesFromResource(d *schema.ResourceData) []*paas.Database {
+func getDatabasesFromResource(d *schema.ResourceData) []*paas.DatabaseCreateRequest {
 	manager := getServiceManagerForResource(d)
 	if manager == nil {
 		return nil
 	}
 
-	var databases []*paas.Database
+	var databases []*paas.DatabaseCreateRequest
 	if v, ok := d.GetOk(databaseFieldKey(d)); ok {
 		databases = manager.ExpandDatabases(v.([]interface{}))
 	} else {
-		databases = []*paas.Database{}
+		databases = []*paas.DatabaseCreateRequest{}
 	}
 
 	return databases

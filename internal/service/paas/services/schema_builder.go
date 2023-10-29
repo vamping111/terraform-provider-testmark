@@ -69,6 +69,10 @@ func (s service) ResourceSchema() *schema.Schema {
 //   - service-specific user parameters, if service has them
 func (s service) userSchema(userParametersSchema map[string]*schema.Schema) *schema.Schema {
 	userSchema := map[string]*schema.Schema{
+		"id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
 		"name": {
 			Type:     schema.TypeString,
 			Required: true,
@@ -89,7 +93,7 @@ func (s service) userSchema(userParametersSchema map[string]*schema.Schema) *sch
 	}
 }
 
-// databaseSchema returns a schema of databse parameters for resource.
+// databaseSchema returns a schema of database parameters for resource.
 //
 // It includes:
 //   - common `backup_enabled` and `name` parameters
@@ -101,6 +105,10 @@ func (s service) databaseSchema(databaseParametersSchema map[string]*schema.Sche
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Computed: true,
 		},
 		"name": {
 			Type:     schema.TypeString,
@@ -191,6 +199,10 @@ func (s service) DataSourceSchema() *schema.Schema {
 // It includes the same blocks as userSchema.
 func (s service) userDataSourceSchema(userParametersSchema map[string]*schema.Schema) *schema.Schema {
 	userSchema := map[string]*schema.Schema{
+		"id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
 		"name": {
 			Type:     schema.TypeString,
 			Computed: true,
@@ -210,13 +222,17 @@ func (s service) userDataSourceSchema(userParametersSchema map[string]*schema.Sc
 	}
 }
 
-// databaseSchema returns a schema of databse parameters for resource.
+// databaseSchema returns a schema of database parameters for resource.
 //
 // It includes the same blocks as databaseSchema.
 func (s service) databaseDataSourceSchema(databaseParametersSchema map[string]*schema.Schema) *schema.Schema {
 	databaseSchema := map[string]*schema.Schema{
 		"backup_enabled": {
 			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"id": {
+			Type:     schema.TypeString,
 			Computed: true,
 		},
 		"name": {

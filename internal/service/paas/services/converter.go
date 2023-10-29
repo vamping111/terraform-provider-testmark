@@ -6,12 +6,12 @@ import (
 )
 
 // ExpandUsers converts terraform representation of list of users to api representation.
-func (s service) ExpandUsers(tfList []interface{}, forDatabase bool) []*paas.User {
+func (s service) ExpandUsers(tfList []interface{}, forDatabase bool) []*paas.UserCreateRequest {
 	if len(tfList) == 0 {
 		return nil
 	}
 
-	var users []*paas.User
+	var users []*paas.UserCreateRequest
 
 	for _, tfMapRaw := range tfList {
 		tfMap, ok := tfMapRaw.(map[string]interface{})
@@ -32,12 +32,12 @@ func (s service) ExpandUsers(tfList []interface{}, forDatabase bool) []*paas.Use
 
 // ExpandUser converts terraform representation of service user to api representation.
 // If forDatabase is true, user is considered a database user.
-func (s service) ExpandUser(tfMap map[string]interface{}, forDatabase bool) *paas.User {
+func (s service) ExpandUser(tfMap map[string]interface{}, forDatabase bool) *paas.UserCreateRequest {
 	if tfMap == nil {
 		return nil
 	}
 
-	user := &paas.User{}
+	user := &paas.UserCreateRequest{}
 
 	if v, ok := tfMap["name"].(string); ok && v != "" {
 		user.Name = aws.String(v)
@@ -54,12 +54,12 @@ func (s service) ExpandUser(tfMap map[string]interface{}, forDatabase bool) *paa
 }
 
 // ExpandDatabases converts terraform representation of list of databases to api representation.
-func (s service) ExpandDatabases(tfList []interface{}) []*paas.Database {
+func (s service) ExpandDatabases(tfList []interface{}) []*paas.DatabaseCreateRequest {
 	if len(tfList) == 0 {
 		return nil
 	}
 
-	var databases []*paas.Database
+	var databases []*paas.DatabaseCreateRequest
 
 	for _, tfMapRaw := range tfList {
 		tfMap, ok := tfMapRaw.(map[string]interface{})
@@ -79,12 +79,12 @@ func (s service) ExpandDatabases(tfList []interface{}) []*paas.Database {
 }
 
 // ExpandDatabase converts terraform representation of database to api representation.
-func (s service) ExpandDatabase(tfParameters map[string]interface{}) *paas.Database {
+func (s service) ExpandDatabase(tfParameters map[string]interface{}) *paas.DatabaseCreateRequest {
 	if tfParameters == nil {
 		return nil
 	}
 
-	database := &paas.Database{}
+	database := &paas.DatabaseCreateRequest{}
 
 	if v, ok := tfParameters["backup_enabled"].(bool); ok {
 		database.BackupEnabled = aws.Bool(v)
@@ -138,8 +138,8 @@ func (s service) expandDatabaseUserParameters(_ map[string]interface{}) Database
 // because these blocks are separated in api representation.
 func (s service) FlattenServiceParametersUsersDatabases(
 	serviceParameters ServiceParameters,
-	users []*paas.User,
-	databases []*paas.Database,
+	users []*paas.UserResponse,
+	databases []*paas.DatabaseResponse,
 ) map[string]interface{} {
 	tfMap := s.toInterface().flattenServiceParameters(serviceParameters)
 
@@ -155,7 +155,7 @@ func (s service) FlattenServiceParametersUsersDatabases(
 }
 
 // FlattenUsers converts api representation of list of users to terraform representation.
-func (s service) FlattenUsers(users []*paas.User, forDatabase bool) []interface{} {
+func (s service) FlattenUsers(users []*paas.UserResponse, forDatabase bool) []interface{} {
 	if len(users) == 0 {
 		return nil
 	}
@@ -175,12 +175,16 @@ func (s service) FlattenUsers(users []*paas.User, forDatabase bool) []interface{
 
 // FlattenUser converts api representation of service user to terraform representation.
 // If forDatabase is true, user is considered a database user.
-func (s service) FlattenUser(user *paas.User, forDatabase bool) map[string]interface{} {
+func (s service) FlattenUser(user *paas.UserResponse, forDatabase bool) map[string]interface{} {
 	if user == nil {
 		return map[string]interface{}{}
 	}
 
 	tfMap := map[string]interface{}{}
+
+	if v := user.Id; v != nil {
+		tfMap["id"] = v
+	}
 
 	if v := user.Name; v != nil {
 		tfMap["name"] = v
@@ -201,7 +205,7 @@ func (s service) FlattenUser(user *paas.User, forDatabase bool) map[string]inter
 }
 
 // FlattenDatabases converts api representation of list of databases to terraform representation.
-func (s service) FlattenDatabases(databases []*paas.Database) []interface{} {
+func (s service) FlattenDatabases(databases []*paas.DatabaseResponse) []interface{} {
 	if len(databases) == 0 {
 		return nil
 	}
@@ -220,7 +224,7 @@ func (s service) FlattenDatabases(databases []*paas.Database) []interface{} {
 }
 
 // FlattenDatabase converts api representation of database to terraform representation.
-func (s service) FlattenDatabase(database *paas.Database) map[string]interface{} {
+func (s service) FlattenDatabase(database *paas.DatabaseResponse) map[string]interface{} {
 	if database == nil {
 		return map[string]interface{}{}
 	}
@@ -229,6 +233,10 @@ func (s service) FlattenDatabase(database *paas.Database) map[string]interface{}
 
 	if v := database.BackupEnabled; v != nil {
 		tfMap["backup_enabled"] = v
+	}
+
+	if v := database.Id; v != nil {
+		tfMap["id"] = v
 	}
 
 	if v := database.Name; v != nil {

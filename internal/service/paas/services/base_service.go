@@ -47,19 +47,21 @@ type schemaBuilder interface {
 // Private methods and ExpandServiceParameters are used to convert different types of service-specific parameters.
 type converter interface {
 	ExpandServiceParameters(map[string]interface{}) ServiceParameters
-	ExpandUsers([]interface{}, bool) []*paas.User
-	ExpandUser(map[string]interface{}, bool) *paas.User
-	ExpandDatabases([]interface{}) []*paas.Database
-	ExpandDatabase(map[string]interface{}) *paas.Database
+	ExpandUsers([]interface{}, bool) []*paas.UserCreateRequest
+	ExpandUser(map[string]interface{}, bool) *paas.UserCreateRequest
+	ExpandDatabases([]interface{}) []*paas.DatabaseCreateRequest
+	ExpandDatabase(map[string]interface{}) *paas.DatabaseCreateRequest
 	expandUserParameters(map[string]interface{}) UserParameters
 	expandDatabaseParameters(map[string]interface{}) DatabaseParameters
 	expandDatabaseUserParameters(map[string]interface{}) DatabaseUserParameters
 
-	FlattenServiceParametersUsersDatabases(ServiceParameters, []*paas.User, []*paas.Database) map[string]interface{}
-	FlattenUsers([]*paas.User, bool) []interface{}
-	FlattenUser(*paas.User, bool) map[string]interface{}
-	FlattenDatabases([]*paas.Database) []interface{}
-	FlattenDatabase(*paas.Database) map[string]interface{}
+	FlattenServiceParametersUsersDatabases(
+		ServiceParameters, []*paas.UserResponse, []*paas.DatabaseResponse,
+	) map[string]interface{}
+	FlattenUsers([]*paas.UserResponse, bool) []interface{}
+	FlattenUser(*paas.UserResponse, bool) map[string]interface{}
+	FlattenDatabases([]*paas.DatabaseResponse) []interface{}
+	FlattenDatabase(response *paas.DatabaseResponse) map[string]interface{}
 	flattenServiceParameters(ServiceParameters) map[string]interface{}
 	flattenUserParameters(UserParameters) map[string]interface{}
 	flattenDatabaseParameters(DatabaseParameters) map[string]interface{}

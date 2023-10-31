@@ -1419,7 +1419,7 @@ func WaitVolumeAttachmentCreated(conn *ec2.EC2, volumeID, instanceID string, tim
 
 func WaitVolumeAttachmentDeleted(conn *ec2.EC2, volumeID, instanceID string, timeout time.Duration) (*ec2.VolumeAttachment, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{ec2.VolumeAttachmentStateDetaching},
+		Pending:    []string{ec2.VolumeAttachmentStateAttached, ec2.VolumeAttachmentStateDetaching},
 		Target:     []string{},
 		Refresh:    StatusVolumeAttachmentState(conn, volumeID, instanceID),
 		Timeout:    timeout,

@@ -297,6 +297,10 @@ func ResourceService() *schema.Resource {
 				RequiredWith: []string{"user_data"},
 				ValidateFunc: validation.StringInSlice([]string{"cloud-config", "x-shellscript"}, false),
 			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			services.ElasticSearch.ServiceType(): services.ElasticSearch.ResourceSchema(),
 			services.Memcached.ServiceType():     services.Memcached.ResourceSchema(),
 			services.PostgreSQL.ServiceType():    services.PostgreSQL.ResourceSchema(),
@@ -346,7 +350,12 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, meta int
 		input.SubnetIds = flex.ExpandStringSet(d.Get("subnet_ids").(*schema.Set))
 	}
 
-	manager := getServiceManagerForResource(d)
+	manager := serviceManager(d)
+
+	if manager == nil {
+		return diag.Errorf("PaaS Service configuration error: unknown service")
+	}
+
 	input.ServiceType = aws.String(manager.ServiceType())
 
 	parametersMap := d.Get(manager.ServiceType()).([]interface{})[0].(map[string]interface{})
@@ -472,6 +481,8 @@ func resourceServiceRead(ctx context.Context, d *schema.ResourceData, meta inter
 	d.Set("total_cpu_count", service.TotalCpuCount)
 	d.Set("total_memory", service.TotalMemory)
 
+	d.Set("vpc_id", service.VpcId)
+
 	return nil
 }
 
@@ -479,36 +490,80 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	conn := meta.(*conns.AWSClient).PaaSConn
 	id := d.Id()
 
-	input := &paas.ModifyServiceInput{
-		ServiceId: aws.String(id),
+	manager := serviceManager(d)
+
+	if manager == nil {
+		return diag.Errorf("PaaS Service (%s) configuration error: unknown service", id)
 	}
 
-	if d.HasChange("backup_settings") {
-		if v, ok := d.GetOk("backup_settings"); ok {
-			backupSettingsMap := v.([]interface{})[0].(map[string]interface{})
-			input.BackupSettings = expandBackupSettings(backupSettingsMap)
+	serviceType := manager.ServiceType()
+
+	if d.HasChange(serviceType) && !d.IsNewResource() {
+		input := &paas.ModifyServiceParametersInput{
+			ServiceId: aws.String(id),
+		}
+
+		parametersMap := d.Get(serviceType).([]interface{})[0].(map[string]interface{})
+		input.Parameters = manager.ExpandServiceParameters(parametersMap)
+
+		log.Printf("[DEBUG] Modifying PaaS Service parameters: %s", input)
+		_, err := conn.ModifyServiceParameters(input)
+
+		if err != nil {
+			return diag.Errorf("error modifying PaaS Service (%s) parameters: %s", id, err)
+		}
+
+		_, err = waitServiceUpdated(ctx, conn, id, d.Timeout(schema.TimeoutUpdate))
+
+		if err != nil {
+			return diag.Errorf("error waiting for PaaS Service (%s) parameters to update: %s", id, err)
 		}
 	}
 
-	if d.HasChange(userFieldKey(d)) {
-		input.Users = getUsersFromResource(d)
-	}
+	userKey := fmt.Sprintf("%s.0.user", serviceType)
+	databaseKey := fmt.Sprintf("%s.0.database", serviceType)
 
-	if d.HasChange(databaseFieldKey(d)) {
-		input.Databases = getDatabasesFromResource(d)
-	}
+	if d.HasChanges("backup_settings", userKey, databaseKey) {
+		input := &paas.ModifyServiceInput{
+			ServiceId: aws.String(id),
+		}
 
-	log.Printf("[DEBUG] Modifying PaaS Service: %s", input)
-	_, err := conn.ModifyService(input)
+		if d.HasChange("backup_settings") {
+			if v, ok := d.GetOk("backup_settings"); ok {
+				backupSettingsMap := v.([]interface{})[0].(map[string]interface{})
+				input.BackupSettings = expandBackupSettings(backupSettingsMap)
+			}
+		}
 
-	if err != nil {
-		return diag.Errorf("error modifying PaaS Service (%s): %s", id, err)
-	}
+		if d.HasChange(userKey) {
+			if v, ok := d.GetOk(userKey); ok {
+				input.Users = manager.ExpandUsers(v.([]interface{}), false)
+			} else {
+				input.Users = []*paas.UserCreateRequest{}
+			}
+		}
 
-	_, err = waitServiceUpdated(ctx, conn, id, d.Timeout(schema.TimeoutUpdate))
+		if d.HasChange(databaseKey) {
+			if v, ok := d.GetOk(databaseKey); ok {
+				input.Databases = manager.ExpandDatabases(v.([]interface{}))
+			} else {
+				input.Databases = []*paas.DatabaseCreateRequest{}
+			}
+		}
 
-	if err != nil {
-		return diag.Errorf("error waiting for PaaS Service (%s) to update: %s", id, err)
+		log.Printf("[DEBUG] Modifying PaaS Service: %s", input)
+		_, err := conn.ModifyService(input)
+
+		if err != nil {
+			return diag.Errorf("error modifying PaaS Service (%s): %s", id, err)
+		}
+
+		_, err = waitServiceUpdated(ctx, conn, id, d.Timeout(schema.TimeoutUpdate))
+
+		if err != nil {
+			return diag.Errorf("error waiting for PaaS Service (%s) to update: %s", id, err)
+		}
+
 	}
 
 	return resourceServiceRead(ctx, d, meta)
@@ -545,15 +600,7 @@ func iopsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	return strings.ToLower(volumeType) != ec2.VolumeTypeIo2 && new == "0"
 }
 
-func userFieldKey(d *schema.ResourceData) string {
-	return fmt.Sprintf("%s.0.user", d.Get("service_type").(string))
-}
-
-func databaseFieldKey(d *schema.ResourceData) string {
-	return fmt.Sprintf("%s.0.database", d.Get("service_type").(string))
-}
-
-func getServiceManagerForResource(d *schema.ResourceData) services.ServiceManager {
+func serviceManager(d *schema.ResourceData) services.ServiceManager {
 	for _, serviceType := range services.ManagedServiceTypes() {
 		_, exists := d.GetOk(serviceType)
 
@@ -564,38 +611,6 @@ func getServiceManagerForResource(d *schema.ResourceData) services.ServiceManage
 
 	log.Printf("[WARN] There is no service specified in configuration.")
 	return nil
-}
-
-func getUsersFromResource(d *schema.ResourceData) []*paas.UserCreateRequest {
-	manager := getServiceManagerForResource(d)
-	if manager == nil {
-		return nil
-	}
-
-	var users []*paas.UserCreateRequest
-	if v, ok := d.GetOk(userFieldKey(d)); ok {
-		users = manager.ExpandUsers(v.([]interface{}), false)
-	} else {
-		users = []*paas.UserCreateRequest{}
-	}
-
-	return users
-}
-
-func getDatabasesFromResource(d *schema.ResourceData) []*paas.DatabaseCreateRequest {
-	manager := getServiceManagerForResource(d)
-	if manager == nil {
-		return nil
-	}
-
-	var databases []*paas.DatabaseCreateRequest
-	if v, ok := d.GetOk(databaseFieldKey(d)); ok {
-		databases = manager.ExpandDatabases(v.([]interface{}))
-	} else {
-		databases = []*paas.DatabaseCreateRequest{}
-	}
-
-	return databases
 }
 
 func expandBackupSettings(tfMap map[string]interface{}) *paas.BackupSettingsRequest {

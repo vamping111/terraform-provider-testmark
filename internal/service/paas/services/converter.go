@@ -3,7 +3,56 @@ package services
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/paas"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func (s service) ExpandServiceParameters(tfMap map[string]interface{}) ServiceParameters {
+	if tfMap == nil {
+		return nil
+	}
+
+	serviceParameters := ServiceParameters{}
+
+	if v, ok := tfMap["logging"].([]interface{}); ok && len(v) > 0 {
+		loggingMap := v[0].(map[string]interface{})
+		serviceParameters["logging"] = true
+
+		if v, ok := loggingMap["log_to"].(string); ok && v != "" {
+			serviceParameters["log_to"] = v
+		}
+
+		if v, ok := loggingMap["logging_tags"].(*schema.Set); ok && v.Len() > 0 {
+			serviceParameters["logging_tags"] = v.List()
+		}
+
+		delete(tfMap, "logging")
+	} else {
+		serviceParameters["logging"] = false
+	}
+
+	if v, ok := tfMap["monitoring"].([]interface{}); ok && len(v) > 0 {
+		monitoringMap := v[0].(map[string]interface{})
+		serviceParameters["monitoring"] = true
+
+		if v, ok := monitoringMap["monitor_by"].(string); ok && v != "" {
+			serviceParameters["monitor_by"] = v
+		}
+
+		if v, ok := monitoringMap["monitoring_labels"].(map[string]interface{}); ok && len(v) > 0 {
+			serviceParameters["monitoring_labels"] = v
+		}
+
+		delete(tfMap, "monitoring")
+	} else {
+		serviceParameters["monitoring"] = false
+	}
+
+	for k, v := range s.toInterface().expandServiceParameters(tfMap) {
+		serviceParameters[k] = v
+	}
+
+	return serviceParameters
+}
 
 // ExpandUsers converts terraform representation of list of users to api representation.
 func (s service) ExpandUsers(tfList []interface{}, forDatabase bool) []*paas.UserCreateRequest {
@@ -106,6 +155,14 @@ func (s service) ExpandDatabase(tfParameters map[string]interface{}) *paas.Datab
 	return database
 }
 
+// expandServiceParameters converts terraform representation of service-specific parameters
+// to api representation.
+//
+// If PaaS service has specific parameters, it should override this method.
+func (s service) expandServiceParameters(_ map[string]interface{}) ServiceParameters {
+	return nil
+}
+
 // expandUserParameters converts terraform representation of service-specific user parameters
 // to api representation.
 //
@@ -134,14 +191,18 @@ func (s service) expandDatabaseUserParameters(_ map[string]interface{}) Database
 // from api to terraform representation.
 //
 // It's Expand analogue is represented by three separate methods:
-// ExpandServiceParameters (overridden on service level), ExpandUsers and ExpandDatabases,
+// ExpandServiceParameters, ExpandUsers and ExpandDatabases,
 // because these blocks are separated in api representation.
 func (s service) FlattenServiceParametersUsersDatabases(
 	serviceParameters ServiceParameters,
 	users []*paas.UserResponse,
 	databases []*paas.DatabaseResponse,
 ) map[string]interface{} {
-	tfMap := s.toInterface().flattenServiceParameters(serviceParameters)
+	tfMap := map[string]interface{}{}
+
+	for k, v := range s.toInterface().flattenServiceParameters(serviceParameters) {
+		tfMap[k] = v
+	}
 
 	if s.usersEnabled {
 		tfMap["user"] = s.toInterface().FlattenUsers(users, false)
@@ -149,6 +210,38 @@ func (s service) FlattenServiceParametersUsersDatabases(
 
 	if s.databasesEnabled {
 		tfMap["database"] = s.toInterface().FlattenDatabases(databases)
+	}
+
+	if s.loggingEnabled {
+		if v, ok := serviceParameters["logging"].(bool); ok && v {
+			loggingMap := map[string]interface{}{}
+
+			if v, ok := serviceParameters["logTo"].(string); ok {
+				loggingMap["log_to"] = v
+			}
+
+			if v, ok := serviceParameters["loggingTags"].([]interface{}); ok {
+				loggingMap["logging_tags"] = v
+			}
+
+			tfMap["logging"] = []map[string]interface{}{loggingMap}
+		}
+	}
+
+	if s.monitoringEnabled {
+		if v, ok := serviceParameters["monitoring"].(bool); ok && v {
+			monitoringMap := map[string]interface{}{}
+
+			if v, ok := serviceParameters["monitorBy"].(string); ok {
+				monitoringMap["monitor_by"] = v
+			}
+
+			if v, ok := serviceParameters["monitoringLabels"].(map[string]interface{}); ok {
+				monitoringMap["monitoring_labels"] = v
+			}
+
+			tfMap["monitoring"] = []map[string]interface{}{monitoringMap}
+		}
 	}
 
 	return tfMap
@@ -252,6 +345,14 @@ func (s service) FlattenDatabase(database *paas.DatabaseResponse) map[string]int
 	}
 
 	return tfMap
+}
+
+// flattenServiceParameters converts api representation of service-specific parameters
+// to terraform representation.
+//
+// If PaaS service has specific parameters, it should override this method.
+func (s service) flattenServiceParameters(_ ServiceParameters) map[string]interface{} {
+	return nil
 }
 
 // flattenUserParameters converts api representation of service-specific user parameters

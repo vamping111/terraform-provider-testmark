@@ -32,7 +32,7 @@ func waitServiceCreated(ctx context.Context, conn *paas.PaaS, id string, timeout
 	return nil, err
 }
 
-func waitServiceUpdated(ctx context.Context, conn *paas.PaaS, id string, timeout time.Duration) (*paas.Service, error) {
+func waitServiceUpdated(ctx context.Context, conn *paas.PaaS, id string, timeout time.Duration) (*paas.Service, error) { //nolint:unparam
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{ServiceStatusUpdating},
 		Target:  []string{ServiceStatusReady},

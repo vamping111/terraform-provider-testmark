@@ -207,6 +207,10 @@ func DataSourceService() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			services.ElasticSearch.ServiceType(): services.ElasticSearch.DataSourceSchema(),
 			services.Memcached.ServiceType():     services.Memcached.DataSourceSchema(),
 			services.PostgreSQL.ServiceType():    services.PostgreSQL.DataSourceSchema(),

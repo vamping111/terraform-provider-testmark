@@ -19,6 +19,8 @@ var PostgreSQL = postgreSQLManager{
 		dataVolumeRequired: true,
 		usersEnabled:       true,
 		databasesEnabled:   true,
+		loggingEnabled:     true,
+		monitoringEnabled:  true,
 	},
 }
 
@@ -151,12 +153,6 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 				validation.IntDivisibleBy(Megabyte),
 			),
 		},
-		"monitoring": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			ForceNew: true,
-			Default:  false,
-		},
 		"options": {
 			Type:     schema.TypeMap,
 			Optional: true,
@@ -286,10 +282,6 @@ func (s postgreSQLManager) serviceParametersDataSourceSchema() map[string]*schem
 			Type:     schema.TypeInt,
 			Computed: true,
 		},
-		"monitoring": {
-			Type:     schema.TypeBool,
-			Computed: true,
-		},
 		"options": {
 			Type:     schema.TypeMap,
 			Computed: true,
@@ -412,7 +404,7 @@ func (s postgreSQLManager) databaseParametersDataSourceSchema() map[string]*sche
 	}
 }
 
-func (s postgreSQLManager) ExpandServiceParameters(tfMap map[string]interface{}) ServiceParameters {
+func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{}) ServiceParameters {
 	if tfMap == nil {
 		return nil
 	}
@@ -481,10 +473,6 @@ func (s postgreSQLManager) ExpandServiceParameters(tfMap map[string]interface{})
 
 	if v, ok := tfMap["min_wal_size"].(int); ok && v != 0 {
 		serviceParameters["min_wal_size"] = int64(v)
-	}
-
-	if v, ok := tfMap["monitoring"].(bool); ok {
-		serviceParameters["monitoring"] = v
 	}
 
 	if v, ok := tfMap["options"].(map[string]interface{}); ok && len(v) > 0 {
@@ -643,10 +631,6 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 		if v, ok := vMap["value"].(int64); ok {
 			tfMap["min_wal_size"] = v
 		}
-	}
-
-	if v, ok := serviceParameters["monitoring"].(bool); ok {
-		tfMap["monitoring"] = v
 	}
 
 	if v, ok := serviceParameters["options"].(map[string]interface{}); ok {

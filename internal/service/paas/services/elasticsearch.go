@@ -19,18 +19,14 @@ var ElasticSearch = elasticSearchManager{
 		dataVolumeRequired: true,
 		usersEnabled:       false,
 		databasesEnabled:   false,
+		loggingEnabled:     true,
+		monitoringEnabled:  true,
 	},
 }
 
 func (s elasticSearchManager) serviceParametersSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"kibana": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			ForceNew: true,
-			Default:  false,
-		},
-		"monitoring": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			ForceNew: true,
@@ -78,10 +74,6 @@ func (s elasticSearchManager) serviceParametersDataSourceSchema() map[string]*sc
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		"monitoring": {
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
 		"options": {
 			Type:     schema.TypeMap,
 			Computed: true,
@@ -98,7 +90,7 @@ func (s elasticSearchManager) serviceParametersDataSourceSchema() map[string]*sc
 	}
 }
 
-func (s elasticSearchManager) ExpandServiceParameters(tfMap map[string]interface{}) ServiceParameters {
+func (s elasticSearchManager) expandServiceParameters(tfMap map[string]interface{}) ServiceParameters {
 	if tfMap == nil {
 		return nil
 	}
@@ -107,10 +99,6 @@ func (s elasticSearchManager) ExpandServiceParameters(tfMap map[string]interface
 
 	if v, ok := tfMap["kibana"].(bool); ok {
 		serviceParameters["kibana"] = v
-	}
-
-	if v, ok := tfMap["monitoring"].(bool); ok {
-		serviceParameters["monitoring"] = v
 	}
 
 	if v, ok := tfMap["password"].(string); ok && v != "" {
@@ -137,10 +125,6 @@ func (s elasticSearchManager) flattenServiceParameters(serviceParameters Service
 
 	if v, ok := serviceParameters["kibana"].(bool); ok {
 		tfMap["kibana"] = v
-	}
-
-	if v, ok := serviceParameters["monitoring"].(bool); ok {
-		tfMap["monitoring"] = v
 	}
 
 	if v, ok := serviceParameters["password"].(string); ok {

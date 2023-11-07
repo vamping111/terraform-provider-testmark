@@ -20,6 +20,8 @@ type service struct {
 	dataVolumeRequired bool
 	usersEnabled       bool
 	databasesEnabled   bool
+	loggingEnabled     bool
+	monitoringEnabled  bool
 }
 
 // Interface schemaBuilder provides methods for building resource and datasource schemas for service.
@@ -51,6 +53,7 @@ type converter interface {
 	ExpandUser(map[string]interface{}, bool) *paas.UserCreateRequest
 	ExpandDatabases([]interface{}) []*paas.DatabaseCreateRequest
 	ExpandDatabase(map[string]interface{}) *paas.DatabaseCreateRequest
+	expandServiceParameters(map[string]interface{}) ServiceParameters
 	expandUserParameters(map[string]interface{}) UserParameters
 	expandDatabaseParameters(map[string]interface{}) DatabaseParameters
 	expandDatabaseUserParameters(map[string]interface{}) DatabaseUserParameters

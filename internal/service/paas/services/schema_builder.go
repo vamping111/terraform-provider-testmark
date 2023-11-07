@@ -9,9 +9,8 @@ import (
 //
 // It includes:
 //   - common `class` parameter that holds chosen class of service
-//   - service-specific parameters
-//   - user parameters if service can hold them
-//   - database parameters if service can hold them
+//   - service-specific parameters including `user`, `database`, `logging`, and `monitoring` parameter blocks
+//     if service can hold them
 func (s service) ResourceSchema() *schema.Schema {
 	serviceSchema := map[string]*schema.Schema{
 		"class": {
@@ -33,6 +32,52 @@ func (s service) ResourceSchema() *schema.Schema {
 
 	if s.databasesEnabled {
 		serviceSchema["database"] = s.databaseSchema(s.toInterface().databaseParametersSchema())
+	}
+
+	if s.loggingEnabled {
+		serviceSchema["logging"] = &schema.Schema{
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"log_to": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"logging_tags": {
+						Type:     schema.TypeSet,
+						Optional: true,
+						Elem: &schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringLenBetween(1, 256),
+						},
+					},
+				},
+			},
+		}
+	}
+
+	if s.monitoringEnabled {
+		serviceSchema["monitoring"] = &schema.Schema{
+			Type:     schema.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"monitor_by": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"monitoring_labels": {
+						Type:             schema.TypeMap,
+						Optional:         true,
+						ValidateDiagFunc: validation.MapKeyLenBetween(1, 64),
+						Elem:             &schema.Schema{Type: schema.TypeString},
+					},
+				},
+			},
+		}
 	}
 
 	var requiredWith, conflictsWith []string
@@ -183,6 +228,45 @@ func (s service) DataSourceSchema() *schema.Schema {
 
 	if s.databasesEnabled {
 		serviceSchema["database"] = s.databaseDataSourceSchema(s.toInterface().databaseParametersSchema())
+	}
+
+	if s.loggingEnabled {
+		serviceSchema["logging"] = &schema.Schema{
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"log_to": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"logging_tags": {
+						Type:     schema.TypeSet,
+						Computed: true,
+						Elem:     &schema.Schema{Type: schema.TypeString},
+					},
+				},
+			},
+		}
+	}
+
+	if s.monitoringEnabled {
+		serviceSchema["monitoring"] = &schema.Schema{
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"monitor_by": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"monitoring_labels": {
+						Type:     schema.TypeMap,
+						Computed: true,
+					},
+				},
+			},
+		}
 	}
 
 	return &schema.Schema{

@@ -235,7 +235,7 @@ func testAccCheckVolumeAttachmentExists(n string) resource.TestCheckFunc {
 
 		conn := acctest.Provider.Meta().(*conns.AWSClient).EC2Conn
 
-		_, err := tfec2.FindEBSVolumeAttachment(conn, rs.Primary.Attributes["volume_id"], rs.Primary.Attributes["instance_id"], rs.Primary.Attributes["device_name"])
+		_, err := tfec2.FindEBSVolumeAttachment(conn, rs.Primary.Attributes["volume_id"], rs.Primary.Attributes["instance_id"])
 
 		if err != nil {
 			return err
@@ -253,7 +253,7 @@ func testAccCheckVolumeAttachmentDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := tfec2.FindEBSVolumeAttachment(conn, rs.Primary.Attributes["volume_id"], rs.Primary.Attributes["instance_id"], rs.Primary.Attributes["device_name"])
+		_, err := tfec2.FindEBSVolumeAttachment(conn, rs.Primary.Attributes["volume_id"], rs.Primary.Attributes["instance_id"])
 
 		if tfresource.NotFound(err) {
 			continue

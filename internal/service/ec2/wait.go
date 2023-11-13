@@ -1398,11 +1398,11 @@ func WaitVolumeUpdated(conn *ec2.EC2, id string, timeout time.Duration) (*ec2.Vo
 	return nil, err
 }
 
-func WaitVolumeAttachmentCreated(conn *ec2.EC2, volumeID, instanceID, deviceName string, timeout time.Duration) (*ec2.VolumeAttachment, error) {
+func WaitVolumeAttachmentCreated(conn *ec2.EC2, volumeID, instanceID string, timeout time.Duration) (*ec2.VolumeAttachment, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{ec2.VolumeAttachmentStateAttaching},
 		Target:     []string{ec2.VolumeAttachmentStateAttached},
-		Refresh:    StatusVolumeAttachmentState(conn, volumeID, instanceID, deviceName),
+		Refresh:    StatusVolumeAttachmentState(conn, volumeID, instanceID),
 		Timeout:    timeout,
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -1417,11 +1417,11 @@ func WaitVolumeAttachmentCreated(conn *ec2.EC2, volumeID, instanceID, deviceName
 	return nil, err
 }
 
-func WaitVolumeAttachmentDeleted(conn *ec2.EC2, volumeID, instanceID, deviceName string, timeout time.Duration) (*ec2.VolumeAttachment, error) {
+func WaitVolumeAttachmentDeleted(conn *ec2.EC2, volumeID, instanceID string, timeout time.Duration) (*ec2.VolumeAttachment, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{ec2.VolumeAttachmentStateDetaching},
+		Pending:    []string{ec2.VolumeAttachmentStateAttached, ec2.VolumeAttachmentStateDetaching},
 		Target:     []string{},
-		Refresh:    StatusVolumeAttachmentState(conn, volumeID, instanceID, deviceName),
+		Refresh:    StatusVolumeAttachmentState(conn, volumeID, instanceID),
 		Timeout:    timeout,
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -2375,20 +2375,4 @@ func WaitEBSSnapshotTierArchive(conn *ec2.EC2, id string) (*ec2.SnapshotTierStat
 	} else {
 		return detail.(*ec2.SnapshotTierStatus), nil
 	}
-}
-
-// WaitVolumeAttachmentAttached waits for a VolumeAttachment to return Attached
-func WaitVolumeAttachmentAttached(conn *ec2.EC2, name, volumeID, instanceID string) error {
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{ec2.VolumeAttachmentStateAttaching},
-		Target:     []string{ec2.VolumeAttachmentStateAttached},
-		Refresh:    volumeAttachmentStateRefreshFunc(conn, name, volumeID, instanceID),
-		Timeout:    5 * time.Minute,
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-
-	return err
 }

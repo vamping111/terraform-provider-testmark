@@ -601,10 +601,9 @@ func FindEBSVolumeByID(conn *ec2.EC2, id string) (*ec2.Volume, error) {
 	return output, nil
 }
 
-func FindEBSVolumeAttachment(conn *ec2.EC2, volumeID, instanceID, deviceName string) (*ec2.VolumeAttachment, error) {
+func FindEBSVolumeAttachment(conn *ec2.EC2, volumeID, instanceID string) (*ec2.VolumeAttachment, error) {
 	input := &ec2.DescribeVolumesInput{
 		Filters: BuildAttributeFilterList(map[string]string{
-			"attachment.device":      deviceName,
 			"attachment.instance-id": instanceID,
 		}),
 		VolumeIds: aws.StringSlice([]string{volumeID}),
@@ -635,7 +634,7 @@ func FindEBSVolumeAttachment(conn *ec2.EC2, volumeID, instanceID, deviceName str
 			continue
 		}
 
-		if aws.StringValue(v.Device) == deviceName && aws.StringValue(v.InstanceId) == instanceID {
+		if aws.StringValue(v.InstanceId) == instanceID {
 			return v, nil
 		}
 	}

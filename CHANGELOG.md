@@ -1,3 +1,13 @@
+## 4.14.0-CROC9
+
+BUG FIXES:
+
+* ec2: volume_attachment: make device_name optional and deprecated
+
+ENHANCEMENTS:
+
+* update docs: s3, fix links and typos
+
 ## 4.14.0-CROC8
 
 FEATURES:

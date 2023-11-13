@@ -8,6 +8,9 @@ description: |-
 
 # Resource: aws_s3_bucket_server_side_encryption_configuration
 
+->  **Unsupported resource**
+This resource is currently unsupported by CROC Cloud
+
 Provides a S3 bucket server-side encryption configuration resource.
 
 ## Example Usage
@@ -20,6 +23,10 @@ resource "aws_kms_key" "mykey" {
 
 resource "aws_s3_bucket" "mybucket" {
   bucket = "mybucket"
+
+  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
+  provider = aws.noregion
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "example" {

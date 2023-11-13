@@ -1,10 +1,12 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "AWS: aws_ebs_snapshot_ids"
+page_title: "CROC Cloud: aws_ebs_snapshot_ids"
 description: |-
   Provides a list of EBS snapshot IDs.
 ---
+
+[describe-snapshots]: https://docs.cloud.croc.ru/en/api/ec2/snapshots/DescribeSnapshots.html
 
 # Data Source: aws_ebs_snapshot_ids
 
@@ -42,6 +44,3 @@ For more information about filtering, see the [EC2 API documentation][describe-s
 
 * `id` - Region (for example, `croc`).
 * `ids` - Set of EBS snapshot IDs, sorted by creation time in descending order.
-
-[describe-snapshots]: https://docs.cloud.croc.ru/en/api/ec2/snapshots/DescribeSnapshots.html
-[tf-ebs-snapshot]: ebs_snapshot.html

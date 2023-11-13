@@ -1,20 +1,20 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_eip"
+page_title: "CROC Cloud: aws_eip"
 description: |-
   Provides an Elastic IP resource.
 ---
+
+[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
+[elastic-ips]: https://docs.cloud.croc.ru/en/services/networks/addresses/operations.html
+[timeouts]: https://www.terraform.io/docs/configuration/blocks/resources/syntax.html#operation-timeouts
 
 # Resource: aws_eip
 
 Provides an Elastic IP resource.
 
-~> **Note:** EIP may require IGW to exist prior to association. Use `depends_on` to set an explicit dependency on the IGW.
-
-For more information, see the documentation on [EIPs][elastic-ips].
-
-[elsatic-ips]: https://docs.cloud.croc.ru/en/services/networks/addresses/operations.html
+For more information about EIPs, see [user documentation][elastic-ips].
 
 ## Example Usage
 
@@ -27,15 +27,11 @@ resource "aws_eip" "example" {
 }
 ```
 
-### Attaching an EIP to an Instance with a pre-assigned private ip
+### Attaching an EIP to an instance with a pre-assigned private ip
 
 ```terraform
 resource "aws_vpc" "default" {
   cidr_block = "10.0.0.0/16"
-}
-
-resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.default.id
 }
 
 resource "aws_subnet" "tf_test_subnet" {
@@ -72,8 +68,8 @@ resource "aws_eip" "byoip-ip" {
 The following arguments are supported:
 
 * `address` - (Optional) IP address from an EC2 BYOIP pool. This option is only available for VPC EIPs.
-* `associate_with_private_ip` - (Optional) User-specified primary or secondary private IP address to associate with the Elastic IP address.
-  If no private IP address is specified, the Elastic IP address is associated with the primary private IP address.
+* `associate_with_private_ip` - (Optional) User-specified primary or secondary private IP address to associate with the elastic IP address.
+  If no private IP address is specified, the elastic IP address is associated with the primary private IP address.
 * `instance` - (Optional) EC2 instance ID.
 * `network_interface` - (Optional) Network interface ID to associate with.
 * `public_ipv4_pool` - (Optional) EC2 IPv4 address pool identifier. This option is only available for VPC EIPs.
@@ -89,7 +85,7 @@ case both options are defined as the api only requires one or the other.
 
 In addition to all arguments above, the following attributes are exported:
 
-* `allocation_id` - ID that AWS assigns to represent the allocation of the Elastic IP address for use with instances in a VPC.
+* `allocation_id` - ID that CROC Cloud assigns to represent the allocation of the elastic IP address for use with instances in a VPC.
 * `association_id` - ID representing the association of the address with an instance in a VPC.
 * `domain` - Indicates if this EIP is for use in VPC (`vpc`).
 * `id` - Contains the EIP allocation ID.
@@ -111,7 +107,7 @@ These exported attributes are currently unsupported by CROC Cloud:
 
 ## Timeouts
 
-`aws_eip` provides the following [Timeouts](https://www.terraform.io/docs/configuration/blocks/resources/syntax.html#operation-timeouts) configuration options:
+`aws_eip` provides the following [timeouts] configuration options:
 
 - `read` - (Default `15 minutes`) How long to wait querying for information about EIPs.
 - `update` - (Default `5 minutes`) How long to wait for an EIP to be updated.
@@ -119,16 +115,14 @@ These exported attributes are currently unsupported by CROC Cloud:
 
 ## Import
 
-EIPs in a VPC can be imported using their Allocation ID, e.g.,
+EIPs in a VPC can be imported using their allocation ID, e.g.,
 
 ```
 $ terraform import aws_eip.bar eipalloc-1234567
 ```
 
-EIPs can be imported using their Public IP, e.g.,
+EIPs can be imported using their public IP, e.g.,
 
 ```
 $ terraform import aws_eip.bar 1.1.1.1
 ```
-
-[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block

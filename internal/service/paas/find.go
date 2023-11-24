@@ -33,3 +33,19 @@ func FindServiceByID(conn *paas.PaaS, id string) (*paas.Service, error) {
 
 	return output.Service, nil
 }
+
+func FindBackupUsers(conn *paas.PaaS) ([]*paas.BackupUser, error) {
+	input := &paas.ListBackupUsersInput{}
+
+	output, err := conn.ListBackupUsers(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil || output.Users == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Users, nil
+}

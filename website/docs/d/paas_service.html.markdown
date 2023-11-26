@@ -50,6 +50,7 @@ In addition to all arguments above, the following attributes are exported:
     * `elasticsearch` - Elasticsearch parameters. The structure of this block is [described below](#elasticsearch-attribute-reference).
     * `memcached` - Memcached parameters. The structure of this block is [described below](#memcached-attribute-reference).
     * `pgsql` - PostgreSQL parameters. The structure of this block is [described below](#postgresql-attribute-reference).
+    * `rabbitmq` - RabbitMQ parameters. The structure of this block is [described below](#rabbitmq-attribute-reference).
     * `redis` - Redis parameters. The structure of this block is [described below](#redis-attribute-reference).
 * `ssh_key_name` - The name of the SSH key for accessing instances.
 * `status` - The current status of the service.
@@ -199,6 +200,20 @@ The `user` block has the following structure:
 * `id` - The ID of the user.
 * `name` - The PostgreSQL user name.
 * `password` - The PostgreSQL user password.
+
+## RabbitMQ Attribute Reference
+
+~> **Note** The following attributes contain default parameter values or user-defined values when the service is created.
+
+In addition to the common attributes for all services [described above](#attribute-reference),
+the following attributes are exported only for a RabbitMQ service:
+
+* `class` - The service class.
+* `logging` - The logging settings for the service. The structure of this block is [described below](#logging).
+* `monitoring` - The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - Other RabbitMQ parameters.
+* `password` - The RabbitMQ admin password.
+* `version` - The installed version.
 
 ## Redis Attribute Reference
 

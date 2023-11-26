@@ -214,6 +214,7 @@ func DataSourceService() *schema.Resource {
 			services.ElasticSearch.ServiceType(): services.ElasticSearch.DataSourceSchema(),
 			services.Memcached.ServiceType():     services.Memcached.DataSourceSchema(),
 			services.PostgreSQL.ServiceType():    services.PostgreSQL.DataSourceSchema(),
+			services.RabbitMQ.ServiceType():      services.RabbitMQ.DataSourceSchema(),
 			services.Redis.ServiceType():         services.Redis.DataSourceSchema(),
 		},
 	}

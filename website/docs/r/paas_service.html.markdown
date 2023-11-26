@@ -10,6 +10,12 @@ description: |-
 [technical support]: https://support.croc.ru/app/#/project/CS
 [timeouts]: https://www.terraform.io/docs/configuration/blocks/resources/syntax.html#operation-timeouts
 
+[Elasticsearch]: #elasticsearch-argument-reference
+[Memcached]: #memcached-argument-reference
+[PostgreSQL]: #postgresql-argument-reference
+[RabbitMQ]: #rabbitmq-argument-reference
+[Redis]: #redis-argument-reference
+
 # Resource: aws_paas_service
 
 Manages a PaaS service. For details about PaaS, see the [user documentation][paas].
@@ -263,17 +269,14 @@ resource "aws_paas_service" "redis" {
 
 * `arbitrator_required` - (Optional) Indicates whether to create a cluster with an arbitrator. Defaults to `false`.
   The parameter can be set to `true` only if `high_availability` is `true`.
-  The parameter is supported only for [Elasticsearch](#elasticsearch-argument-reference) and [PostgreSQL](#postgresql-argument-reference) services.
+  The parameter is supported only for [Elasticsearch] and [PostgreSQL] services.
 * `backup_settings` - (Optional) The backup settings for the service. The structure of this block is [described below](#backup_settings).
-  The parameter is supported only for a [PostgreSQL](#postgresql-argument-reference) service.
+  The parameter is supported only for a [PostgreSQL] service.
 * `data_volume` - (Optional) The data volume parameters for the service. The structure of this block is [described below](#data_volume).
-  The parameter is required for [Elasticsearch](#elasticsearch-argument-reference), [Memcached](#memcached-argument-reference),
-  [PostgreSQL](#postgresql-argument-reference) and [Redis](#redis-argument-reference) services.
-* `delete_interfaces_on_destroy` - (Optional) Indicates whether to delete the instance network interfaces
-  when the service is destroyed. Defaults to `false`.
+  The parameter is required for [Elasticsearch], [Memcached], [PostgreSQL], [RabbitMQ] and [Redis] services.
+* `delete_interfaces_on_destroy` - (Optional) Indicates whether to delete the instance network interfaces when the service is destroyed. Defaults to `false`.
 * `high_availability` - (Optional) Indicates whether to create a high availability service. Defaults to `false`.
-  The parameter is supported only for [Elasticsearch](#elasticsearch-argument-reference),
-  [PostgreSQL](#postgresql-argument-reference) and [Redis](#redis-argument-reference) services.
+  The parameter is supported only for [Elasticsearch], [PostgreSQL], [RabbitMQ] and [Redis] services.
 * `instance_type` - (Required) The instance type.
 * `name` - (Required) The service name. The value must start and end with a Latin letter or number and
   can only contain lowercase Latin letters, numbers, periods (.) and hyphens (-).
@@ -290,6 +293,7 @@ One of the following blocks with service parameters must be specified:
 * `elasticsearch` - Elasticsearch parameters. The structure of this block is [described below](#elasticsearch-argument-reference).
 * `memcached` - Memcached parameters. The structure of this block is [described below](#memcached-argument-reference).
 * `pgsql` - PostgreSQL parameters. The structure of this block is [described below](#postgresql-argument-reference).
+* `rabbitmq` - RabbitMQ parameters. The structure of this block is [described below](#rabbitmq-argument-reference).
 * `redis` - Redis parameters. The structure of this block is [described below](#redis-argument-reference).
 
 ### backup_settings
@@ -438,7 +442,7 @@ The `database` block has the following structure:
 * `name` - (Required) The database name.
 * `owner` - (Required) The name of the user who is the database owner. This must be one of the existing users.
   Such a user cannot be deleted as long as it is the database owner.
-* `user` - (Optional) List of PostgreSQL users with parameters. The maximum number of databases is 1000.
+* `user` - (Optional) List of PostgreSQL users with parameters. The maximum number of users is 1000.
   The structure of this block is [described below](#postgresql-database-user).
 
 ### PostgreSQL database user
@@ -458,6 +462,24 @@ The `user` block has the following structure:
 * `name` - (Required) The PostgreSQL user name.
 * `password` - (Required) The PostgreSQL user password.
   The value must be 8 to 128 characters long and must not contain `'`, `"`,  `` ` `` and `\`.
+
+## RabbitMQ Argument Reference
+
+In addition to the common arguments for all services [described above](#argument-reference),
+the `rabbitmq` block can contain the following arguments:
+
+* `class` - (Optional) The service class. Valid value is `message_broker`. Defaults to `message_broker`.
+* `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
+* `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - (Optional) Map containing other RabbitMQ parameters.
+  Parameter names must be in camelCase. Values are strings.
+
+~> If the parameter name includes a dot, then it cannot be passed in the `options`.
+If you need to use such a parameter, contact [technical support].
+
+* `password` - (Required) The RabbitMQ admin password.
+  The value must be 8 to 128 characters long and must not contain `'`, `"`,  `` ` `` and `\`.
+* `version` - (Required) The version to install. Valid values are `3.8.30`, `3.9.16`, `3.10.0`.
 
 ## Redis Argument Reference
 

@@ -8,13 +8,15 @@ const (
 	ServiceTypeElasticSearch = "elasticsearch"
 	ServiceTypeMemcached     = "memcached"
 	ServiceTypePostgreSQL    = "pgsql"
+	ServiceTypeRabbitMQ      = "rabbitmq"
 	ServiceTypeRedis         = "redis"
 )
 
 const (
-	ServiceClassCacher   = "cacher"
-	ServiceClassDatabase = "database"
-	ServiceClassSearch   = "search"
+	ServiceClassCacher        = "cacher"
+	ServiceClassDatabase      = "database"
+	ServiceClassMessageBroker = "message_broker"
+	ServiceClassSearch        = "search"
 )
 
 const (
@@ -29,6 +31,7 @@ var managers = map[string]ServiceManager{
 	Memcached.ServiceType():     Memcached,
 	PostgreSQL.ServiceType():    PostgreSQL,
 	Redis.ServiceType():         Redis,
+	RabbitMQ.ServiceType():      RabbitMQ,
 }
 
 func ManagedServiceTypes() []string {

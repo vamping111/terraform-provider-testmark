@@ -12,12 +12,31 @@ const (
 	ServiceTypeRedis         = "redis"
 )
 
+func ServiceTypeValues() []string {
+	return []string{
+		ServiceTypeElasticSearch,
+		ServiceTypeMemcached,
+		ServiceTypePostgreSQL,
+		ServiceTypeRabbitMQ,
+		ServiceTypeRedis,
+	}
+}
+
 const (
 	ServiceClassCacher        = "cacher"
 	ServiceClassDatabase      = "database"
 	ServiceClassMessageBroker = "message_broker"
 	ServiceClassSearch        = "search"
 )
+
+func ServiceClassValues() []string {
+	return []string{
+		ServiceClassCacher,
+		ServiceClassDatabase,
+		ServiceClassMessageBroker,
+		ServiceClassSearch,
+	}
+}
 
 const (
 	Kilobyte = 1024

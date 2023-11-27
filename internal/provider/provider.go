@@ -654,6 +654,8 @@ func Provider() *schema.Provider {
 			//"aws_resourcegroupstaggingapi_resources": resourcegroupstaggingapi.DataSourceResources(),
 
 			"aws_paas_service":      paas.DataSourceService(),
+			"aws_paas_backup":       paas.DataSourceBackup(),
+			"aws_paas_backups":      paas.DataSourceBackups(),
 			"aws_paas_backup_users": paas.DataSourceBackupUsers(),
 
 			//"aws_route53_delegation_set":          route53.DataSourceDelegationSet(),

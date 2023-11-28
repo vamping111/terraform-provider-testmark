@@ -444,7 +444,10 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 	}
 
 	if v, ok := tfMap["maintenance_work_mem"].(int); ok && v != 0 {
-		serviceParameters["maintenance_work_mem"] = int64(v)
+		serviceParameters["maintenance_work_mem"] = map[string]interface{}{
+			"dimension": "B",
+			"value":     int64(v),
+		}
 	}
 
 	if v, ok := tfMap["max_connections"].(int); ok && v != 0 {
@@ -452,7 +455,10 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 	}
 
 	if v, ok := tfMap["max_wal_size"].(int); ok && v != 0 {
-		serviceParameters["max_wal_size"] = int64(v)
+		serviceParameters["max_wal_size"] = map[string]interface{}{
+			"dimension": "B",
+			"value":     int64(v),
+		}
 	}
 
 	if v, ok := tfMap["max_parallel_maintenance_workers"].(int); ok && v != postgreSQLMaxParallelMaintenanceWorkersDefault {
@@ -472,7 +478,10 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 	}
 
 	if v, ok := tfMap["min_wal_size"].(int); ok && v != 0 {
-		serviceParameters["min_wal_size"] = int64(v)
+		serviceParameters["min_wal_size"] = map[string]interface{}{
+			"dimension": "B",
+			"value":     int64(v),
+		}
 	}
 
 	if v, ok := tfMap["options"].(map[string]interface{}); ok && len(v) > 0 {
@@ -500,7 +509,10 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 	}
 
 	if v, ok := tfMap["work_mem"].(int); ok && v != 0 {
-		serviceParameters["work_mem"] = int64(v)
+		serviceParameters["work_mem"] = map[string]interface{}{
+			"dimension": "B",
+			"value":     int64(v),
+		}
 	}
 
 	return serviceParameters

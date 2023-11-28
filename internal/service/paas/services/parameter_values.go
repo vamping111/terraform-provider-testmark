@@ -3,9 +3,35 @@ package services
 // These values are used as defaults for the fields that can't hold 0 as default value.
 // It allows to prevent sending the field until the user sets it in config.
 const (
+	mySQLGcsFcFactorDefault                        = -1
+	mySQLInnodbThreadConcurrencyDefault            = -1
+	mySQLThreadCacheSizeDefault                    = -1
 	postgreSQLMaxParallelMaintenanceWorkersDefault = -1
 	postgreSQLWalKeepSegmentsDefault               = -1
 )
+
+func mySQLDatabaseUserPrivileges() []string {
+	return []string{
+		"ALL",
+		"ALTER",
+		"ALTER ROUTINE",
+		"CREATE",
+		"CREATE ROUTINE",
+		"CREATE TEMPORARY TABLES",
+		"CREATE VIEW",
+		"DELETE",
+		"DROP",
+		"EVENT",
+		"EXECUTE",
+		"INDEX",
+		"INSERT",
+		"LOCK TABLES",
+		"SELECT",
+		"SHOW VIEW",
+		"TRIGGER",
+		"UPDATE",
+	}
+}
 
 func postgreSQLDatabaseExtensions() []string {
 	return []string{

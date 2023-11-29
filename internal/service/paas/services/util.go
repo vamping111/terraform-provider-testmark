@@ -7,6 +7,7 @@ import (
 const (
 	ServiceTypeElasticSearch = "elasticsearch"
 	ServiceTypeMemcached     = "memcached"
+	ServiceTypeMongoDB       = "mongodb"
 	ServiceTypeMySQL         = "mysql"
 	ServiceTypePostgreSQL    = "pgsql"
 	ServiceTypeRabbitMQ      = "rabbitmq"
@@ -17,6 +18,7 @@ func ServiceTypeValues() []string {
 	return []string{
 		ServiceTypeElasticSearch,
 		ServiceTypeMemcached,
+		ServiceTypeMongoDB,
 		ServiceTypeMySQL,
 		ServiceTypePostgreSQL,
 		ServiceTypeRabbitMQ,
@@ -50,6 +52,7 @@ const (
 var managers = map[string]ServiceManager{
 	ElasticSearch.ServiceType(): ElasticSearch,
 	Memcached.ServiceType():     Memcached,
+	MongoDB.ServiceType():       MongoDB,
 	MySQL.ServiceType():         MySQL,
 	PostgreSQL.ServiceType():    PostgreSQL,
 	Redis.ServiceType():         Redis,

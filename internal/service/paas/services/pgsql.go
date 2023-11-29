@@ -318,7 +318,7 @@ func (s postgreSQLManager) userParametersSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"password": {
 			Type:      schema.TypeString,
-			Optional:  true,
+			Required:  true,
 			Sensitive: true,
 			ValidateFunc: validation.All(
 				validation.StringLenBetween(8, 128),

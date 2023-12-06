@@ -1623,6 +1623,7 @@ func Provider() *schema.Provider {
 			//"aws_route53_resolver_rule":                            route53resolver.ResourceRule(),
 			//"aws_route53_resolver_rule_association":                route53resolver.ResourceRuleAssociation(),
 
+			"aws_paas_backup":  paas.ResourceBackup(),
 			"aws_paas_service": paas.ResourceService(),
 
 			"aws_s3_bucket": s3.ResourceBucket(),

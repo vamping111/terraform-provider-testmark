@@ -135,7 +135,7 @@ func (s service) ExpandDatabase(tfParameters map[string]interface{}) *paas.Datab
 
 	database := &paas.DatabaseCreateRequest{}
 
-	if v, ok := tfParameters["backup_enabled"].(bool); ok {
+	if v, ok := tfParameters["backup_enabled"].(bool); ok && s.allowBackup {
 		database.BackupEnabled = aws.Bool(v)
 		delete(tfParameters, "backup_enabled")
 	}
@@ -324,7 +324,7 @@ func (s service) FlattenDatabase(database *paas.DatabaseResponse) map[string]int
 
 	tfMap := map[string]interface{}{}
 
-	if v := database.BackupEnabled; v != nil {
+	if v := database.BackupEnabled; v != nil && s.allowBackup {
 		tfMap["backup_enabled"] = v
 	}
 

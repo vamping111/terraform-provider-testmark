@@ -146,11 +146,6 @@ func (s service) userSchema(userParametersSchema map[string]*schema.Schema) *sch
 //   - service-specific database parameters, if service has them
 func (s service) databaseSchema(databaseParametersSchema map[string]*schema.Schema) *schema.Schema {
 	databaseSchema := map[string]*schema.Schema{
-		"backup_enabled": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
-		},
 		"id": {
 			Type:     schema.TypeString,
 			Computed: true,
@@ -159,6 +154,14 @@ func (s service) databaseSchema(databaseParametersSchema map[string]*schema.Sche
 			Type:     schema.TypeString,
 			Required: true,
 		},
+	}
+
+	if s.allowBackup {
+		databaseSchema["backup_enabled"] = &schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		}
 	}
 
 	if s.usersEnabled {
@@ -311,10 +314,6 @@ func (s service) userDataSourceSchema(userParametersSchema map[string]*schema.Sc
 // It includes the same blocks as databaseSchema.
 func (s service) databaseDataSourceSchema(databaseParametersSchema map[string]*schema.Schema) *schema.Schema {
 	databaseSchema := map[string]*schema.Schema{
-		"backup_enabled": {
-			Type:     schema.TypeBool,
-			Computed: true,
-		},
 		"id": {
 			Type:     schema.TypeString,
 			Computed: true,
@@ -323,6 +322,13 @@ func (s service) databaseDataSourceSchema(databaseParametersSchema map[string]*s
 			Type:     schema.TypeString,
 			Computed: true,
 		},
+	}
+
+	if s.allowBackup {
+		databaseSchema["backup_enabled"] = &schema.Schema{
+			Type:     schema.TypeBool,
+			Computed: true,
+		}
 	}
 
 	if s.usersEnabled {

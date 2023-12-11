@@ -525,7 +525,7 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 
 	if v, ok := tfMap["gcache_size"].(int); ok && v != 0 {
 		serviceParameters["gcache_size"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -552,7 +552,7 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 
 	if v, ok := tfMap["innodb_buffer_pool_size"].(int); ok && v != 0 {
 		serviceParameters["innodb_buffer_pool_size"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -575,7 +575,7 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 
 	if v, ok := tfMap["innodb_log_file_size"].(int); ok && v != 0 {
 		serviceParameters["innodb_log_file_size"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -602,7 +602,7 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 
 	if v, ok := tfMap["max_allowed_packet"].(int); ok && v != 0 {
 		serviceParameters["max_allowed_packet"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -617,7 +617,7 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 
 	if v, ok := tfMap["max_heap_table_size"].(int); ok && v != 0 {
 		serviceParameters["max_heap_table_size"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -640,7 +640,7 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 
 	if v, ok := tfMap["tmp_table_size"].(int); ok && v != 0 {
 		serviceParameters["tmp_table_size"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -742,8 +742,10 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 	}
 
 	if vMap, okMap := serviceParameters["gcacheSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["gcache_size"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["gcache_size"] = bytes
 		}
 	}
 
@@ -770,8 +772,10 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 	}
 
 	if vMap, okMap := serviceParameters["innodbBufferPoolSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["innodb_buffer_pool_size"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["innodb_buffer_pool_size"] = bytes
 		}
 	}
 
@@ -792,8 +796,10 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 	}
 
 	if vMap, okMap := serviceParameters["innodbLogFileSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["innodb_log_file_size"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["innodb_log_file_size"] = bytes
 		}
 	}
 
@@ -820,8 +826,10 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 	}
 
 	if vMap, okMap := serviceParameters["maxAllowedPacket"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["max_allowed_packet"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["max_allowed_packet"] = bytes
 		}
 	}
 
@@ -834,8 +842,10 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 	}
 
 	if vMap, okMap := serviceParameters["maxHeapTableSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["max_heap_table_size"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["max_heap_table_size"] = bytes
 		}
 	}
 
@@ -858,8 +868,10 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 	}
 
 	if vMap, okMap := serviceParameters["tmpTableSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["tmp_table_size"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["tmp_table_size"] = bytes
 		}
 	}
 

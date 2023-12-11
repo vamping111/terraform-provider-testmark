@@ -116,7 +116,7 @@ func (s mongoDBManager) serviceParametersDataSourceSchema() map[string]*schema.S
 			Computed: true,
 		},
 		"storage_engine_cache_size": {
-			Type:     schema.TypeInt,
+			Type:     schema.TypeFloat,
 			Computed: true,
 		},
 		"quiet": {
@@ -213,7 +213,7 @@ func (s mongoDBManager) expandServiceParameters(tfMap map[string]interface{}) Se
 
 	if v, ok := tfMap["storage_engine_cache_size"].(float64); ok && v != 0.0 {
 		serviceParameters["storage_engine_cache_size"] = map[string]interface{}{
-			"dimension": "GiB",
+			"dimension": GiB,
 			"value":     v,
 		}
 	}
@@ -290,7 +290,7 @@ func (s mongoDBManager) flattenServiceParameters(serviceParameters ServiceParame
 	}
 
 	if vMap, okMap := serviceParameters["storageEngineCacheSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(float64); ok {
+		if v, ok := vMap["value"].(float64); ok && vMap["dimension"].(string) == GiB {
 			tfMap["storage_engine_cache_size"] = v
 		}
 	}

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -42,11 +43,53 @@ func ServiceClassValues() []string {
 	}
 }
 
+// TODO: move to some common package
 const (
-	Kilobyte = 1024
-	Megabyte = 1024 * Kilobyte
-	Gigabyte = 1024 * Megabyte
+	Byte = 1 << (10 * iota)
+	Kilobyte
+	Megabyte
+	Gigabyte
+	Terabyte
 )
+
+const (
+	B   = "B"
+	KiB = "KiB"
+	MiB = "MiB"
+	GiB = "GiB"
+	TiB = "TiB"
+)
+
+// DimensionToBytes converts a dimension string to its corresponding value in bytes.
+// It returns an error if the dimension is not recognized.
+func DimensionToBytes(dimension string) (int, error) {
+	switch dimension {
+	case B:
+		return Byte, nil
+	case KiB:
+		return Kilobyte, nil
+	case MiB:
+		return Megabyte, nil
+	case GiB:
+		return Gigabyte, nil
+	case TiB:
+		return Terabyte, nil
+	default:
+		return 0, fmt.Errorf("unsupported dimension: %s", dimension)
+	}
+}
+
+// parseBytes parses the given value and dimension, returning the value in bytes.
+func parseBytes(value int64, dimension string) (int64, error) {
+	bytes, err := DimensionToBytes(dimension)
+
+	if err != nil {
+		log.Printf("[ERROR] Error parsing value `%d %s` to bytes: %s", value, dimension, err)
+		return value, err
+	}
+
+	return value * int64(bytes), nil
+}
 
 // Map with ServiceManager objects for each supported PaaS service.
 var managers = map[string]ServiceManager{

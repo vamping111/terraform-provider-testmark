@@ -445,7 +445,7 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 
 	if v, ok := tfMap["maintenance_work_mem"].(int); ok && v != 0 {
 		serviceParameters["maintenance_work_mem"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -456,7 +456,7 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 
 	if v, ok := tfMap["max_wal_size"].(int); ok && v != 0 {
 		serviceParameters["max_wal_size"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -479,7 +479,7 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 
 	if v, ok := tfMap["min_wal_size"].(int); ok && v != 0 {
 		serviceParameters["min_wal_size"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -510,7 +510,7 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 
 	if v, ok := tfMap["work_mem"].(int); ok && v != 0 {
 		serviceParameters["work_mem"] = map[string]interface{}{
-			"dimension": "B",
+			"dimension": B,
 			"value":     int64(v),
 		}
 	}
@@ -606,8 +606,10 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 	}
 
 	if vMap, okMap := serviceParameters["maintenanceWorkMem"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["maintenance_work_mem"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["maintenance_work_mem"] = bytes
 		}
 	}
 
@@ -616,8 +618,10 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 	}
 
 	if vMap, okMap := serviceParameters["maxWalSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["max_wal_size"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["max_wal_size"] = bytes
 		}
 	}
 
@@ -640,8 +644,10 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 	}
 
 	if vMap, okMap := serviceParameters["minWalSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["min_wal_size"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["min_wal_size"] = bytes
 		}
 	}
 
@@ -672,8 +678,10 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 	}
 
 	if vMap, okMap := serviceParameters["workMem"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(int64); ok {
-			tfMap["work_mem"] = v
+		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
+
+		if err == nil {
+			tfMap["work_mem"] = bytes
 		}
 	}
 

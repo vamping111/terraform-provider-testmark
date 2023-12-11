@@ -38,8 +38,6 @@ The following arguments are supported:
 
 * `backup_id` - (Required) The ID of the existing PaaS service backup (e.g. `paas-backup-12345678`).
 * `enable_deletion_protection` - (Optional) Indicates whether the backup must be protected from automatic scheduled deletion.
-* `force_delete` -  (Optional) Indicates whether to delete the backup when running `terraform destroy`.
-  If the parameter is set to `false`, the backup will only be removed from Terraform state. Defaults to `false`.
 
 ## Attribute Reference
 

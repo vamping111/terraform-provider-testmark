@@ -71,11 +71,12 @@ func ResourceBackup() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: nullable.ValidateTypeStringNullableBool,
 			},
-			"force_delete": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
+			// TODO: temporarily remove this parameter from the schema until it is approved.
+			//"force_delete": {
+			//	Type:     schema.TypeBool,
+			//	Optional: true,
+			//	Default:  false,
+			//},
 			"protected": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -172,7 +173,7 @@ func resourceBackupDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	conn := meta.(*conns.AWSClient).PaaSConn
 	id := d.Id()
 
-	if d.Get("force_delete").(bool) {
+	if v, ok := d.Get("force_delete").(bool); ok && v {
 		input := &paas.DeleteBackupsInput{
 			ServiceId: aws.String(d.Get("service_id").(string)),
 			BackupIds: []*string{aws.String(id)},

@@ -70,6 +70,8 @@ resource "aws_paas_service" "elasticsearch" {
   security_group_ids           = [aws_vpc.example.default_security_group_id]
   subnet_ids                   = [aws_subnet.example.id]
 
+  ssh_key_name = "<name>"
+
   elasticsearch {
     version = "8.2.2"
     kibana  = true
@@ -99,6 +101,8 @@ resource "aws_paas_service" "memcached" {
   delete_interfaces_on_destroy = true
   security_group_ids           = [aws_vpc.example.default_security_group_id]
   subnet_ids                   = [aws_subnet.example.id]
+
+  ssh_key_name = "<name>"
 
   memcached {
     monitoring {
@@ -183,6 +187,8 @@ resource "aws_paas_service" "pgsql" {
   security_group_ids           = [aws_vpc.example.default_security_group_id]
   subnet_ids                   = [aws_subnet.subnet_vol52.id, aws_subnet.subnet_vol51.id, aws_subnet.subnet_comp1p.id]
 
+  ssh_key_name = "<name>"
+
   backup_settings {
     enabled            = true
     expiration_days    = 5
@@ -248,6 +254,8 @@ resource "aws_paas_service" "redis" {
   security_group_ids           = [aws_vpc.example.default_security_group_id]
   subnet_ids                   = [aws_subnet.example.id]
 
+  ssh_key_name = "<name>"
+
   redis {
     class   = "database"
     version = "5.0.14"
@@ -290,7 +298,7 @@ resource "aws_paas_service" "redis" {
 * `network_interface_ids` - (Required if `subnet_ids` is not specified) List of network interface IDs.
 * `root_volume` - (Required) The root volume parameters for the service. The structure of this block is [described below](#root_volume).
 * `security_group_ids` - (Required) List of security group IDs.
-* `ssh_key_name` - (Optional) The name of the SSH key for accessing instances.
+* `ssh_key_name` - (Required) The name of the SSH key for accessing instances.
 * `subnet_ids` - (Required if `network_interface_ids` is not specified) List of subnet IDs.
 * `user_data` - (Required if `user_data_content_type` is specified) User data.
 * `user_data_content_type` - (Required if `user_data` is specified) The type of `user_data`. Valid values are `cloud-config`, `x-shellscript`.

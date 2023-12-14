@@ -256,7 +256,7 @@ func ResourceService() *schema.Resource {
 			},
 			"ssh_key_name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"status": {

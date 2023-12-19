@@ -6,8 +6,6 @@ description: |-
   Provides information about users with the PaaS Backup User project privileges.
 ---
 
-[RFC3339 format]: https://datatracker.ietf.org/doc/html/rfc3339#section-5.8
-
 # Data Source: aws_paas_backup_users
 
 Provides information about users with the PaaS Backup User project privileges.
@@ -39,8 +37,5 @@ In addition to all arguments above, the following attributes are exported:
     * `email` - The user email.
     * `enabled` - Indicates whether the user is active.
     * `id` - The ID of the user.
-    * `last_login_time` - The time when the user was last active in [RFC3339 format].
     * `login` - The user login.
-    * `modify_time` - The time when user info was last modified in [RFC3339 format].
     * `name` - The user name.
-    * `grants` - List of user's project privileges.

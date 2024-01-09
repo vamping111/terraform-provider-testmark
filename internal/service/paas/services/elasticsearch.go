@@ -35,7 +35,6 @@ func (s elasticSearchManager) serviceParametersSchema() map[string]*schema.Schem
 		"options": {
 			Type:     schema.TypeMap,
 			Optional: true,
-			ForceNew: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 		"password": {

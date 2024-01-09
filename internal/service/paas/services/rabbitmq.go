@@ -29,14 +29,12 @@ func (s rabbitMQManager) serviceParametersSchema() map[string]*schema.Schema {
 		"options": {
 			Type:     schema.TypeMap,
 			Optional: true,
-			ForceNew: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 		"password": {
 			Type:      schema.TypeString,
 			Required:  true,
 			Sensitive: true,
-			ForceNew:  true,
 			ValidateFunc: validation.All(
 				validation.StringLenBetween(8, 128),
 				validation.StringDoesNotContainAny("`'\"\\"),

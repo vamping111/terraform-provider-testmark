@@ -31,49 +31,41 @@ func (s mongoDBManager) serviceParametersSchema() map[string]*schema.Schema {
 		"journal_commit_interval": {
 			Type:         schema.TypeInt,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.IntBetween(1, 500),
 		},
 		"maxconns": {
 			Type:         schema.TypeInt,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.IntBetween(10, 51200),
 		},
 		"options": {
 			Type:     schema.TypeMap,
 			Optional: true,
-			ForceNew: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 		"profile": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.StringInSlice([]string{"off", "slowOp", "all"}, false),
 		},
 		"slowms": {
 			Type:         schema.TypeInt,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.IntBetween(0, 36000000),
 		},
 		"storage_engine_cache_size": {
 			Type:         schema.TypeFloat,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.FloatAtLeast(0.25),
 		},
 		"quiet": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			ForceNew: true,
 			Default:  false,
 		},
 		"verbositylevel": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.StringInSlice([]string{"v", "vv", "vvv", "vvvv", "vvvvv"}, false),
 		},
 		"version": {

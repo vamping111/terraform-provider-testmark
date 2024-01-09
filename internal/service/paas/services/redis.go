@@ -35,13 +35,11 @@ func (s redisManager) serviceParametersSchema() map[string]*schema.Schema {
 		"databases": {
 			Type:         schema.TypeInt,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.IntBetween(1, 2147483647),
 		},
 		"maxmemory_policy": {
 			Type:     schema.TypeString,
 			Optional: true,
-			ForceNew: true,
 			ValidateFunc: validation.StringInSlice([]string{
 				"noeviction",
 				"allkeys-lru",
@@ -56,7 +54,6 @@ func (s redisManager) serviceParametersSchema() map[string]*schema.Schema {
 		"options": {
 			Type:     schema.TypeMap,
 			Optional: true,
-			ForceNew: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 		"password": {
@@ -72,31 +69,26 @@ func (s redisManager) serviceParametersSchema() map[string]*schema.Schema {
 		"persistence_aof": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			ForceNew: true,
 			Default:  false,
 		},
 		"persistence_rdb": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			ForceNew: true,
 			Default:  false,
 		},
 		"timeout": {
 			Type:         schema.TypeInt,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.IntBetween(0, 2147483647),
 		},
 		"tcp_backlog": {
 			Type:         schema.TypeInt,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.IntBetween(1, 4096),
 		},
 		"tcp_keepalive": {
 			Type:         schema.TypeInt,
 			Optional:     true,
-			ForceNew:     true,
 			ValidateFunc: validation.IntAtLeast(0),
 		},
 		"version": {

@@ -211,6 +211,7 @@ const (
 	Organizations                = "organizations"
 	Outposts                     = "outposts"
 	PI                           = "pi"
+	PaaS                         = "paas"
 	Panorama                     = "panorama"
 	Personalize                  = "personalize"
 	PersonalizeEvents            = "personalizeevents"

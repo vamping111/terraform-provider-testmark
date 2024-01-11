@@ -213,6 +213,7 @@ variable "service_labels" {
     "opsworkscm",
     "organizations",
     "outposts",
+    "paas",
     "panorama",
     "personalize",
     "personalizeevents",

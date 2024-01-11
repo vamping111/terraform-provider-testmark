@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
-	"time"
 )
 
 func DataSourceBackupUsers() *schema.Resource {
@@ -37,26 +36,13 @@ func DataSourceBackupUsers() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"last_login_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"login": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modify_time": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
-						},
-						"grants": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -117,24 +103,12 @@ func flattenBackupUsers(users []*paas.BackupUser) []map[string]interface{} {
 			tfMap["id"] = v
 		}
 
-		if v := user.LastLoginTime; v != nil {
-			tfMap["last_login_time"] = time.Unix(aws.Int64Value(v), 0).Format(time.RFC3339)
-		}
-
 		if v := user.Login; v != nil {
 			tfMap["login"] = v
 		}
 
-		if v := user.ModifyTime; v != nil {
-			tfMap["modify_time"] = time.Unix(aws.Int64Value(v), 0).Format(time.RFC3339)
-		}
-
 		if v := user.Name; v != nil {
 			tfMap["name"] = v
-		}
-
-		if v := user.ProjectGrants; v != nil {
-			tfMap["grants"] = v
 		}
 
 		tfList = append(tfList, tfMap)

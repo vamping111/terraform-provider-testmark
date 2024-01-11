@@ -256,7 +256,7 @@ func ResourceService() *schema.Resource {
 			},
 			"ssh_key_name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"status": {
@@ -303,7 +303,10 @@ func ResourceService() *schema.Resource {
 			},
 			services.ElasticSearch.ServiceType(): services.ElasticSearch.ResourceSchema(),
 			services.Memcached.ServiceType():     services.Memcached.ResourceSchema(),
+			services.MongoDB.ServiceType():       services.MongoDB.ResourceSchema(),
+			services.MySQL.ServiceType():         services.MySQL.ResourceSchema(),
 			services.PostgreSQL.ServiceType():    services.PostgreSQL.ResourceSchema(),
+			services.RabbitMQ.ServiceType():      services.RabbitMQ.ResourceSchema(),
 			services.Redis.ServiceType():         services.Redis.ResourceSchema(),
 		},
 	}

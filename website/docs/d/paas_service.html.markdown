@@ -49,7 +49,10 @@ In addition to all arguments above, the following attributes are exported:
 * `service_type` - The service type. This value determines which service parameters are included in the corresponding block.
     * `elasticsearch` - Elasticsearch parameters. The structure of this block is [described below](#elasticsearch-attribute-reference).
     * `memcached` - Memcached parameters. The structure of this block is [described below](#memcached-attribute-reference).
+    * `mongodb` - MongoDB parameters. The structure of this block is [described below](#mongodb-attribute-reference).
+    * `mysql` - MySQL parameters. The structure of this block is [described below](#mysql-attribute-reference).
     * `pgsql` - PostgreSQL parameters. The structure of this block is [described below](#postgresql-attribute-reference).
+    * `rabbitmq` - RabbitMQ parameters. The structure of this block is [described below](#rabbitmq-attribute-reference).
     * `redis` - Redis parameters. The structure of this block is [described below](#redis-attribute-reference).
 * `ssh_key_name` - The name of the SSH key for accessing instances.
 * `status` - The current status of the service.
@@ -64,7 +67,7 @@ In addition to all arguments above, the following attributes are exported:
 The `backup_settings` block has the following structure:
 
 * `bucket_name` - The name of the bucket in object storage where the service backup is saved.
-* `enabled` -  Indicates whether backup is enabled for the service.
+* `enabled` - Indicates whether backup is enabled for the service.
 * `expiration_days` - The backup retention period in days.
 * `notification_email` - The email address to which a notification that backup was created is sent.
 * `start_time` - The time when the daily backup process starts. It is set as a string in the HH:MM format Moscow time.
@@ -102,7 +105,7 @@ The `root_volume` block has the following structure:
 
 ## Elasticsearch Attribute Reference
 
-~> **Note** The following attributes contain default parameter values or user-defined values when the service is created.
+~> The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for an Elasticsearch service:
@@ -117,7 +120,7 @@ the following attributes are exported only for an Elasticsearch service:
 
 ## Memcached Attribute Reference
 
-~> **Note** The following attributes contain default parameter values or user-defined values when the service is created.
+~> The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a Memcached service:
@@ -126,9 +129,133 @@ the following attributes are exported only for a Memcached service:
 * `logging` - The logging settings for the service. The structure of this block is [described below](#logging).
 * `monitoring` - The monitoring settings for the service. The structure of this block is [described below](#monitoring).
 
+## MongoDB Attribute Reference
+
+~> The following attributes contain default parameter values or user-defined values used when the service is created.
+
+In addition to the common attributes for all services [described above](#attribute-reference),
+the following attributes are exported only for a Memcached service:
+
+* `class` - The service class.
+* `database` - List of MongoDB databases with parameters. The structure of this block is [described below](#mongodb-database).
+* `journal_commit_interval` - The maximum interval in milliseconds between saving log data.
+* `logging` - The logging settings for the service. The structure of this block is [described below](#logging).
+* `maxconns` - The maximum number of concurrent connections allowed for _mongos_ or _mongod_.
+* `monitoring` - The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - Other MongoDB parameters.
+* `profile` - Indicates which operations to profile.
+* `slowms` - The operation time threshold in milliseconds, above which the operation is considered slow.
+* `storage_engine_cache_size` - The maximum size of internal cache in GiB used to store all data.
+* `user` - List of MongoDB users with parameters. The structure of this block is [described below](#mongodb-user).
+* `quiet` - Indicates whether the quiet mode of _mongos_ or _mongod_ is enabled.
+* `verbositylevel` - The level of message detail in the message log.
+* `version` - The installed version.
+
+### MongoDB database
+
+The `database` block has the following structure:
+
+* `id` - The ID of the database.
+* `name` - The database name.
+* `user` - List of database users with parameters. The structure of this block is [described below](#mongodb-database-user).
+
+### MongoDB database user
+
+The `user` block has the following structure:
+
+* `id` - The ID of the user.
+* `name` - The MongoDB user name.
+* `roles` - List of user roles.
+
+### MongoDB user
+
+The `user` block has the following structure:
+
+* `id` - The ID of the user.
+* `name` - The MongoDB user name.
+* `password` - The MongoDB user password.
+
+## MySQL Attribute Reference
+
+~> The following attributes contain default parameter values or user-defined values used when the service is created.
+
+In addition to the common attributes for all services [described above](#attribute-reference),
+the following attributes are exported only for a MySQL service:
+
+* `class` - The service class.
+* `connect_timeout` - The number of seconds that the _mysqld_ server waits for a connect packet before responding with **Bad handshake**.
+* `database` - List of MySQL databases with parameters. The structure of this block is [described below](#mysql-database).
+* `galera_options` - Other Galera parameters.
+* `gcache_size` - A Galera parameter. The size of GCache circular buffer storage preallocated on startup in bytes.
+* `gcs_fc_factor` - A Galera parameter. The fraction of `gcs_fc_limit` at which replication is resumed
+  when the recv queue length falls below this value.
+* `gcs_fc_limit` - A Galera parameter. The number of writesets. If the recv queue length exceeds it replication is suspended.
+* `gcs_fc_master_slave` - A Galera parameter. Indicates whether the cluster has only one source node.
+* `gcs_fc_single_primary` - A Galera parameter. Indicates whether there is more than one replication source.
+* `innodb_buffer_pool_instances` - The number of regions that `innodb_buffer_pool_size` is divided into when `innodb_buffer_pool_size` > 1 GiB.
+* `innodb_buffer_pool_size` - The size in bytes of the buffer pool used to cache table data and indexes.
+* `innodb_change_buffering` - Operations for which change buffering optimization is enabled.
+* `innodb_flush_log_at_trx_commit` - The value of the parameter controls the behaviour for transaction commit operations.
+* `innodb_io_capacity` - The number of I/O operations per second (IOPS) available to InnoDB background tasks.
+* `innodb_io_capacity_max` - The maximum number of IOPS that InnoDB background tasks can perform.
+* `innodb_log_file_size` - The size of a single file in bytes in the redo system log.
+* `innodb_log_files_in_group` - The number of system log files in a log group.
+* `innodb_purge_threads` - The number of background threads allocated for the InnoDB purge operation.
+* `innodb_thread_concurrency` - The maximum number of threads permitted inside of InnoDB.
+* `innodb_strict_mode` - The MySQL operation mode.
+* `innodb_sync_array_size` - The size of the mutex/lock wait array.
+* `max_allowed_packet` - The maximum size of one packet, any generated/intermediate string
+  or any parameter sent by the _mysql_stmt_send_long_data()_ C API function.
+* `max_connect_errors` - The maximum number of connection errors, at which the server blocks the host from further connections.
+* `max_connections` - The maximum permitted number of simultaneous client connections that a host can handle.
+* `max_heap_table_size` - The maximum size in bytes to which user-created `MEMORY` tables are permitted to grow.
+* `logging` - The logging settings for the service. The structure of this block is [described below](#logging).
+* `monitoring` - The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - Other MySQL parameters.
+* `pxc_strict_mode` - PXC mode.
+* `table_open_cache` - The number of open tables for all threads.
+* `thread_cache_size` - The number of threads that the server caches to establish new network connections.
+* `tmp_table_size` - The maximum size of internal in-memory temporary tables in bytes.
+* `transaction_isolation` - The transaction isolation level.
+* `user` - List of MySQL users with parameters. The structure of this block is [described below](#mysql-user).
+* `vendor` - The engine vendor.
+* `version` - The installed version.
+* `wait_timeout` - The number of seconds the server waits for activity on a noninteractive connection before closing it.
+
+### MySQL database
+
+The `database` block has the following structure:
+
+* `backup_enabled` - Indicates whether backup is enabled for the database.
+* `backup_id` - The database backup ID.
+* `backup_db_name` - The name of a database from the backup specified in the `backup_id` parameter.
+* `charset` - The database charset.
+* `collate` - The database collation.
+* `id` - The ID of the database.
+* `name` - The database name.
+* `user` - List of database users with parameters. The structure of this block is [described below](#mysql-database-user).
+
+### MySQL database user
+
+The `user` block has the following structure:
+
+* `id` - The ID of the user.
+* `name` - The MySQL user name.
+* `options` - List of user options.
+* `privileges` - List of user privileges.
+
+### MySQL user
+
+The `user` block has the following structure:
+
+* `host` - The hostname or IP address.
+* `id` - The ID of the user.
+* `name` - The MySQL user name.
+* `password` - The MySQL user password.
+
 ## PostgreSQL Attribute Reference
 
-~> **Note** The following attributes contain default parameter values or user-defined values when the service is created.
+~> The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a PostgreSQL service:
@@ -146,9 +273,9 @@ the following attributes are exported only for a PostgreSQL service:
 * `database` - List of PostgreSQL databases with parameters. The structure of this block is [described below](#postgresql-database).
 * `effective_cache_size` - The planner’s assumption about the effective size of the disk cache
   that is available to a single query.
-* `effective_io_concurrency` -  The number of concurrent disk I/O operations.
+* `effective_io_concurrency` - The number of concurrent disk I/O operations.
 * `logging` - The logging settings for the service. The structure of this block is [described below](#logging).
-* `maintenance_work_mem` -  The maximum amount of memory in bytes used by maintenance operations,
+* `maintenance_work_mem` - The maximum amount of memory in bytes used by maintenance operations,
   such as `VACUUM`, `CREATE INDEX`, and `ALTER TABLE ADD FOREIGN KEY`.
 * `max_connections` - The maximum number of simultaneous connections to the database server.
 * `max_wal_size` - The maximum size in bytes that WAL can reach at automatic checkpoints.
@@ -200,9 +327,23 @@ The `user` block has the following structure:
 * `name` - The PostgreSQL user name.
 * `password` - The PostgreSQL user password.
 
+## RabbitMQ Attribute Reference
+
+~> The following attributes contain default parameter values or user-defined values used when the service is created.
+
+In addition to the common attributes for all services [described above](#attribute-reference),
+the following attributes are exported only for a RabbitMQ service:
+
+* `class` - The service class.
+* `logging` - The logging settings for the service. The structure of this block is [described below](#logging).
+* `monitoring` - The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - Other RabbitMQ parameters.
+* `password` - The RabbitMQ admin password.
+* `version` - The installed version.
+
 ## Redis Attribute Reference
 
-~> **Note** The following attributes contain default parameter values or user-defined values when the service is created.
+~> The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a Redis service:

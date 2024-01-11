@@ -653,7 +653,10 @@ func Provider() *schema.Provider {
 			//
 			//"aws_resourcegroupstaggingapi_resources": resourcegroupstaggingapi.DataSourceResources(),
 
-			"aws_paas_service": paas.DataSourceService(),
+			"aws_paas_service":      paas.DataSourceService(),
+			"aws_paas_backup":       paas.DataSourceBackup(),
+			"aws_paas_backups":      paas.DataSourceBackups(),
+			"aws_paas_backup_users": paas.DataSourceBackupUsers(),
 
 			//"aws_route53_delegation_set":          route53.DataSourceDelegationSet(),
 			//"aws_route53_traffic_policy_document": route53.DataSourceTrafficPolicyDocument(),
@@ -1620,6 +1623,7 @@ func Provider() *schema.Provider {
 			//"aws_route53_resolver_rule":                            route53resolver.ResourceRule(),
 			//"aws_route53_resolver_rule_association":                route53resolver.ResourceRuleAssociation(),
 
+			"aws_paas_backup":  paas.ResourceBackup(),
 			"aws_paas_service": paas.ResourceService(),
 
 			"aws_s3_bucket": s3.ResourceBucket(),

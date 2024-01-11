@@ -10,3 +10,15 @@ const (
 	ServiceStatusReady        = "READY"
 	ServiceStatusError        = "ERROR"
 )
+
+const (
+	BackupStatusCreated = "CREATED"
+)
+
+const (
+	DayHours = 24
+)
+
+const (
+	ageDaysDefault = -1
+)

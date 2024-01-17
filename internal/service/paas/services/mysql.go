@@ -1,10 +1,12 @@
 package services
 
 import (
+	"math"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-aws/internal/experimental/nullable"
-	"strconv"
 )
 
 type mySQLManager struct {
@@ -79,13 +81,11 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(1, 64),
 		},
 		"innodb_buffer_pool_size": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			ForceNew: true,
-			Default:  128 * Megabyte,
-			// FIXME: max should be 2^63-1
-			// https://github.com/hashicorp/terraform-plugin-sdk/issues/1215
-			ValidateFunc: validation.IntBetween(5*Megabyte, 4611686018427387903), // 2^62-1
+			Type:         nullable.TypeNullableInt,
+			Optional:     true,
+			ForceNew:     true,
+			Default:      strconv.FormatInt(128*Megabyte, 10),
+			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(5*Megabyte, math.MaxInt64),
 		},
 		"innodb_change_buffering": {
 			Type:     schema.TypeString,
@@ -108,27 +108,23 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(0, 2),
 		},
 		"innodb_io_capacity": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			ForceNew: true,
-			Default:  200,
-			// FIXME: max should be 2^63-1
-			// https://github.com/hashicorp/terraform-plugin-sdk/issues/1215
-			ValidateFunc: validation.IntBetween(100, 4611686018427387903), // 2^62-1
-		},
-		"innodb_io_capacity_max": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			ForceNew: true,
-			// FIXME: max should be 2^63-1
-			// https://github.com/hashicorp/terraform-plugin-sdk/issues/1215
-			ValidateFunc: validation.IntBetween(100, 4611686018427387903), // 2^62-1
-		},
-		"innodb_log_file_size": {
-			Type:         schema.TypeInt,
+			Type:         nullable.TypeNullableInt,
 			Optional:     true,
 			ForceNew:     true,
-			ValidateFunc: validation.IntBetween(4*Megabyte, 512*Gigabyte),
+			Default:      strconv.FormatInt(200, 10),
+			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(100, math.MaxInt64),
+		},
+		"innodb_io_capacity_max": {
+			Type:         nullable.TypeNullableInt,
+			Optional:     true,
+			ForceNew:     true,
+			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(100, math.MaxInt64),
+		},
+		"innodb_log_file_size": {
+			Type:         nullable.TypeNullableInt,
+			Optional:     true,
+			ForceNew:     true,
+			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(4*Megabyte, 512*Gigabyte),
 		},
 		"innodb_log_files_in_group": {
 			Type:         schema.TypeInt,
@@ -172,13 +168,11 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(16*Megabyte, 1*Gigabyte),
 		},
 		"max_connect_errors": {
-			Type:     schema.TypeInt,
-			Optional: true,
-			ForceNew: true,
-			Default:  100,
-			// FIXME: max should be 2^63-1
-			// https://github.com/hashicorp/terraform-plugin-sdk/issues/1215
-			ValidateFunc: validation.IntBetween(1, 4611686018427387903), // 2^62-1
+			Type:         nullable.TypeNullableInt,
+			Optional:     true,
+			ForceNew:     true,
+			Default:      strconv.FormatInt(100, 10),
+			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(1, math.MaxInt64),
 		},
 		"max_connections": {
 			Type:         schema.TypeInt,
@@ -188,11 +182,11 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(1, 100000),
 		},
 		"max_heap_table_size": {
-			Type:         schema.TypeInt,
+			Type:         nullable.TypeNullableInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      16 * Megabyte,
-			ValidateFunc: validation.IntBetween(16*Kilobyte, 4294966272),
+			Default:      strconv.FormatInt(16*Megabyte, 10),
+			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(16*Kilobyte, 4294966272),
 		},
 		"options": {
 			Type:     schema.TypeMap,
@@ -220,11 +214,11 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(0, 16*Kilobyte),
 		},
 		"tmp_table_size": {
-			Type:         schema.TypeInt,
+			Type:         nullable.TypeNullableInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      16 * Megabyte,
-			ValidateFunc: validation.IntBetween(1*Kilobyte, 4294967295),
+			Default:      strconv.FormatInt(16*Megabyte, 10),
+			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(1*Kilobyte, 4294967295),
 		},
 		"transaction_isolation": {
 			Type:     schema.TypeString,
@@ -295,7 +289,7 @@ func (s mySQLManager) serviceParametersDataSourceSchema() map[string]*schema.Sch
 			Computed: true,
 		},
 		"innodb_buffer_pool_size": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"innodb_change_buffering": {
@@ -307,15 +301,15 @@ func (s mySQLManager) serviceParametersDataSourceSchema() map[string]*schema.Sch
 			Computed: true,
 		},
 		"innodb_io_capacity": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"innodb_io_capacity_max": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"innodb_log_file_size": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"innodb_log_files_in_group": {
@@ -343,7 +337,7 @@ func (s mySQLManager) serviceParametersDataSourceSchema() map[string]*schema.Sch
 			Computed: true,
 		},
 		"max_connect_errors": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"max_connections": {
@@ -351,7 +345,7 @@ func (s mySQLManager) serviceParametersDataSourceSchema() map[string]*schema.Sch
 			Computed: true,
 		},
 		"max_heap_table_size": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"options": {
@@ -371,7 +365,7 @@ func (s mySQLManager) serviceParametersDataSourceSchema() map[string]*schema.Sch
 			Computed: true,
 		},
 		"tmp_table_size": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"transaction_isolation": {
@@ -550,10 +544,10 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 		serviceParameters["innodb_buffer_pool_instances"] = int64(v)
 	}
 
-	if v, ok := tfMap["innodb_buffer_pool_size"].(int); ok && v != 0 {
+	if v, _, _ := nullable.Int(tfMap["innodb_buffer_pool_size"].(string)).Value(); v != 0 {
 		serviceParameters["innodb_buffer_pool_size"] = map[string]interface{}{
 			"dimension": B,
-			"value":     int64(v),
+			"value":     v,
 		}
 	}
 
@@ -565,18 +559,18 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 		serviceParameters["innodb_flush_log_at_trx_commit"] = int64(v)
 	}
 
-	if v, ok := tfMap["innodb_io_capacity"].(int); ok && v != 0 {
-		serviceParameters["innodb_io_capacity"] = int64(v)
+	if v, _, _ := nullable.Int(tfMap["innodb_io_capacity"].(string)).Value(); v != 0 {
+		serviceParameters["innodb_io_capacity"] = v
 	}
 
-	if v, ok := tfMap["innodb_io_capacity_max"].(int); ok && v != 0 {
-		serviceParameters["innodb_io_capacity_max"] = int64(v)
+	if v, _, _ := nullable.Int(tfMap["innodb_io_capacity_max"].(string)).Value(); v != 0 {
+		serviceParameters["innodb_io_capacity_max"] = v
 	}
 
-	if v, ok := tfMap["innodb_log_file_size"].(int); ok && v != 0 {
+	if v, _, _ := nullable.Int(tfMap["innodb_log_file_size"].(string)).Value(); v != 0 {
 		serviceParameters["innodb_log_file_size"] = map[string]interface{}{
 			"dimension": B,
-			"value":     int64(v),
+			"value":     v,
 		}
 	}
 
@@ -607,18 +601,18 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 		}
 	}
 
-	if v, ok := tfMap["max_connect_errors"].(int); ok && v != 0 {
-		serviceParameters["max_connect_errors"] = int64(v)
+	if v, _, _ := nullable.Int(tfMap["max_connect_errors"].(string)).Value(); v != 0 {
+		serviceParameters["max_connect_errors"] = v
 	}
 
 	if v, ok := tfMap["max_connections"].(int); ok && v != 0 {
 		serviceParameters["max_connections"] = int64(v)
 	}
 
-	if v, ok := tfMap["max_heap_table_size"].(int); ok && v != 0 {
+	if v, _, _ := nullable.Int(tfMap["max_heap_table_size"].(string)).Value(); v != 0 {
 		serviceParameters["max_heap_table_size"] = map[string]interface{}{
 			"dimension": B,
-			"value":     int64(v),
+			"value":     v,
 		}
 	}
 
@@ -638,10 +632,10 @@ func (s mySQLManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 		serviceParameters["thread_cache_size"] = int64(v)
 	}
 
-	if v, ok := tfMap["tmp_table_size"].(int); ok && v != 0 {
+	if v, _, _ := nullable.Int(tfMap["tmp_table_size"].(string)).Value(); v != 0 {
 		serviceParameters["tmp_table_size"] = map[string]interface{}{
 			"dimension": B,
-			"value":     int64(v),
+			"value":     v,
 		}
 	}
 
@@ -775,7 +769,7 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
 
 		if err == nil {
-			tfMap["innodb_buffer_pool_size"] = bytes
+			tfMap["innodb_buffer_pool_size"] = strconv.FormatInt(bytes, 10)
 		}
 	}
 
@@ -788,18 +782,18 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 	}
 
 	if v, ok := serviceParameters["innodbIoCapacity"].(int64); ok {
-		tfMap["innodb_io_capacity"] = v
+		tfMap["innodb_io_capacity"] = strconv.FormatInt(v, 10)
 	}
 
 	if v, ok := serviceParameters["innodbIoCapacityMax"].(int64); ok {
-		tfMap["innodb_io_capacity_max"] = v
+		tfMap["innodb_io_capacity_max"] = strconv.FormatInt(v, 10)
 	}
 
 	if vMap, okMap := serviceParameters["innodbLogFileSize"].(map[string]interface{}); okMap {
 		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
 
 		if err == nil {
-			tfMap["innodb_log_file_size"] = bytes
+			tfMap["innodb_log_file_size"] = strconv.FormatInt(bytes, 10)
 		}
 	}
 
@@ -834,7 +828,7 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 	}
 
 	if v, ok := serviceParameters["maxConnectErrors"].(int64); ok {
-		tfMap["max_connect_errors"] = v
+		tfMap["max_connect_errors"] = strconv.FormatInt(v, 10)
 	}
 
 	if v, ok := serviceParameters["maxConnections"].(int64); ok {
@@ -845,7 +839,7 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
 
 		if err == nil {
-			tfMap["max_heap_table_size"] = bytes
+			tfMap["max_heap_table_size"] = strconv.FormatInt(bytes, 10)
 		}
 	}
 
@@ -871,7 +865,7 @@ func (s mySQLManager) flattenServiceParameters(serviceParameters ServiceParamete
 		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
 
 		if err == nil {
-			tfMap["tmp_table_size"] = bytes
+			tfMap["tmp_table_size"] = strconv.FormatInt(bytes, 10)
 		}
 	}
 

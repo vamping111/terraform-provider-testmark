@@ -1,8 +1,11 @@
 package services
 
 import (
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-provider-aws/internal/experimental/nullable"
 )
 
 type postgreSQLManager struct {
@@ -88,13 +91,13 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(0, 1000),
 		},
 		"maintenance_work_mem": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  64 * Megabyte,
+			Default:  strconv.FormatInt(64*Megabyte, 10),
 			ValidateFunc: validation.All(
-				validation.IntBetween(1*Megabyte, 2*Gigabyte),
-				validation.IntDivisibleBy(Kilobyte),
+				nullable.ValidateTypeStringNullableIntBetween(1*Megabyte, 2*Gigabyte),
+				nullable.ValidateTypeStringNullableIntDivisibleBy(Kilobyte),
 			),
 		},
 		"max_connections": {
@@ -105,13 +108,13 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(1, 262143),
 		},
 		"max_wal_size": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  1 * Gigabyte,
+			Default:  strconv.FormatInt(1*Gigabyte, 10),
 			ValidateFunc: validation.All(
-				validation.IntBetween(2*Megabyte, 2147483647*Megabyte),
-				validation.IntDivisibleBy(Megabyte),
+				nullable.ValidateTypeStringNullableIntBetween(2*Megabyte, 2147483647*Megabyte),
+				nullable.ValidateTypeStringNullableIntDivisibleBy(Megabyte),
 			),
 		},
 		// TODO: add validation that depends on version value
@@ -144,13 +147,13 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(0, 262143),
 		},
 		"min_wal_size": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  80 * Megabyte,
+			Default:  strconv.FormatInt(80*Megabyte, 10),
 			ValidateFunc: validation.All(
-				validation.IntBetween(32*Megabyte, 2147483647*Megabyte),
-				validation.IntDivisibleBy(Megabyte),
+				nullable.ValidateTypeStringNullableIntBetween(32*Megabyte, 2147483647*Megabyte),
+				nullable.ValidateTypeStringNullableIntDivisibleBy(Megabyte),
 			),
 		},
 		"options": {
@@ -204,13 +207,13 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			ValidateFunc: validation.IntBetween(8, 262143),
 		},
 		"work_mem": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  4 * Megabyte,
+			Default:  strconv.FormatInt(4*Megabyte, 10),
 			ValidateFunc: validation.All(
-				validation.IntBetween(64*Kilobyte, 2147483647*Kilobyte),
-				validation.IntDivisibleBy(Kilobyte),
+				nullable.ValidateTypeStringNullableIntBetween(64*Kilobyte, 2147483647*Kilobyte),
+				nullable.ValidateTypeStringNullableIntDivisibleBy(Kilobyte),
 			),
 		},
 	}
@@ -251,7 +254,7 @@ func (s postgreSQLManager) serviceParametersDataSourceSchema() map[string]*schem
 			Computed: true,
 		},
 		"maintenance_work_mem": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"max_connections": {
@@ -259,7 +262,7 @@ func (s postgreSQLManager) serviceParametersDataSourceSchema() map[string]*schem
 			Computed: true,
 		},
 		"max_wal_size": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"max_parallel_maintenance_workers": {
@@ -279,7 +282,7 @@ func (s postgreSQLManager) serviceParametersDataSourceSchema() map[string]*schem
 			Computed: true,
 		},
 		"min_wal_size": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 		"options": {
@@ -308,7 +311,7 @@ func (s postgreSQLManager) serviceParametersDataSourceSchema() map[string]*schem
 			Computed: true,
 		},
 		"work_mem": {
-			Type:     schema.TypeInt,
+			Type:     nullable.TypeNullableInt,
 			Computed: true,
 		},
 	}
@@ -443,10 +446,10 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 		serviceParameters["effective_io_concurrency"] = int64(v)
 	}
 
-	if v, ok := tfMap["maintenance_work_mem"].(int); ok && v != 0 {
+	if v, _, _ := nullable.Int(tfMap["maintenance_work_mem"].(string)).Value(); v != 0 {
 		serviceParameters["maintenance_work_mem"] = map[string]interface{}{
 			"dimension": B,
-			"value":     int64(v),
+			"value":     v,
 		}
 	}
 
@@ -454,10 +457,10 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 		serviceParameters["max_connections"] = int64(v)
 	}
 
-	if v, ok := tfMap["max_wal_size"].(int); ok && v != 0 {
+	if v, _, _ := nullable.Int(tfMap["max_wal_size"].(string)).Value(); v != 0 {
 		serviceParameters["max_wal_size"] = map[string]interface{}{
 			"dimension": B,
-			"value":     int64(v),
+			"value":     v,
 		}
 	}
 
@@ -477,10 +480,10 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 		serviceParameters["max_worker_processes"] = int64(v)
 	}
 
-	if v, ok := tfMap["min_wal_size"].(int); ok && v != 0 {
+	if v, _, _ := nullable.Int(tfMap["min_wal_size"].(string)).Value(); v != 0 {
 		serviceParameters["min_wal_size"] = map[string]interface{}{
 			"dimension": B,
-			"value":     int64(v),
+			"value":     v,
 		}
 	}
 
@@ -508,10 +511,10 @@ func (s postgreSQLManager) expandServiceParameters(tfMap map[string]interface{})
 		serviceParameters["wal_buffers"] = int64(v)
 	}
 
-	if v, ok := tfMap["work_mem"].(int); ok && v != 0 {
+	if v, _, _ := nullable.Int(tfMap["work_mem"].(string)).Value(); v != 0 {
 		serviceParameters["work_mem"] = map[string]interface{}{
 			"dimension": B,
-			"value":     int64(v),
+			"value":     v,
 		}
 	}
 
@@ -609,7 +612,7 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
 
 		if err == nil {
-			tfMap["maintenance_work_mem"] = bytes
+			tfMap["maintenance_work_mem"] = strconv.FormatInt(bytes, 10)
 		}
 	}
 
@@ -621,7 +624,7 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
 
 		if err == nil {
-			tfMap["max_wal_size"] = bytes
+			tfMap["max_wal_size"] = strconv.FormatInt(bytes, 10)
 		}
 	}
 
@@ -647,7 +650,7 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
 
 		if err == nil {
-			tfMap["min_wal_size"] = bytes
+			tfMap["min_wal_size"] = strconv.FormatInt(bytes, 10)
 		}
 	}
 
@@ -681,7 +684,7 @@ func (s postgreSQLManager) flattenServiceParameters(serviceParameters ServicePar
 		bytes, err := parseBytes(vMap["value"].(int64), vMap["dimension"].(string))
 
 		if err == nil {
-			tfMap["work_mem"] = bytes
+			tfMap["work_mem"] = strconv.FormatInt(bytes, 10)
 		}
 	}
 

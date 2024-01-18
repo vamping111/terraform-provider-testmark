@@ -2,6 +2,7 @@ package nullable
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -51,7 +52,7 @@ func ValidateTypeStringNullableInt(v interface{}, k string) (ws []string, es []e
 
 // ValidateTypeStringNullableIntAtLeast provides custom error messaging for TypeString ints
 // Some arguments require an int value or unspecified, empty field.
-func ValidateTypeStringNullableIntAtLeast(min int) schema.SchemaValidateFunc {
+func ValidateTypeStringNullableIntAtLeast(min int64) schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (ws []string, es []error) {
 		value, ok := i.(string)
 		if !ok {
@@ -69,7 +70,7 @@ func ValidateTypeStringNullableIntAtLeast(min int) schema.SchemaValidateFunc {
 			return
 		}
 
-		if v < int64(min) {
+		if v < min {
 			es = append(es, fmt.Errorf("expected %s to be at least (%d), got %d", k, min, v))
 		}
 
@@ -79,7 +80,7 @@ func ValidateTypeStringNullableIntAtLeast(min int) schema.SchemaValidateFunc {
 
 // ValidateTypeStringNullableIntBetween provides custom error messaging for TypeString ints
 // Some arguments require an int value or unspecified, empty field.
-func ValidateTypeStringNullableIntBetween(min int, max int) schema.SchemaValidateFunc {
+func ValidateTypeStringNullableIntBetween(min int64, max int64) schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (ws []string, es []error) {
 		value, ok := i.(string)
 		if !ok {
@@ -97,8 +98,36 @@ func ValidateTypeStringNullableIntBetween(min int, max int) schema.SchemaValidat
 			return
 		}
 
-		if v < int64(min) || v > int64(max) {
+		if v < min || v > max {
 			es = append(es, fmt.Errorf("expected %s to be at between (%d) and (%d), got %d", k, min, max, v))
+		}
+
+		return
+	}
+}
+
+// ValidateTypeStringNullableIntDivisibleBy returns a SchemaValidateFunc which tests if the provided value
+// is of type string, can be converted to int and is divisible by a given number.
+func ValidateTypeStringNullableIntDivisibleBy(divisor int64) schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (ws []string, es []error) {
+		value, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if value == "" {
+			return
+		}
+
+		v, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			es = append(es, fmt.Errorf("%s: cannot parse '%s' as int: %w", k, value, err))
+			return
+		}
+
+		if math.Mod(float64(v), float64(divisor)) != 0 {
+			es = append(es, fmt.Errorf("expected %s to be divisible by %d, got: %v", k, divisor, i))
 		}
 
 		return

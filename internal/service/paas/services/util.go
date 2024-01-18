@@ -62,7 +62,7 @@ const (
 
 // DimensionToBytes converts a dimension string to its corresponding value in bytes.
 // It returns an error if the dimension is not recognized.
-func DimensionToBytes(dimension string) (int, error) {
+func DimensionToBytes(dimension string) (int64, error) {
 	switch dimension {
 	case B:
 		return Byte, nil
@@ -88,7 +88,7 @@ func parseBytes(value int64, dimension string) (int64, error) {
 		return value, err
 	}
 
-	return value * int64(bytes), nil
+	return value * bytes, nil
 }
 
 // Map with ServiceManager objects for each supported PaaS service.

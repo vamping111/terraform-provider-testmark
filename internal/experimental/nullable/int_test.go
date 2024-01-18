@@ -98,3 +98,31 @@ func TestValidationIntAtLeast(t *testing.T) {
 		},
 	})
 }
+
+func TestValidationIntDivisibleBy(t *testing.T) {
+	runTestCases(t, []testCase{
+		{
+			val: "",
+			f:   ValidateTypeStringNullableIntDivisibleBy(2),
+		},
+		{
+			val: "16",
+			f:   ValidateTypeStringNullableIntDivisibleBy(8),
+		},
+		{
+			val:         "16",
+			f:           ValidateTypeStringNullableIntDivisibleBy(7),
+			expectedErr: regexp.MustCompile(`expected [\w]+ to be divisible by 7, got: 16`),
+		},
+		{
+			val:         "words",
+			f:           ValidateTypeStringNullableIntDivisibleBy(2),
+			expectedErr: regexp.MustCompile(`[\w]+: cannot parse 'words' as int: .*`),
+		},
+		{
+			val:         1,
+			f:           ValidateTypeStringNullableIntAtLeast(2),
+			expectedErr: regexp.MustCompile(`expected type of [\w]+ to be string`),
+		},
+	})
+}

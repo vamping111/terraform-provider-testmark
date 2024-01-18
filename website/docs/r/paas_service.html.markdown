@@ -469,16 +469,16 @@ This parameter is relevant for Percona 8.0, MySQL 8.0, and MariaDB 10.4, 10.5, 1
   when `innodb_buffer_pool_size` > 1 GiB. This parameter is relevant for Percona 5.7, 8.0 и MariaDB 10.2, 10.3, 10.4.
   Valid values are from 1 to 64.
 * `innodb_buffer_pool_size` - (Optional) The size in bytes of the buffer pool used to cache table data and indexes.
-  Valid values are from 5242880 (5 MiB) to 4611686018427387903. Defaults to `134217728` (128 MiB).
+  Valid values are from 5242880 (5 MiB) to 9223372036854775807. Defaults to `134217728` (128 MiB).
 * `innodb_change_buffering` - (Optional) Operations for which change buffering optimization is enabled.
   Valid values are `inserts`, `deletes`, `changes`, `purges`, `all`, `none`.
 * `innodb_flush_log_at_trx_commit` - (Optional) The value of the parameter controls the behaviour for transaction commit operations.
   Valid values are from 0 to 2. Defaults to `1`.
   For more information about the parameter, see the [MySQL documentation][doc-innodb_flush_log_at_trx_commit].
 * `innodb_io_capacity` - (Optional) The number of I/O operations per second (IOPS) available to InnoDB background tasks.
-  Valid values are from 100 to 4611686018427387903. Defaults to `200`.
+  Valid values are from 100 to 9223372036854775807. Defaults to `200`.
 * `innodb_io_capacity_max` - (Optional) The maximum number of IOPS that InnoDB background tasks can perform.
-  Valid values are from 100 to 4611686018427387903.
+  Valid values are from 100 to 9223372036854775807.
 * `innodb_log_file_size` - (Optional) The size of a single file in bytes in the redo system log
   Valid values are from 4 MiB to 512 GiB.
 * `innodb_log_files_in_group` - (Optional) The number of system log files in a log group.
@@ -495,7 +495,7 @@ This parameter is relevant for Percona 8.0, MySQL 8.0, and MariaDB 10.4, 10.5, 1
   or any parameter sent by the _mysql_stmt_send_long_data()_ C API function.
   Valid values are from 16 MiB to 1 GiB. Defaults to `16777216` (16 MiB).
 * `max_connect_errors` - (Optional) The maximum number of connection errors, at which the server blocks the host from further connections.
-  Valid values are from 1 to 4611686018427387903. Defaults to `100`.
+  Valid values are from 1 to 9223372036854775807. Defaults to `100`.
 * `max_connections` - (Optional) The maximum permitted number of simultaneous client connections that a host can handle.
   Valid values are from 1 to 100000. Defaults to `151`.
 * `max_heap_table_size` - (Optional) The maximum size in bytes to which user-created `MEMORY` tables are permitted to grow.

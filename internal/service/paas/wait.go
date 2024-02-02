@@ -2,6 +2,7 @@ package paas
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -34,7 +35,7 @@ func waitServiceCreated(ctx context.Context, conn *paas.PaaS, id string, timeout
 
 func waitServiceUpdated(ctx context.Context, conn *paas.PaaS, id string, timeout time.Duration) (*paas.Service, error) { //nolint:unparam
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{ServiceStatusUpdating},
+		Pending: []string{ServiceStatusUpdating, ServiceStatusRecovering},
 		Target:  []string{ServiceStatusReady},
 		Refresh: statusService(conn, id),
 		Timeout: timeout,
@@ -45,6 +46,13 @@ func waitServiceUpdated(ctx context.Context, conn *paas.PaaS, id string, timeout
 	if output, ok := outputRaw.(*paas.Service); ok {
 		if err != nil {
 			setServiceErrorToResourceLastError(output, err)
+		}
+
+		if aws.StringValue(output.Status) == ServiceStatusReady && aws.BoolValue(output.IsRolledBack) {
+			return output, errors.New("an error occurred while updating the service and " +
+				"it was rolled back to the previous version. " +
+				"Please check the updated parameters and apply the changes again",
+			)
 		}
 
 		return output, err

@@ -3,6 +3,10 @@
 Адаптация [Terraform AWS Provider](https://github.com/hashicorp/terraform-provider-aws) от **HashiCorp**
 под **Облако КРОК** (C2).
 
+| Upstream Name | Upstream Version |
+|------|---------|
+| [Terraform AWS Provider](https://github.com/hashicorp/terraform-provider-aws) | [4.14.0](https://github.com/hashicorp/terraform-provider-aws/tree/v4.14.0) |
+
 - [Требования](#требования)
 - [Общая информация](#общая-информация)
 - [Начало работы](#начало-работы)
@@ -258,7 +262,7 @@ $ make docscheck
 **Важно!** Не допускается обновление уже выпущенных версий, т.к. могут возникнуть проблемы со скачиванием провайдера
 из terraform registry.
 
-Схема версионирования C2: **<upstream_version>-CROCX**, X - инкрементируется каждый релиз.
+Стартовая версия: **v24.0.0**
 
 ### Релиз
 
@@ -284,8 +288,8 @@ $ make docscheck
 6. Установка релизного тега с версией (см. [версионирование](#версионирование)) и его публикация
 
    ```
-   $ git tag v1.2.3-CROC0
-   $ git push <remote> v1.2.3-CROC0
+   $ git tag v1.2.3
+   $ git push <remote> v1.2.3
    ```
 
 7. Сборка и подпись релизных артефактов. Артефакты будут размещены в директории `dist/`

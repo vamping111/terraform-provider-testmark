@@ -86,6 +86,7 @@ One of the following target arguments must be supplied:
 * `gateway_id` - (Optional) ID of an internet gateway or virtual private gateway.
 * `instance_id` - (Optional) ID of an EC2 instance.
 * `network_interface_id` - (Optional) ID of an EC2 network interface.
+* `transit_gateway_id` - (Optional) The ID of the transit gateway.
 
 ## Attributes Reference
 
@@ -106,7 +107,6 @@ These exported attributes are currently unsupported by CROC Cloud:
     * `core_network_arn` - The ARN of a core network. Always `""`.
     * `egress_only_gateway_id` - ID of a VPC Egress Only Internet Gateway. Always `""`.
     * `nat_gateway_id` - ID of a VPC NAT gateway. Always `""`.
-    * `transit_gateway_id` - ID of an EC2 Transit Gateway. Always `""`.
     * `vpc_endpoint_id` - ID of a VPC Endpoint. Always `""`.
     * `vpc_peering_connection_id` - ID of a VPC peering connection. Always `""`.
 

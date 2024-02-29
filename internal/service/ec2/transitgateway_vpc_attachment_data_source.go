@@ -71,34 +71,32 @@ func dataSourceTransitGatewayVPCAttachmentRead(d *schema.ResourceData, meta inte
 		input.TransitGatewayAttachmentIds = []*string{aws.String(v.(string))}
 	}
 
-	log.Printf("[DEBUG] Reading EC2 Transit Gateways: %s", input)
+	log.Printf("[DEBUG] Reading EC2 Transit Gateway VPC Attachments: %s", input)
 	output, err := conn.DescribeTransitGatewayVpcAttachments(input)
 
 	if err != nil {
-		return fmt.Errorf("error reading EC2 Transit Gateway Route Table: %w", err)
+		return fmt.Errorf("error EC2 Transit Gateway VPC Attachments: %w", err)
 	}
 
 	if output == nil || len(output.TransitGatewayVpcAttachments) == 0 {
-		return errors.New("error reading EC2 Transit Gateway Route Table: no results found")
+		return errors.New("error reading EC2 Transit Gateway VPC Attachments: no results found")
 	}
 
 	if len(output.TransitGatewayVpcAttachments) > 1 {
-		return errors.New("error reading EC2 Transit Gateway Route Table: multiple results found, try adjusting search criteria")
+		return errors.New("error reading EC2 Transit Gateway VPC Attachments: multiple results found, try adjusting search criteria")
 	}
 
 	transitGatewayVpcAttachment := output.TransitGatewayVpcAttachments[0]
 
 	if transitGatewayVpcAttachment == nil {
-		return errors.New("error reading EC2 Transit Gateway Route Table: empty result")
+		return errors.New("error reading EC2 Transit Gateway VPC Attachments: empty result")
 	}
 
-	if transitGatewayVpcAttachment.Options == nil {
-		return fmt.Errorf("error reading EC2 Transit Gateway VPC Attachment (%s): missing options", d.Id())
+	if transitGatewayVpcAttachment.Options != nil {
+		d.Set("appliance_mode_support", transitGatewayVpcAttachment.Options.ApplianceModeSupport)
+		d.Set("dns_support", transitGatewayVpcAttachment.Options.DnsSupport)
+		d.Set("ipv6_support", transitGatewayVpcAttachment.Options.Ipv6Support)
 	}
-
-	d.Set("appliance_mode_support", transitGatewayVpcAttachment.Options.ApplianceModeSupport)
-	d.Set("dns_support", transitGatewayVpcAttachment.Options.DnsSupport)
-	d.Set("ipv6_support", transitGatewayVpcAttachment.Options.Ipv6Support)
 
 	if err := d.Set("subnet_ids", aws.StringValueSlice(transitGatewayVpcAttachment.SubnetIds)); err != nil {
 		return fmt.Errorf("error setting subnet_ids: %w", err)

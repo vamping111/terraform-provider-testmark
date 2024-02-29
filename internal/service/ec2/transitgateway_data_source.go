@@ -67,6 +67,11 @@ func DataSourceTransitGateway() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"shared_owners": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"tags": tftags.TagsSchemaComputed(),
 			"transit_gateway_cidr_blocks": {
 				Type:     schema.TypeList,
@@ -132,6 +137,7 @@ func dataSourceTransitGatewayRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("multicast_support", transitGateway.Options.MulticastSupport)
 	d.Set("owner_id", transitGateway.OwnerId)
 	d.Set("propagation_default_route_table_id", transitGateway.Options.PropagationDefaultRouteTableId)
+	d.Set("shared_owners", aws.StringValueSlice(transitGateway.Options.SharedOwners))
 	d.Set("transit_gateway_cidr_blocks", aws.StringValueSlice(transitGateway.Options.TransitGatewayCidrBlocks))
 	d.Set("vpn_ecmp_support", transitGateway.Options.VpnEcmpSupport)
 

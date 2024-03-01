@@ -1,3 +1,23 @@
+## 24.0.0
+
+NOTES:
+
+* Change versioning policy: `v4.14.0-CROCX` => semver started from `v24.0.0`
+
+FEATURES:
+
+* **New Data Source:** `aws_ec2_transit_gateway`
+* **New Data Source:** `aws_ec2_transit_gateway_route_table`
+* **New Data Source:** `aws_ec2_transit_gateway_route_tables`
+* **New Data Source:** `aws_ec2_transit_gateway_vpc_attachment`
+* **New Data Source:** `aws_ec2_transit_gateway_vpc_attachments`
+* **New Resource:** `aws_ec2_transit_gateway`
+* **New Resource:** `aws_ec2_transit_gateway_route`
+* **New Resource:** `aws_ec2_transit_gateway_route_table`
+* **New Resource:** `aws_ec2_transit_gateway_route_table_association`
+* **New Resource:** `aws_ec2_transit_gateway_route_table_propagation`
+* **New Resource:** `aws_ec2_transit_gateway_vpc_attachment`
+
 ## 4.14.0-CROC10
 
 FEATURES:

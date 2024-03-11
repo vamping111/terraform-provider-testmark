@@ -13,7 +13,7 @@ import (
 
 func waitServiceCreated(ctx context.Context, conn *paas.PaaS, id string, timeout time.Duration) (*paas.Service, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{ServiceStatusPending, ServiceStatusClaimed, ServiceStatusProvisioning},
+		Pending: []string{ServiceStatusPending, ServiceStatusClaimed, ServiceStatusCreating, ServiceStatusProvisioning},
 		Target:  []string{ServiceStatusReady},
 		Refresh: statusService(conn, id),
 		Timeout: timeout,
@@ -55,7 +55,7 @@ func waitServiceUpdated(ctx context.Context, conn *paas.PaaS, id string, timeout
 
 func waitServiceDeleted(ctx context.Context, conn *paas.PaaS, id string, timeout time.Duration) (*paas.Service, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{ServiceStatusPending, ServiceStatusClaimed},
+		Pending: []string{ServiceStatusPending, ServiceStatusClaimed, ServiceStatusDeleting},
 		Target:  []string{ServiceStatusDeleted},
 		Refresh: statusService(conn, id),
 		Timeout: timeout,

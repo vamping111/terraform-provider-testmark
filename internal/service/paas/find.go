@@ -15,8 +15,7 @@ func FindServiceByID(conn *paas.PaaS, id string) (*paas.Service, error) {
 
 	output, err := conn.DescribeService(input)
 
-	// TODO: fix parsing error message (__type -> code) in sdk
-	if tfawserr.ErrCodeEquals(err, "Document.NotFound") {
+	if tfawserr.ErrCodeEquals(err, ServiceNotFoundCode) {
 		return nil, &resource.NotFoundError{
 			LastError:   err,
 			LastRequest: input,

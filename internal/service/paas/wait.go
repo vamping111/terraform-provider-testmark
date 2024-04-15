@@ -55,13 +55,18 @@ func waitServiceUpdated(ctx context.Context, conn *paas.PaaS, id string, timeout
 
 func waitServiceDeleted(ctx context.Context, conn *paas.PaaS, id string, timeout time.Duration) (*paas.Service, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{ServiceStatusPending, ServiceStatusClaimed, ServiceStatusDeleting},
-		Target:  []string{ServiceStatusDeleted},
-		Refresh: statusService(conn, id),
-		Timeout: timeout,
+		Pending:        []string{ServiceStatusPending, ServiceStatusClaimed, ServiceStatusDeleting},
+		Target:         []string{ServiceStatusDeleted},
+		Refresh:        statusService(conn, id),
+		Timeout:        timeout,
+		NotFoundChecks: 1,
 	}
 
 	outputRaw, err := stateConf.WaitForStateContext(ctx)
+
+	if tfresource.NotFound(err) {
+		return nil, nil
+	}
 
 	if output, ok := outputRaw.(*paas.Service); ok {
 		if err != nil {

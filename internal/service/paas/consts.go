@@ -4,8 +4,10 @@ package paas
 const (
 	ServiceStatusPending      = "PENDING"
 	ServiceStatusClaimed      = "CLAIMED"
+	ServiceStatusCreating     = "CREATING"
 	ServiceStatusProvisioning = "PROVISIONING"
 	ServiceStatusUpdating     = "UPDATING"
+	ServiceStatusDeleting     = "DELETING"
 	ServiceStatusDeleted      = "DELETED"
 	ServiceStatusReady        = "READY"
 	ServiceStatusError        = "ERROR"

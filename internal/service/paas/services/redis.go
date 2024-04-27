@@ -42,7 +42,6 @@ func (s redisManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 			ForceNew: true,
-			Default:  "noeviction",
 			ValidateFunc: validation.StringInSlice([]string{
 				"noeviction",
 				"allkeys-lru",
@@ -86,21 +85,18 @@ func (s redisManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      0,
 			ValidateFunc: validation.IntBetween(0, 2147483647),
 		},
 		"tcp_backlog": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      511,
 			ValidateFunc: validation.IntBetween(1, 4096),
 		},
 		"tcp_keepalive": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      300,
 			ValidateFunc: validation.IntAtLeast(0),
 		},
 		"version": {
@@ -201,7 +197,7 @@ func (s redisManager) expandServiceParameters(tfMap map[string]interface{}) Serv
 		serviceParameters["timeout"] = int64(v)
 	}
 
-	if v, ok := tfMap["tcp_backlog"].(int); ok {
+	if v, ok := tfMap["tcp_backlog"].(int); ok && v != 0 {
 		serviceParameters["tcp-backlog"] = int64(v)
 	}
 

@@ -81,7 +81,7 @@ resource "aws_paas_service" "elasticsearch" {
 
 ### Memcached Service with Enabled Monitoring
 
-~> This example uses the VPC and subnet defined in [Elasticsearch Service example](#elasticsearch-service).
+~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
 
 ```terraform
 resource "aws_paas_service" "memcached" {
@@ -110,6 +110,118 @@ resource "aws_paas_service" "memcached" {
       monitoring_labels = {
         key1 = "value1"
         key3 = "value3"
+      }
+    }
+  }
+}
+```
+
+### MongoDB Service
+
+~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
+
+```terraform
+resource "aws_paas_service" "mongodb" {
+  name          = "tf-service"
+  instance_type = "c5.large"
+
+  root_volume {
+    type = "st2"
+    size = 32
+  }
+
+  data_volume {
+    type = "st2"
+    size = 32
+  }
+
+  delete_interfaces_on_destroy = true
+  security_group_ids           = [aws_vpc.example.default_security_group_id]
+  subnet_ids                   = [aws_subnet.example.id]
+
+  ssh_key_name = "<name>"
+
+  mongodb {
+    version = "4.2.23"
+
+    journal_commit_interval = 301
+    maxconns                = 16
+    profile                 = "all"
+    slowms                  = 3600001
+
+    quiet          = false
+    verbositylevel = "vvvv"
+
+    user {
+      name     = "user1"
+      password = "********"
+    }
+
+    database {
+      name = "test_db1"
+
+      user {
+        name  = "user1"
+        roles = ["readWrite", "dbAdmin"]
+      }
+    }
+  }
+}
+```
+
+### MySQL Service
+
+~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
+
+```terraform
+resource "aws_paas_service" "mysql" {
+  name          = "tf-service"
+  instance_type = "c5.large"
+
+  root_volume {
+    type = "st2"
+    size = 32
+  }
+
+  data_volume {
+    type = "st2"
+    size = 32
+  }
+
+  delete_interfaces_on_destroy = true
+  security_group_ids           = [aws_vpc.example.default_security_group_id]
+  subnet_ids                   = [aws_subnet.example.id]
+
+  ssh_key_name = "<name>"
+
+  mysql {
+    vendor  = "mariadb"
+    version = "10.7.7"
+
+    user {
+      name     = "user1"
+      host     = "127.0.0.1"
+      password = "********"
+    }
+
+    user {
+      name     = "user2"
+      host     = "127.0.0.1"
+      password = "********"
+    }
+
+    database {
+      backup_enabled = false
+      name           = "test_db1"
+
+      user {
+        name       = "user1"
+        privileges = ["INSERT"]
+        options    = ["GRANT"]
+      }
+
+      user {
+        name = "user2"
       }
     }
   }
@@ -231,9 +343,41 @@ resource "aws_paas_service" "pgsql" {
 }
 ```
 
+### RabbitMQ Service
+
+~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
+
+```terraform
+resource "aws_paas_service" "rabbitmq" {
+  name          = "tf-service"
+  instance_type = "c5.large"
+
+  root_volume {
+    type = "st2"
+    size = 32
+  }
+
+  data_volume {
+    type = "gp2"
+    size = 40
+  }
+
+  delete_interfaces_on_destroy = true
+  security_group_ids           = [aws_vpc.example.default_security_group_id]
+  subnet_ids                   = [aws_subnet.example.id]
+
+  ssh_key_name = "<name>"
+
+  rabbitmq {
+    version  = "3.8.30"
+    password = "********"
+  }
+}
+```
+
 ### Redis Service with Enabled Logging
 
-~> This example uses the VPC and subnet defined in [Elasticsearch Service example](#elasticsearch-service).
+~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
 
 ```terraform
 resource "aws_paas_service" "redis" {

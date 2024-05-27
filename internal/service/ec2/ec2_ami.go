@@ -264,7 +264,7 @@ func ResourceAMI() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      ec2.VirtualizationTypeParavirtual,
+				Default:      ec2.VirtualizationTypeHvm,
 				ValidateFunc: validation.StringInSlice(ec2.VirtualizationType_Values(), false),
 			},
 		},

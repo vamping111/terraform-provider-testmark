@@ -44,7 +44,7 @@ The following arguments are supported:
 * `name` - (Required) An unique name for the image.
 * `description` - (Optional) A longer, human-readable description for the image.
 * `root_device_name` - (Optional) The name of the root device. Valid values are `disk<N>`, `cdrom<N>`, `floppy<N>`, `menu` (N - disk number). Defaults to `disk1`.
-* `virtualization_type` - (Optional) Keyword to choose what virtualization mode created instances will use. Valid values: `hvm`.
+* `virtualization_type` - (Optional) Keyword to choose what virtualization mode created instances will use. Valid values are `hvm`, `hvm-legacy`. Defaults to `hvm`.
 * `architecture` - (Optional) Machine architecture for created instances. Defaults to `x86_64`.
 * `ebs_block_device` - (Optional) Nested block describing an EBS block device that should be
   attached to created instances. The structure of this block is described below.

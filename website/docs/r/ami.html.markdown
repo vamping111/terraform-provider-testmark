@@ -6,7 +6,7 @@ description: |-
   Creates and manages a custom Amazon Machine Image (AMI).
 ---
 
-[images]: https://docs.cloud.croc.ru/en/services/instances_and_volumes/images.html
+[images]: https://docs.cloud.croc.ru/en/services/storage/images.html
 [default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
 
 # Resource: aws_ami

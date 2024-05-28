@@ -65,7 +65,7 @@ Nested `ebs_block_device` blocks have the following structure:
 * `volume_size` - (Required unless `snapshot_id` is set) The size of created volumes in GiB.
   If `snapshot_id` is set and `volume_size` is omitted then the volume will have the same size
   as the selected snapshot.
-* `volume_type` - (Optional) The type of EBS volume to create. Valid values are `st2`, `gp2`, `io2`.
+* `volume_type` - (Optional) The type of EBS volume to create. Valid values are `st2`, `gp2`, `io2`. Defaults to `st2`.
 
 Nested `ephemeral_block_device` blocks have the following structure:
 

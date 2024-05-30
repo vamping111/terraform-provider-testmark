@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -290,8 +292,14 @@ func (s mongoDBManager) flattenServiceParameters(serviceParameters ServiceParame
 	}
 
 	if vMap, okMap := serviceParameters["storageEngineCacheSize"].(map[string]interface{}); okMap {
-		if v, ok := vMap["value"].(float64); ok && vMap["dimension"].(string) == GiB {
-			tfMap["storage_engine_cache_size"] = v
+		if v, ok := vMap["value"]; ok && vMap["dimension"].(string) == GiB {
+			if int64Val, int64Ok := v.(int64); int64Ok {
+				tfMap["storage_engine_cache_size"] = float64(int64Val)
+			} else if floatVal, floatOk := vMap["value"].(float64); floatOk {
+				tfMap["storage_engine_cache_size"] = floatVal
+			} else {
+				log.Printf("[ERROR] Unknown type '%T' for storageEngineCacheSize %s", v, v)
+			}
 		}
 	}
 

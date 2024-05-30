@@ -314,7 +314,7 @@ One of the following blocks with service parameters must be specified:
 * `redis` - Redis parameters. The structure of this block is [described below](#redis-argument-reference).
 
 ### backup_settings
-
+mongo
 ~> All the parameters in the `backup_settings` block are editable.
 
 The `backup_settings` block has the following structure:
@@ -354,9 +354,9 @@ the `elasticsearch` block can contain the following arguments:
 
 * `class` - (Optional) The service class. Valid value is `search`. Defaults to `search`.
 * `kibana` - (Optional) Indicates whether the Kibana deployment is enabled. Defaults to `false`.
-* `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
-* `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
-* `options` - (Optional) Map containing other Elasticsearch parameters.
+* `logging` - (Optional, Editable) The logging settings for the service. The structure of this block is [described below](#logging).
+* `monitoring` - (Optional, Editable) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - (Optional, Editable) Map containing other Elasticsearch parameters.
   Parameter names must be in camelCase. Values are strings.
 
 ~> If a parameter name includes a dot, it cannot be passed in `options`.
@@ -373,8 +373,8 @@ In addition to the common arguments for all services [described above](#argument
 the `memcached` block can contain the following arguments:
 
 * `class` - (Optional) The service class. Valid value is `cacher`. Defaults to `cacher`.
-* `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
-* `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `logging` - (Optional, Editable) The logging settings for the service. The structure of this block is [described below](#logging).
+* `monitoring` - (Optional, Editable) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
 
 ## MongoDB Argument Reference
 
@@ -382,27 +382,28 @@ In addition to the common arguments for all services [described above](#argument
 the `mongodb` block can contain the following arguments:
 
 * `class` - (Optional) The service class. Valid value is `database`. Defaults to `database`.
-* `database` - (Optional) List of MongoDB databases with parameters. The structure of this block is [described below](#mongodb-database).
-* `journal_commit_interval` - (Optional) The maximum interval in milliseconds between saving log data.
+* `database` - (Optional, Editable) List of MongoDB databases with parameters. The structure of this block is [described below](#mongodb-database).
+* `journal_commit_interval` - (Optional, Editable) The maximum interval in milliseconds between saving log data.
   Valid values are from 1 to 500.
-* `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
-* `maxconns` - (Optional) The maximum number of concurrent connections allowed for _mongos_ or _mongod_.
+* `logging` - (Optional, Editable) The logging settings for the service. The structure of this block is [described below](#logging).
+* `maxconns` - (Optional, Editable) The maximum number of concurrent connections allowed for _mongos_ or _mongod_.
   Valid values are from 10 to 51200.
-* `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
-* `options` - (Optional) Map containing other MongoDB parameters.
+* `monitoring` - (Optional, Editable) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - (Optional, Editable) Map containing other MongoDB parameters.
   Parameter names must be in camelCase. Values are strings.
 
 ~> If a parameter name includes a dot, it cannot be passed in `options`.
 If you need to use such a parameter, contact [technical support].
 
-* `profile` - (Optional) Indicates which operations to profile. Valid values are `off`, `slowOp`, `all`.
-* `slowms` - (Optional) The operation time threshold in milliseconds, above which the operation is considered slow.
+* `profile` - (Optional, Editable) Indicates which operations to profile. Valid values are `off`, `slowOp`, `all`.
+* `slowms` - (Optional, Editable) The operation time threshold in milliseconds, above which the operation is considered slow.
   Valid values are from 0 to 36000000.
-* `storage_engine_cache_size` - (Optional) The maximum size of internal cache in GiB used to store all data.
+* `storage_engine_cache_size` - (Optional, Editable) The maximum size of internal cache in GiB used to store all data.
   A floating-point number. Valid values are greater or equal to `0.25`.
-* `user` - (Optional) List of MongoDB users with parameters. The structure of this block is [described below](#mongodb-user).
-* `quiet` - (Optional) Indicates whether the quiet mode of _mongos_ or _mongod_ is enabled. Defaults to `false`.
-* `verbositylevel` - (Optional) The level of message detail in the message log. Valid values are `v`, `vv`, `vvv`, `vvvv`, `vvvvv`.
+* `user` - (Optional, Editable) List of MongoDB users with parameters. The structure of this block is [described below](#mongodb-user).
+* `quiet` - (Optional, Editable) Indicates whether the quiet mode of _mongos_ or _mongod_ is enabled. Defaults to `false`.
+* `verbositylevel` - (Optional, Editable) The level of message detail in the message log.
+  Valid values are `v`, `vv`, `vvv`, `vvvv`, `vvvvv`.
 * `version` - (Required) The version to install. Valid values are `3.6.23`, `4.0.28`, `4.2.23`, `4.4.17`, `5.0.13`.
 
 ### MongoDB database
@@ -437,7 +438,7 @@ the `mysql` block can contain the following arguments:
 * `class` - (Optional) The service class. Valid value is `database`. Defaults to `database`.
 * `connect_timeout` - (Optional) The number of seconds that the _mysqld_ server waits for a connect packet before responding with **Bad handshake**.
   Valid values are from 2 to 31536000.
-* `database` - (Optional) List of MySQL databases with parameters. The maximum number of databases is 1000.
+* `database` - (Optional, Editable) List of MySQL databases with parameters. The maximum number of databases is 1000.
   The structure of this block is [described below](#mysql-database).
 * `galera_options` - (Optional) Map containing other Galera parameters.
   Parameter names must be in camelCase. Values are strings.
@@ -500,8 +501,8 @@ This parameter is relevant for Percona 8.0, MySQL 8.0, and MariaDB 10.4, 10.5, 1
   Valid values are from 1 to 100000.
 * `max_heap_table_size` - (Optional) The maximum size in bytes to which user-created `MEMORY` tables are permitted to grow.
   Valid values are from 16384 (16 KiB) to 4294966272.
-* `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
-* `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `logging` - (Optional, Editable) The logging settings for the service. The structure of this block is [described below](#logging).
+* `monitoring` - (Optional, Editable) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
 * `options` - (Optional) Map containing other MySQL parameters.
   Parameter names must be in camelCase. Values are strings.
 
@@ -519,7 +520,7 @@ If you need to use such a parameter, contact [technical support].
 * `transaction_isolation` - (Optional) The transaction isolation level.
   For more information about the parameter, see the [MySQL documentation][doc-transaction_isolation].
   Valid values are `READ-UNCOMMITTED`, `READ-COMMITTED`, `REPEATABLE-READ`, `SERIALIZABLE`.
-* `user` - (Optional) List of MySQL users with parameters. The maximum number of users is 1000.
+* `user` - (Optional, Editable) List of MySQL users with parameters. The maximum number of users is 1000.
   The structure of this block is [described below](#mysql-user).
 * `vendor` - (Required) The engine vendor. Valid values are `mariadb`, `percona`, `mysql`.
 * `version` - (Required) The version to install. Valid values depend on `vendor`.
@@ -588,12 +589,12 @@ the `pgsql` block can contain the following arguments:
 * `autovacuum_vacuum_scale_factor` - (Optional) The fraction of the table size to add to `autovacuum_vacuum_threshold`
   when deciding whether to trigger a `VACUUM`. Valid values are from 0 to 100.
 * `class` - (Optional) The service class. Valid value is `database`. Defaults to `database`.
-* `database` - (Optional) List of PostgreSQL databases with parameters. The maximum number of databases is 1000.
+* `database` - (Optional, Editable) List of PostgreSQL databases with parameters. The maximum number of databases is 1000.
   The structure of this block is [described below](#postgresql-database).
 * `effective_cache_size` - (Optional) The planner’s assumption about the effective size of the disk cache
   that is available to a single query. Valid values are from 1 to 2147483647.
 * `effective_io_concurrency` - (Optional) The number of concurrent disk I/O operations. Valid values are from 0 to 1000.
-* `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
+* `logging` - (Optional, Editable) The logging settings for the service. The structure of this block is [described below](#logging).
 * `maintenance_work_mem` - (Optional) The maximum amount of memory in bytes (multiple of 1 KiB) used by maintenance operations,
   such as `VACUUM`, `CREATE INDEX`, and `ALTER TABLE ADD FOREIGN KEY`.
   Valid values are from 1 MiB to 2 GiB.
@@ -611,7 +612,7 @@ the `pgsql` block can contain the following arguments:
 * `min_wal_size` - (Optional) The minimum size in bytes (multiple of 1 MiB) to shrink the WAL to. As long as WAL disk usage stays below this setting,
   old WAL files are always recycled for future use at a checkpoint, rather than removed.
   Valid values are from 32 to 2147483647 MiB.
-* `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `monitoring` - (Optional, Editable) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
 * `options` - (Optional) Map containing other PostgreSQL parameters.
   Parameter names must be in camelCase. Values are strings.
 
@@ -622,7 +623,7 @@ If you need to use such a parameter, contact [technical support].
   The parameter must be set if `high_availability` is `true`. Valid values are `asynchronous`, `synchronous`, `synchronous_strict`.
 * `shared_buffers` - (Optional) The amount of memory in 8 KiB pages the database server uses for shared memory buffers.
   Valid values are from 16 to 1073741823.
-* `user` - (Optional) List of PostgreSQL users with parameters. The maximum number of users is 1000.
+* `user` - (Optional, Editable) List of PostgreSQL users with parameters. The maximum number of users is 1000.
   The structure of this block is [described below](#postgresql-user).
 * `version` - (Required) The version to install. Valid values are `10.21`, `11.16`, `12.11`, `13.7`, `14.4`, `15.2`.
 * `wal_buffers` - (Optional) The amount of shared memory in 8 KiB pages used for WAL data not yet written to a volume.
@@ -681,15 +682,15 @@ In addition to the common arguments for all services [described above](#argument
 the `rabbitmq` block can contain the following arguments:
 
 * `class` - (Optional) The service class. Valid value is `message_broker`. Defaults to `message_broker`.
-* `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
-* `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
-* `options` - (Optional) Map containing other RabbitMQ parameters.
+* `logging` - (Optional, Editable) The logging settings for the service. The structure of this block is [described below](#logging).
+* `monitoring` - (Optional, Editable) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - (Optional, Editable) Map containing other RabbitMQ parameters.
   Parameter names must be in camelCase. Values are strings.
 
 ~> If a parameter name includes a dot, it cannot be passed in the `options`.
 If you need to use such a parameter, contact [technical support].
 
-* `password` - (Required) The RabbitMQ admin password.
+* `password` - (Required, Editable) The RabbitMQ admin password.
   The value must be 8 to 128 characters long and must not contain `'`, `"`, `` ` `` and `\`.
 * `version` - (Required) The version to install. Valid values are `3.8.30`, `3.9.16`, `3.10.0`.
 
@@ -701,12 +702,12 @@ the `redis` block can contain the following arguments:
 * `class` - (Optional) The service class. Valid values are `cacher`, `database`. Defaults to `cacher`.
 * `cluster_type` - (Optional) The clustering option. Valid values are `native`, `sentinel`.
   The parameter must be set if `high_availability` is `true`.
-* `databases` - (Optional) The number of databases. Valid values are from 1 to 2147483647.
-* `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
-* `maxmemory_policy` - (Optional) The memory management mode.
+* `databases` - (Optional, Editable) The number of databases. Valid values are from 1 to 2147483647.
+* `logging` - (Optional, Editable) The logging settings for the service. The structure of this block is [described below](#logging).
+* `maxmemory_policy` - (Optional, Editable) The memory management mode.
   Valid values are `noeviction`, `allkeys-lru`, `allkeys-lfu`, `volatile-lru`, `volatile-lfu`, `allkeys-random`, `volatile-random`, `volatile-ttl`.
-* `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
-* `options` - (Optional) Map containing other Redis parameters.
+* `monitoring` - (Optional, Editable) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
+* `options` - (Optional, Editable) Map containing other Redis parameters.
   Parameter names must be in camelCase. Values are strings.
 
 ~> If a parameter name includes a dot, it cannot be passed in `options`.
@@ -714,12 +715,12 @@ If you need to use such a parameter, contact [technical support].
 
 * `password` - (Optional) The Redis user password.
   The value must be 8 to 128 characters long and must not contain `'`, `"`, `` ` `` and `\`.
-* `persistence_aof` - (Optional) Indicates whether the AOF storage mode is enabled. Defaults to `false`.
-* `persistence_rdb` - (Optional) Indicates whether the RDB storage mode is enabled. Defaults to `false`.
-* `timeout` - (Optional) The time in seconds during which the connection to an inactive client is retained.
+* `persistence_aof` - (Optional, Editable) Indicates whether the AOF storage mode is enabled. Defaults to `false`.
+* `persistence_rdb` - (Optional, Editable) Indicates whether the RDB storage mode is enabled. Defaults to `false`.
+* `timeout` - (Optional, Editable) The time in seconds during which the connection to an inactive client is retained.
   Valid values are from 0 to 2147483647.
-* `tcp_backlog` - (Optional) The size of a connection queue. Valid values are from 1 to 4096.
-* `tcp_keepalive` - (Optional) The time in seconds during which the service sends ACKs to detect dead peers (unreachable clients).
+* `tcp_backlog` - (Optional, Editable) The size of a connection queue. Valid values are from 1 to 4096.
+* `tcp_keepalive` - (Optional, Editable) The time in seconds during which the service sends ACKs to detect dead peers (unreachable clients).
   The value must be non-negative.
 * `version` - (Required) The version to install. Valid values are `5.0.14`, `6.2.6`, `7.0.11`.
 

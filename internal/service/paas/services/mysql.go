@@ -34,7 +34,6 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      10,
 			ValidateFunc: validation.IntBetween(2, 31536000),
 		},
 		"galera_options": {
@@ -84,7 +83,6 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         nullable.TypeNullableInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      strconv.FormatInt(128*Megabyte, 10),
 			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(5*Megabyte, math.MaxInt64),
 		},
 		"innodb_change_buffering": {
@@ -104,14 +102,12 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      1,
 			ValidateFunc: validation.IntBetween(0, 2),
 		},
 		"innodb_io_capacity": {
 			Type:         nullable.TypeNullableInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      strconv.FormatInt(200, 10),
 			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(100, math.MaxInt64),
 		},
 		"innodb_io_capacity_max": {
@@ -130,14 +126,12 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      2,
 			ValidateFunc: validation.IntBetween(2, 100),
 		},
 		"innodb_purge_threads": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      4,
 			ValidateFunc: validation.IntBetween(1, 32),
 		},
 		"innodb_thread_concurrency": {
@@ -171,21 +165,18 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         nullable.TypeNullableInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      strconv.FormatInt(100, 10),
 			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(1, math.MaxInt64),
 		},
 		"max_connections": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      151,
 			ValidateFunc: validation.IntBetween(1, 100000),
 		},
 		"max_heap_table_size": {
 			Type:         nullable.TypeNullableInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      strconv.FormatInt(16*Megabyte, 10),
 			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(16*Kilobyte, 4294966272),
 		},
 		"options": {
@@ -217,14 +208,12 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         nullable.TypeNullableInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      strconv.FormatInt(16*Megabyte, 10),
 			ValidateFunc: nullable.ValidateTypeStringNullableIntBetween(1*Kilobyte, 4294967295),
 		},
 		"transaction_isolation": {
 			Type:     schema.TypeString,
 			Optional: true,
 			ForceNew: true,
-			Default:  "REPEATABLE-READ",
 			ValidateFunc: validation.StringInSlice([]string{
 				"READ-UNCOMMITTED",
 				"READ-COMMITTED",
@@ -248,7 +237,6 @@ func (s mySQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      28800,
 			ValidateFunc: validation.IntBetween(1, 31536000),
 		},
 	}
@@ -429,12 +417,10 @@ func (s mySQLManager) databaseParametersSchema() map[string]*schema.Schema {
 		"charset": {
 			Type:     schema.TypeString,
 			Optional: true,
-			Default:  "utf8",
 		},
 		"collate": {
 			Type:     schema.TypeString,
 			Optional: true,
-			Default:  "utf8_unicode_ci",
 		},
 	}
 }

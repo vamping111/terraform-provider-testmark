@@ -33,14 +33,12 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeString,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      "ON",
 			ValidateFunc: validation.StringInSlice([]string{"ON", "OFF"}, false),
 		},
 		"autovacuum_max_workers": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      3,
 			ValidateFunc: validation.IntBetween(1, 262143),
 		},
 		"autovacuum_vacuum_cost_delay": {
@@ -56,7 +54,6 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:     schema.TypeInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  -1,
 			ValidateFunc: validation.Any(
 				validation.IntInSlice([]int{-1}),
 				validation.IntBetween(1, 10000),
@@ -66,35 +63,30 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeFloat,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      0.1,
 			ValidateFunc: validation.FloatBetween(0, 100),
 		},
 		"autovacuum_vacuum_scale_factor": {
 			Type:         schema.TypeFloat,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      0.2,
 			ValidateFunc: validation.FloatBetween(0, 100),
 		},
 		"effective_cache_size": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      524288,
 			ValidateFunc: validation.IntBetween(1, 2147483647),
 		},
 		"effective_io_concurrency": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      1,
 			ValidateFunc: validation.IntBetween(0, 1000),
 		},
 		"maintenance_work_mem": {
 			Type:     nullable.TypeNullableInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  strconv.FormatInt(64*Megabyte, 10),
 			ValidateFunc: validation.All(
 				nullable.ValidateTypeStringNullableIntBetween(1*Megabyte, 2*Gigabyte),
 				nullable.ValidateTypeStringNullableIntDivisibleBy(Kilobyte),
@@ -104,14 +96,12 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      100,
 			ValidateFunc: validation.IntBetween(1, 262143),
 		},
 		"max_wal_size": {
 			Type:     nullable.TypeNullableInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  strconv.FormatInt(1*Gigabyte, 10),
 			ValidateFunc: validation.All(
 				nullable.ValidateTypeStringNullableIntBetween(2*Megabyte, 2147483647*Megabyte),
 				nullable.ValidateTypeStringNullableIntDivisibleBy(Megabyte),
@@ -129,28 +119,24 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      8,
 			ValidateFunc: validation.IntBetween(0, 1024),
 		},
 		"max_parallel_workers_per_gather": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      2,
 			ValidateFunc: validation.IntBetween(0, 1024),
 		},
 		"max_worker_processes": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      8,
 			ValidateFunc: validation.IntBetween(0, 262143),
 		},
 		"min_wal_size": {
 			Type:     nullable.TypeNullableInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  strconv.FormatInt(80*Megabyte, 10),
 			ValidateFunc: validation.All(
 				nullable.ValidateTypeStringNullableIntBetween(32*Megabyte, 2147483647*Megabyte),
 				nullable.ValidateTypeStringNullableIntDivisibleBy(Megabyte),
@@ -176,7 +162,6 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      1024,
 			ValidateFunc: validation.IntBetween(16, 1073741823),
 		},
 		"version": {
@@ -210,7 +195,6 @@ func (s postgreSQLManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:     nullable.TypeNullableInt,
 			Optional: true,
 			ForceNew: true,
-			Default:  strconv.FormatInt(4*Megabyte, 10),
 			ValidateFunc: validation.All(
 				nullable.ValidateTypeStringNullableIntBetween(64*Kilobyte, 2147483647*Kilobyte),
 				nullable.ValidateTypeStringNullableIntDivisibleBy(Kilobyte),
@@ -354,7 +338,6 @@ func (s postgreSQLManager) databaseParametersSchema() map[string]*schema.Schema 
 		"encoding": {
 			Type:     schema.TypeString,
 			Optional: true,
-			Default:  "UTF8",
 		},
 		"extensions": {
 			Type:     schema.TypeSet,
@@ -367,7 +350,6 @@ func (s postgreSQLManager) databaseParametersSchema() map[string]*schema.Schema 
 		"locale": {
 			Type:         schema.TypeString,
 			Optional:     true,
-			Default:      "ru_RU.UTF-8",
 			ValidateFunc: validation.StringInSlice(postgreSQLDatabaseLocales(), false),
 		},
 		"owner": {

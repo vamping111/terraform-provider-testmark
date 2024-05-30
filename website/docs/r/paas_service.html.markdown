@@ -384,10 +384,10 @@ the `mongodb` block can contain the following arguments:
 * `class` - (Optional) The service class. Valid value is `database`. Defaults to `database`.
 * `database` - (Optional) List of MongoDB databases with parameters. The structure of this block is [described below](#mongodb-database).
 * `journal_commit_interval` - (Optional) The maximum interval in milliseconds between saving log data.
-  Valid values are from 1 to 500. Defaults to `100`.
+  Valid values are from 1 to 500.
 * `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
 * `maxconns` - (Optional) The maximum number of concurrent connections allowed for _mongos_ or _mongod_.
-  Valid values are from 10 to 51200. Defaults to `51200`.
+  Valid values are from 10 to 51200.
 * `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
 * `options` - (Optional) Map containing other MongoDB parameters.
   Parameter names must be in camelCase. Values are strings.
@@ -395,9 +395,9 @@ the `mongodb` block can contain the following arguments:
 ~> If a parameter name includes a dot, it cannot be passed in `options`.
 If you need to use such a parameter, contact [technical support].
 
-* `profile` - (Optional) Indicates which operations to profile. Valid values are `off`, `slowOp`, `all`. Defaults to `slowOp`.
+* `profile` - (Optional) Indicates which operations to profile. Valid values are `off`, `slowOp`, `all`.
 * `slowms` - (Optional) The operation time threshold in milliseconds, above which the operation is considered slow.
-  Valid values are from 0 to 36000000. Defaults to `100`.
+  Valid values are from 0 to 36000000.
 * `storage_engine_cache_size` - (Optional) The maximum size of internal cache in GiB used to store all data.
   A floating-point number. Valid values are greater or equal to `0.25`.
 * `user` - (Optional) List of MongoDB users with parameters. The structure of this block is [described below](#mongodb-user).
@@ -436,7 +436,7 @@ the `mysql` block can contain the following arguments:
 
 * `class` - (Optional) The service class. Valid value is `database`. Defaults to `database`.
 * `connect_timeout` - (Optional) The number of seconds that the _mysqld_ server waits for a connect packet before responding with **Bad handshake**.
-  Valid values are from 2 to 31536000. Defaults to `10`.
+  Valid values are from 2 to 31536000.
 * `database` - (Optional) List of MySQL databases with parameters. The maximum number of databases is 1000.
   The structure of this block is [described below](#mysql-database).
 * `galera_options` - (Optional) Map containing other Galera parameters.
@@ -469,11 +469,11 @@ This parameter is relevant for Percona 8.0, MySQL 8.0, and MariaDB 10.4, 10.5, 1
   when `innodb_buffer_pool_size` > 1 GiB. This parameter is relevant for Percona 5.7, 8.0 и MariaDB 10.2, 10.3, 10.4.
   Valid values are from 1 to 64.
 * `innodb_buffer_pool_size` - (Optional) The size in bytes of the buffer pool used to cache table data and indexes.
-  Valid values are from 5242880 (5 MiB) to 9223372036854775807. Defaults to `134217728` (128 MiB).
+  Valid values are from 5242880 (5 MiB) to 9223372036854775807.
 * `innodb_change_buffering` - (Optional) Operations for which change buffering optimization is enabled.
   Valid values are `inserts`, `deletes`, `changes`, `purges`, `all`, `none`.
 * `innodb_flush_log_at_trx_commit` - (Optional) The value of the parameter controls the behaviour for transaction commit operations.
-  Valid values are from 0 to 2. Defaults to `1`.
+  Valid values are from 0 to 2.
   For more information about the parameter, see the [MySQL documentation][doc-innodb_flush_log_at_trx_commit].
 * `innodb_io_capacity` - (Optional) The number of I/O operations per second (IOPS) available to InnoDB background tasks.
   Valid values are from 100 to 9223372036854775807. Defaults to `200`.
@@ -482,9 +482,9 @@ This parameter is relevant for Percona 8.0, MySQL 8.0, and MariaDB 10.4, 10.5, 1
 * `innodb_log_file_size` - (Optional) The size of a single file in bytes in the redo system log
   Valid values are from 4 MiB to 512 GiB.
 * `innodb_log_files_in_group` - (Optional) The number of system log files in a log group.
-  Valid values are from 2 to 100. Defaults to `2`.
+  Valid values are from 2 to 100.
 * `innodb_purge_threads` - (Optional) The number of background threads allocated for the InnoDB purge operation.
-  Valid values are from 1 to 32. Defaults to `4`.
+  Valid values are from 1 to 32.
 * `innodb_thread_concurrency` - (Optional) The maximum number of threads permitted inside of InnoDB.
   This parameter is relevant for Percona 5.7, 8.0 and MariaDB 10.2, 10.3, 10.4. Valid values are from 0 to 1000.
 * `innodb_strict_mode` - (Optional) The MySQL operation mode. Valid values are `ON`, `OFF`. Defaults to `OFF`.
@@ -495,11 +495,11 @@ This parameter is relevant for Percona 8.0, MySQL 8.0, and MariaDB 10.4, 10.5, 1
   or any parameter sent by the _mysql_stmt_send_long_data()_ C API function.
   Valid values are from 16 MiB to 1 GiB. Defaults to `16777216` (16 MiB).
 * `max_connect_errors` - (Optional) The maximum number of connection errors, at which the server blocks the host from further connections.
-  Valid values are from 1 to 9223372036854775807. Defaults to `100`.
+  Valid values are from 1 to 9223372036854775807.
 * `max_connections` - (Optional) The maximum permitted number of simultaneous client connections that a host can handle.
-  Valid values are from 1 to 100000. Defaults to `151`.
+  Valid values are from 1 to 100000.
 * `max_heap_table_size` - (Optional) The maximum size in bytes to which user-created `MEMORY` tables are permitted to grow.
-  Valid values are from 16384 (16 KiB) to 4294966272. Defaults to `16777216` (16 MiB).
+  Valid values are from 16384 (16 KiB) to 4294966272.
 * `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
 * `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
 * `options` - (Optional) Map containing other MySQL parameters.
@@ -515,10 +515,10 @@ If you need to use such a parameter, contact [technical support].
 * `thread_cache_size` - (Optional) The number of threads that the server caches to establish new network connections.
   Valid values are from 0 to 16 KiB.
 * `tmp_table_size` - (Optional) The maximum size of internal in-memory temporary tables in bytes.
-  Valid values are from 1024 to 4294967295. Defaults to `16777216` (16 MiB).
+  Valid values are from 1024 to 4294967295.
 * `transaction_isolation` - (Optional) The transaction isolation level.
   For more information about the parameter, see the [MySQL documentation][doc-transaction_isolation].
-  Valid values are `READ-UNCOMMITTED`, `READ-COMMITTED`, `REPEATABLE-READ`, `SERIALIZABLE`. Defaults to `REPEATABLE-READ`.
+  Valid values are `READ-UNCOMMITTED`, `READ-COMMITTED`, `REPEATABLE-READ`, `SERIALIZABLE`.
 * `user` - (Optional) List of MySQL users with parameters. The maximum number of users is 1000.
   The structure of this block is [described below](#mysql-user).
 * `vendor` - (Required) The engine vendor. Valid values are `mariadb`, `percona`, `mysql`.
@@ -527,7 +527,7 @@ If you need to use such a parameter, contact [technical support].
   `percona`: `5.7.38`, `8.0.28`.
   `mysql`: `5.7.41`, `8.0.32`.
 * `wait_timeout` - (Optional) The number of seconds the server waits for activity on a noninteractive connection before closing it.
-  Valid values are from 1 to 31536000. Defaults to `28800`.
+  Valid values are from 1 to 31536000.
 
 ### MySQL database
 
@@ -541,11 +541,9 @@ The `database` block has the following structure:
 * `charset` - (Optional) The database charset. Valid values depend on `vendor`.
   `mariadb`: see the [MariaDB documentation][doc-mariadb-charset-collate].
   `percona`, `mysql`: see the [MySQL documentation][doc-mysql-charset-collate].
-* Defaults to `utf8`.
 * `collate` - (Optional) The database collation. Valid values depend on `vendor`.
   `mariadb`: see the [MariaDB documentation][doc-mariadb-charset-collate].
   `percona`, `mysql`: see the [MySQL documentation][doc-mysql-charset-collate].
-  Defaults to `utf8_unicode_ci`.
 * `name` - (Required) The database name.
 * `user` - (Optional) List of database users with parameters. The maximum number of users is 1000.
   The structure of this block is [described below](#mysql-database-user).
@@ -578,41 +576,41 @@ In addition to the common arguments for all services [described above](#argument
 the `pgsql` block can contain the following arguments:
 
 * `autovacuum` - (Optional) Indicates whether the server must run the autovacuum launcher daemon.
-  Valid values are `ON`, `OFF`. Defaults to `ON`.
+  Valid values are `ON`, `OFF`.
 * `autovacuum_max_workers` - (Optional) The maximum number of autovacuum processes (other than the autovacuum launcher)
-  that can run simultaneously. Valid values are from 1 to 262143. Defaults to `3`.
+  that can run simultaneously. Valid values are from 1 to 262143.
 * `autovacuum_vacuum_cost_delay` - (Optional) The cost delay value in milliseconds used in automatic `VACUUM` operations.
   Valid values are `-1`, from 1 to 100.
 * `autovacuum_vacuum_cost_limit` - (Optional) The cost limit value used in automatic `VACUUM` operations.
-  Valid values are `-1`, from 1 to 10000. Defaults to `-1`.
+  Valid values are `-1`, from 1 to 10000.
 * `autovacuum_analyze_scale_factor` - (Optional) The fraction of the table size to add to `autovacuum_analyze_threshold`
-  when deciding whether to trigger an `ANALYZE`. Valid values are from 0 to 100. Defaults to `0.1`.
+  when deciding whether to trigger an `ANALYZE`. Valid values are from 0 to 100.
 * `autovacuum_vacuum_scale_factor` - (Optional) The fraction of the table size to add to `autovacuum_vacuum_threshold`
-  when deciding whether to trigger a `VACUUM`. Valid values are from 0 to 100. Defaults to `0.2`.
+  when deciding whether to trigger a `VACUUM`. Valid values are from 0 to 100.
 * `class` - (Optional) The service class. Valid value is `database`. Defaults to `database`.
 * `database` - (Optional) List of PostgreSQL databases with parameters. The maximum number of databases is 1000.
   The structure of this block is [described below](#postgresql-database).
 * `effective_cache_size` - (Optional) The planner’s assumption about the effective size of the disk cache
-  that is available to a single query. Valid values are from 1 to 2147483647. Defaults to `524288`.
-* `effective_io_concurrency` - (Optional) The number of concurrent disk I/O operations. Valid values are from 0 to 1000. Defaults to `1`.
+  that is available to a single query. Valid values are from 1 to 2147483647.
+* `effective_io_concurrency` - (Optional) The number of concurrent disk I/O operations. Valid values are from 0 to 1000.
 * `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
 * `maintenance_work_mem` - (Optional) The maximum amount of memory in bytes (multiple of 1 KiB) used by maintenance operations,
   such as `VACUUM`, `CREATE INDEX`, and `ALTER TABLE ADD FOREIGN KEY`.
-  Valid values are from 1 MiB to 2 GiB. Defaults to `67108864` (64 MiB).
+  Valid values are from 1 MiB to 2 GiB.
 * `max_connections` - (Optional) The maximum number of simultaneous connections to the database server.
-  Valid values are from 1 to 262143. Defaults to `100`.
+  Valid values are from 1 to 262143.
 * `max_wal_size` - (Optional) The maximum size in bytes (multiple of 1 MiB) that WAL can reach at automatic checkpoints.
-  Valid values are from 2 to 2147483647 MiB. Defaults to `83886080` (80 MiB).
+  Valid values are from 2 to 2147483647 MiB.
 * `max_parallel_maintenance_workers` - (Optional) The maximum number of parallel workers that a single utility command can start.
   This parameter is relevant only for PostgreSQL versions 11 and higher. Valid values are from 0 to 1024.
 * `max_parallel_workers` - (Optional) The maximum number of workers that the system can support for parallel operations.
 * `max_parallel_workers_per_gather` - (Optional) The maximum number of workers that a single _Gather_ node can start.
-  Valid values are from 0 to 1024. Defaults to `2`.
+  Valid values are from 0 to 1024.
 * `max_worker_processes` - (Optional) The maximum number of background processes that the system can support.
-  Valid values are from 0 to 262143. Defaults to `8`.
+  Valid values are from 0 to 262143.
 * `min_wal_size` - (Optional) The minimum size in bytes (multiple of 1 MiB) to shrink the WAL to. As long as WAL disk usage stays below this setting,
   old WAL files are always recycled for future use at a checkpoint, rather than removed.
-  Valid values are from 32 to 2147483647 MiB. Defaults to `83886080` (80 MiB).
+  Valid values are from 32 to 2147483647 MiB.
 * `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
 * `options` - (Optional) Map containing other PostgreSQL parameters.
   Parameter names must be in camelCase. Values are strings.
@@ -623,7 +621,7 @@ If you need to use such a parameter, contact [technical support].
 * `replication_mode` - (Optional) The replication mode in the _Patroni_ cluster.
   The parameter must be set if `high_availability` is `true`. Valid values are `asynchronous`, `synchronous`, `synchronous_strict`.
 * `shared_buffers` - (Optional) The amount of memory in 8 KiB pages the database server uses for shared memory buffers.
-  Valid values are from 16 to 1073741823. Defaults to `1024`.
+  Valid values are from 16 to 1073741823.
 * `user` - (Optional) List of PostgreSQL users with parameters. The maximum number of users is 1000.
   The structure of this block is [described below](#postgresql-user).
 * `version` - (Required) The version to install. Valid values are `10.21`, `11.16`, `12.11`, `13.7`, `14.4`, `15.2`.
@@ -634,7 +632,7 @@ If you need to use such a parameter, contact [technical support].
   This parameter is relevant only for PostgreSQL versions 10, 11, 12. Valid values are from 0 to 2147483647.
 * `work_mem` - (Optional) The base maximum amount of memory in bytes (multiple of 1 KiB) to be used by a query operation
   (such as a sort or hash table) before writing to temporary disk files.
-  Valid values are from 64 to 2147483647 KiB. Defaults to `4194304` (4 MiB).
+  Valid values are from 64 to 2147483647 KiB.
 
 ### PostgreSQL database
 
@@ -645,14 +643,14 @@ The `database` block has the following structure:
 * `backup_enabled` - (Optional) Indicates whether backup is enabled for the database. Defaults to `false`.
 * `backup_id` - (Optional) The database backup ID.
 * `backup_db_name` - (Optional) The name of a database from the backup specified in the `backup_id` parameter.
-* `encoding` - (Optional) The database encoding. Defaults to `UTF8`.
+* `encoding` - (Optional) The database encoding.
 * `extensions` - (Optional) List of extensions for the database. Valid values are
   `address_standardizer`, `address_standardizer_data_us`, `amcheck`, `autoinc`, `bloom`, `btree_gin`, `btree_gist`,
   `citext`, `cube`, `dblink`, `dict_int`, `dict_xsyn`, `earthdistance`, `fuzzystrmatch`, `hstore`, `intarray`, `isn`,
   `lo`, `ltree`, `moddatetime`, `pg_buffercache`, `pg_trgm`, `pg_visibility `, `pgcrypto`, `pgrowlocks`, `pgstattuple`,
   `postgis`, `postgis_tiger_geocoder`, `postgis_topology`, `postgres_fdw`, `seg`, `tablefunc`, `tcn`, `timescaledb`,
   `tsm_system_rows`, `tsm_system_time`, `unaccent`, `uuid-ossp`, `xml2`.
-* `locale` - (Optional) The database locale. Defaults to `ru_RU.UTF-8`.
+* `locale` - (Optional) The database locale.
 * `name` - (Required) The database name.
 * `owner` - (Required) The name of the user who is the database owner. This must be one of the existing users.
   Such a user cannot be deleted as long as it is the database owner.
@@ -707,7 +705,6 @@ the `redis` block can contain the following arguments:
 * `logging` - (Optional) The logging settings for the service. The structure of this block is [described below](#logging).
 * `maxmemory_policy` - (Optional) The memory management mode.
   Valid values are `noeviction`, `allkeys-lru`, `allkeys-lfu`, `volatile-lru`, `volatile-lfu`, `allkeys-random`, `volatile-random`, `volatile-ttl`.
-  Defaults to `noeviction`.
 * `monitoring` - (Optional) The monitoring settings for the service. The structure of this block is [described below](#monitoring).
 * `options` - (Optional) Map containing other Redis parameters.
   Parameter names must be in camelCase. Values are strings.
@@ -720,10 +717,10 @@ If you need to use such a parameter, contact [technical support].
 * `persistence_aof` - (Optional) Indicates whether the AOF storage mode is enabled. Defaults to `false`.
 * `persistence_rdb` - (Optional) Indicates whether the RDB storage mode is enabled. Defaults to `false`.
 * `timeout` - (Optional) The time in seconds during which the connection to an inactive client is retained.
-  Valid values are from 0 to 2147483647. Defaults to `0`.
-* `tcp_backlog` - (Optional) The size of a connection queue. Valid values are from 1 to 4096. Defaults to `511`.
+  Valid values are from 0 to 2147483647.
+* `tcp_backlog` - (Optional) The size of a connection queue. Valid values are from 1 to 4096.
 * `tcp_keepalive` - (Optional) The time in seconds during which the service sends ACKs to detect dead peers (unreachable clients).
-  The value must be non-negative. Defaults to `300`.
+  The value must be non-negative.
 * `version` - (Required) The version to install. Valid values are `5.0.14`, `6.2.6`, `7.0.11`.
 
 ## Common Service Argument Reference

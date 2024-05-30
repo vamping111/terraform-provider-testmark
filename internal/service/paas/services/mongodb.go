@@ -32,14 +32,12 @@ func (s mongoDBManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      100,
 			ValidateFunc: validation.IntBetween(1, 500),
 		},
 		"maxconns": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      51200,
 			ValidateFunc: validation.IntBetween(10, 51200),
 		},
 		"options": {
@@ -52,14 +50,12 @@ func (s mongoDBManager) serviceParametersSchema() map[string]*schema.Schema {
 			Type:         schema.TypeString,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      "slowOp",
 			ValidateFunc: validation.StringInSlice([]string{"off", "slowOp", "all"}, false),
 		},
 		"slowms": {
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ForceNew:     true,
-			Default:      100,
 			ValidateFunc: validation.IntBetween(0, 36000000),
 		},
 		"storage_engine_cache_size": {

@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/paas"
+	"github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2/tfawserr"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -583,6 +584,11 @@ func resourceServiceDelete(ctx context.Context, d *schema.ResourceData, meta int
 
 	log.Printf("[DEBUG] Deleting PaaS Service: %s", input)
 	_, err := conn.DeleteService(input)
+
+	if tfawserr.ErrCodeEquals(err, ServiceNotFoundCode) {
+		log.Printf("[WARN] PaaS Service (%s) not found, removing from state", id)
+		return nil
+	}
 
 	if err != nil {
 		return diag.Errorf("error deleting PaaS Service (%s): %s", id, err)

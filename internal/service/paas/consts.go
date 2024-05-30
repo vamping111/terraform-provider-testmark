@@ -14,6 +14,10 @@ const (
 )
 
 const (
+	ServiceNotFoundCode = "Document.NotFound"
+)
+
+const (
 	BackupStatusCreated = "CREATED"
 )
 

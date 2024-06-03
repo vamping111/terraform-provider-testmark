@@ -1,3 +1,17 @@
+## 24.0.1
+
+BUG FIXES:
+
+* resource/aws_paas_service: remove service from tfstate if it is not found when deleting
+* resource/aws_paas_service: update list of possible service statuses
+* resource/aws_paas_service: add proper type casting for `mongodb.storage_engine_cache_size` parameter
+
+ENHANCEMENTS:
+
+* resource/aws_paas_service: add examples for MongoDB, MySQL and RabbitMQ PaaS services to documentation
+* resource/aws_paas_service: remove default value for optional parameters
+* resource/aws_paas_service: add the ability to update service parameters for ElasticSearch, MongoDB, RabbitMQ and Redis PaaS services
+
 ## 24.0.0
 
 NOTES:

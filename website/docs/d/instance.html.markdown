@@ -60,6 +60,7 @@ are exported:
 ~> **NOTE:** Some values are not always set and may not be available for
 interpolation.
 
+* `affinity` - The affinity setting for an instance on a dedicated host.
 * `ami` - The ID of the image used to launch the instance.
 * `arn` - The ARN of the instance.
 * `associate_public_ip_address` - Whether the instance is associated with a public IP address or not.
@@ -75,6 +76,7 @@ interpolation.
     * `device_name` - The physical name of the device.
     * `no_device` - Whether the specified device included in the device mapping was suppressed or not.
     * `virtual_name` - The virtual device name.
+* `host_id` - The ID of the dedicated host that the instance will be assigned to.
 * `instance_state` - The state of the instance. One of: `pending`, `running`, `shutting-down`, `terminated`, `stopping`, `stopped`.
 * `instance_type` - The type of the instance.
 * `key_name` - The key name of the instance.
@@ -98,6 +100,7 @@ interpolation.
 * `user_data` - SHA-1 hash of user data supplied to the instance.
 * `user_data_base64` - Base64 encoded contents of User Data supplied to the instance. Valid UTF-8 contents can be decoded with the [`base64decode` function][base64decode-function]. This attribute is only exported if `get_user_data` is true.
 * `tags` - A map of tags assigned to the instance.
+* `tenancy` - The placement type.
 * `vpc_security_group_ids` - The associated security groups in a non-default VPC.
 
 ->  **Unsupported attributes**
@@ -111,7 +114,6 @@ These exported attributes are currently unsupported by CROC Cloud:
 * `ebs_optimized` - If true, the launched EC2 instance will be EBS-optimized. Always `false`.
 * `enclave_options` - Enable Nitro Enclaves on launched instances. Always empty.
 * `get_password_data` - (Optional) If true, wait for password data to become available and retrieve it. Useful for getting the administrator password for instances running Microsoft Windows. The password data is exported to the `password_data` attribute. See [GetPasswordData](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetPasswordData.html) for more information.
-* `host_id` - ID of a dedicated host that the instance will be assigned to. Always empty.
 * `iam_instance_profile` - IAM Instance Profile to launch the instance with. Always `""`.
 * `ipv6_addresses` - Specify one or more IPv6 addresses from the range of the subnet to associate with the primary network interface. Always empty.
 * `maintenance_options` - The maintenance and recovery options for the instance. Always empty.
@@ -130,4 +132,3 @@ These exported attributes are currently unsupported by CROC Cloud:
     * `encrypted` - Whether to enable volume encryption. Always `false`.
     * `kms_key_id` - The ARN of the KMS Key to use when encrypting the volume. Always `""`.
     * `throughput` - Throughput to provision for a volume in mebibytes per second (MiB/s). Always `0`.
-* `tenancy` - Tenancy of the instance (if the instance is running in a VPC). Always empty.

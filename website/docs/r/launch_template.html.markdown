@@ -129,8 +129,13 @@ The placement group of the instance.
 
 The `placement block supports the following:
 
+* `affinity` - (Optional) The affinity setting for an instance on a dedicated host. The parameter could be set to `host` only if `tenancy` is `host`.
 * `availability_zone` - The availability zone for the instance.
 * `group_name` - The name of the placement group for the instance.
+* `host_id` - (Optional) The ID of the dedicated host for the instance.
+* `tenancy` - (Optional) The tenancy of the instance (if the instance is running in a VPC). Valid values are `default`, `host`. Defaults to `default`.
+
+->**NOTE:** If you use the `host` value, you must provide the ID of the dedicated host in the `host_id` attribute and the availability zone of this dedicated host in the `availability_zone` attribute.
 
 ### Tag Specifications
 
@@ -230,11 +235,8 @@ These exported attributes are currently unsupported by CROC Cloud:
     * `ipv6_prefixes` - One or more IPv6 prefixes to be assigned to the network interface. Always empty.
     * `network_card_index` - The index of the network card. Some instance types support multiple network cards. Always `0`.
 * `placement`:
-    * `affinity` - The affinity setting for an instance on a Dedicated Host. Always `""`.
-    * `host_id` - The ID of the Dedicated Host for the instance. Always `""`.
     * `host_resource_group_arn` - The ARN of the Host Resource Group in which to launch instances. Always `""`.
     * `spread_domain` - Reserved for future use. Always `""`.
-    * `tenancy` - The tenancy of the instance (if the instance is running in a VPC). Always `""`.
     * `partition_number` - The number of the partition the instance should launch in. Always `0`.
 * `private_dns_name_options` - The options for the instance hostname. The default values are inherited from the subnet. Always empty.
     * `enable_resource_name_dns_aaaa_record` - Indicates whether to respond to DNS queries for instance hostnames with DNS AAAA records.

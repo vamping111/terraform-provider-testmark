@@ -418,26 +418,15 @@ func dataSourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 // Populate instance attribute fields with the returned instance
 func instanceDescriptionAttributes(d *schema.ResourceData, instance *ec2.Instance, conn *ec2.EC2, ignoreTagsConfig *tftags.IgnoreConfig) error {
 	d.SetId(aws.StringValue(instance.InstanceId))
+
 	// Set the easy attributes
 	d.Set("instance_state", instance.State.Name)
-	if instance.Placement.Affinity != nil {
-		d.Set("affinity", instance.Placement.Affinity)
-	}
-	if instance.Placement != nil {
-		d.Set("availability_zone", instance.Placement.AvailabilityZone)
-	}
-	if instance.Placement.GroupName != nil {
-		d.Set("placement_group", instance.Placement.GroupName)
-	}
-	if instance.Placement.PartitionNumber != nil {
-		d.Set("placement_partition_number", instance.Placement.PartitionNumber)
-	}
-	if instance.Placement.Tenancy != nil {
-		d.Set("tenancy", instance.Placement.Tenancy)
-	}
-	if instance.Placement.HostId != nil {
-		d.Set("host_id", instance.Placement.HostId)
-	}
+	d.Set("affinity", instance.Placement.Affinity)
+	d.Set("availability_zone", instance.Placement.AvailabilityZone)
+	d.Set("placement_group", instance.Placement.GroupName)
+	d.Set("placement_partition_number", instance.Placement.PartitionNumber)
+	d.Set("tenancy", instance.Placement.Tenancy)
+	d.Set("host_id", instance.Placement.HostId)
 
 	d.Set("ami", instance.ImageId)
 	d.Set("instance_type", instance.InstanceType)

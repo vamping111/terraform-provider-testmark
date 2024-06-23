@@ -73,7 +73,7 @@ In addition to all arguments above, the following attributes are exported:
 * `version_id` - Unique version ID value for the object, if bucket versioning is enabled.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `bucket_key_enabled` - Whether to use [Amazon S3 Bucket Keys](https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-key.html) for SSE-KMS. Always `false`.
 * `force_destroy` - Whether to allow the object to be deleted by removing any legal hold on any object version. This value should be set to `true` only if the bucket has S3 object lock enabled. Always `false`.

@@ -66,7 +66,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `owner_id` - ID of the CROC Cloud account that owns the DHCP options set.
 

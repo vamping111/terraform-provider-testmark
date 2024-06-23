@@ -58,7 +58,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the created image.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `snapshot_without_reboot` - Whether the behavior of stopping the instance before snapshotting is overrided. Always empty.
 

@@ -57,7 +57,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags` - A map of tags for the resource.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `data_encryption_key_id` - The data encryption key identifier for the snapshot. Always `""`.
 * `encrypted` - Whether the snapshot is encrypted. Always `false`.

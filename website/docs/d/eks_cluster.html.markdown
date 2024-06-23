@@ -43,7 +43,7 @@ data "aws_eks_cluster" "example" {
 * `tags` - Key-value map of resource tags.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `enabled_cluster_log_types` - The enabled control plane logs. Always empty.
 * `encryption_config` - Configuration block with encryption configuration for the cluster. Always empty.

@@ -140,7 +140,7 @@ In addition to all arguments above, the following attributes are exported:
 * `version` – Kubernetes version.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `ami_type` - Type of image associated with the EKS node group. Always `""`.
 * `force_update_version` - Force version update if existing pods are unable to be drained due to a pod disruption budget issue. Always empty.

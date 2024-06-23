@@ -79,7 +79,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags` - Key-value map of tags associated with Elastic IP.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_ip` - Carrier IP address. Always `""`.
 * `customer_owned_ip` - Customer owned IP. Always `""`.

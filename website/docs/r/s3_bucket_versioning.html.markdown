@@ -121,7 +121,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The `bucket`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
 * `mfa` - The concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device. Always empty.

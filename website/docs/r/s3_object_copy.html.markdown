@@ -68,7 +68,7 @@ In addition to all arguments above, the following attributes are exported:
 * `version_id` - Version ID of the newly created copy.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `cache_control` - Specifies caching behavior along the request/reply chain. Read [w3c cache_control] for further details. Always `""`.
 * `content_disposition` - Specifies presentational information for the object. Read [w3c content_disposition] for further information. Always `""`.

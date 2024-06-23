@@ -71,7 +71,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the security group rule.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `prefix_list_ids` - List of prefix list IDs (for allowing access to VPC endpoints). Always empty.
 

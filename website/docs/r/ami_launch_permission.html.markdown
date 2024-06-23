@@ -47,7 +47,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - Launch permission ID.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `organization_arn` - The ARN of an organization for the launch permission. Always `""`.
 * `organizational_unit_arn` - The ARN of an organizational unit for the launch permission. Always `""`.

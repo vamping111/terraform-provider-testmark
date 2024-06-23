@@ -48,7 +48,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the association
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `gateway_id` - Gateway ID to create an association. Always `""`.
 

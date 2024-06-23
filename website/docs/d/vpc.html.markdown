@@ -72,7 +72,7 @@ The following attribute is additionally exported:
 * `main_route_table_id` - ID of the main route table associated with this VPC.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `enable_dns_hostnames` - Whether the VPC has DNS hostname support. Always `true`.
 * `instance_tenancy` - The allowed tenancy of instances launched into the selected VPC. Always `default`.

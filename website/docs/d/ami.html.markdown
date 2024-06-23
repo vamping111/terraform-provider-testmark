@@ -89,7 +89,7 @@ interpolation.
 * `virtualization_type` - The type of virtualization of the image (ie: `hvm`).
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `boot_mode` - The boot mode of the image. Always `""`.
 * `creation_date` - The date and time the image was created. Always `""`.

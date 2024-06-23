@@ -63,7 +63,7 @@ For more information about filtering, see the [EC2 API documentation][describe-d
 * `tags` - A map of tags assigned to the resource.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `owner_id` - The ID of the CROC Cloud account that owns the DHCP options set.
 

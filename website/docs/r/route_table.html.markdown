@@ -107,7 +107,7 @@ attribute once the route resource is created.
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_gateway_id` - ID of a carrier gateway. Always `""`.
 * `destination_prefix_list_id` - ID of a managed prefix list destination of the route. Always `""`.

@@ -50,7 +50,7 @@ The following arguments are optional:
 * `transit_gateway_id` - (Optional) The ID of the transit gateway.
 
 ->  **Unsupported arguments**
-These arguments are currently unsupported by CROC Cloud:
+These arguments are currently unsupported:
 
 * `carrier_gateway_id` - ID of a carrier gateway. Always `""`.
 * `core_network_arn` - ARN of a core network. Always `""`.

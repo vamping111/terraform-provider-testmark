@@ -79,7 +79,7 @@ In addition to all arguments above, the following attributes are exported:
 * `vpc_owner_id` - The ID of CROC Cloud account that owns the VPC.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `appliance_mode_support` - Whether Appliance Mode support is enabled. Always empty.
 * `dns_support` - Whether DNS support is enabled. Always empty.

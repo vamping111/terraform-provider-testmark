@@ -63,7 +63,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - Map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `interface_type` - Type of network interface to create. Always `"interface"`.
 * `ipv4_prefix_count` - Number of IPv4 prefixes that AWS automatically assigns to the network interface. Always `0`.

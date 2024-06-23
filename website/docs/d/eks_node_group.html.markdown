@@ -50,7 +50,7 @@ data "aws_eks_node_group" "example" {
 * `version` – Kubernetes version.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `ami_type` - Type of image associated with the EKS node group. Always `""`.
 * `node_role_arn` – The ARN of the IAM Role that provides permissions for the EKS node group. Always `""`.

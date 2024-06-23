@@ -59,7 +59,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `data_encryption_key_id` - The data encryption key identifier for the snapshot. Always `""`.
 * `encrypted` - Whether the snapshot is encrypted. Always `false`.

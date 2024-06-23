@@ -158,7 +158,7 @@ In addition to all arguments above, the following attributes are exported:
 * `vpc_id` -  ID of the associated VPC
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `ipv6_cidr_block` - The IPv6 CIDR block. Always `""`.
 * `owner_id` - ID of the CROC Cloud account that owns the default network ACL. Always `""`.

@@ -48,7 +48,7 @@ Additionally, the following attributes are exported:
 * `vpc_id` - The ID of the VPC.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `interface_type` - The type of interface. Always `"interface"`.
 * `ipv6_addresses` - List of IPv6 addresses to assign to the ENI. Always empty.
@@ -65,7 +65,7 @@ These exported attributes are currently unsupported by CROC Cloud:
 * `public_ip` - The address of the elastic IP address bound to the network interface.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_ip` - The carrier IP address associated with the network interface. This attribute is only set when the network interface is in a subnet which is associated with a Wavelength Zone.
 

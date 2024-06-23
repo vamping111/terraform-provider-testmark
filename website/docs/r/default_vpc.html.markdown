@@ -44,7 +44,7 @@ In addition to all arguments above, the following attributes are exported:
 * `instance_tenancy` - The allowed tenancy of instances launched into the VPC
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `force_destroy` - Whether destroying the resource deletes the default VPC. Always: `false`.
 

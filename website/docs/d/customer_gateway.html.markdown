@@ -54,7 +54,7 @@ In addition to the arguments above, the following attributes are exported:
 * `type` - The type of customer gateway. Possible values: `ipsec.1`, `ipsec.legacy`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `certificate_arn` - The ARN for the customer gateway certificate. Always `""`.
 * `device_name` - A name for the customer gateway device. Always `""`.

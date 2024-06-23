@@ -79,7 +79,7 @@ In addition to all arguments above, the following attributes are exported:
     * `vpc_id` - The VPC associated with your cluster.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `enabled_cluster_log_types` - The enabled control plane logs. Always empty.
 * `encryption_config` - Configuration block with encryption configuration for the cluster. Always empty.

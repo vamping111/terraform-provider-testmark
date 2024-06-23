@@ -97,7 +97,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `ipv6_cidr_block` - The IPv6 CIDR block. Always `""`.
 * `owner_id` - ID of the CROC Cloud account that owns the Network ACL. Always `""`.

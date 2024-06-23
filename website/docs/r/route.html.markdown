@@ -54,7 +54,7 @@ In addition to all arguments above, the following attributes are exported:
 * `state` - The state of the route - `active` or `blackhole`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_gateway_id` - ID of a carrier gateway. Always `""`.
 * `core_network_arn` - ARN of a core network. Always `""`.

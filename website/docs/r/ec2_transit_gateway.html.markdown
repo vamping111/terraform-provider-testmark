@@ -51,7 +51,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - Map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `amazon_side_asn` - Private Autonomous System Number (ASN) for the Amazon side of a BGP session. Always `0`.
 * `arn` - The ARN of the transit gateway. Always `""`.

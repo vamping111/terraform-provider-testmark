@@ -70,7 +70,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the network ACL Rule
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `ipv6_cidr_block` - The IPv6 CIDR block. Always `""`.
 

@@ -215,7 +215,7 @@ For `root_block_device`, in addition to the arguments above, the following attri
 * `device_name` - Device name, e.g., `disk1`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `capacity_reservation_specification` - Describes an instance's Capacity Reservation targeting option. Always empty.
     * `capacity_reservation_preference` - Indicates the instance's Capacity Reservation preferences.

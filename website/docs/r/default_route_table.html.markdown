@@ -98,7 +98,7 @@ In addition to all arguments above, the following attributes are exported:
 * `vpc_id` - ID of the VPC.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `destination_prefix_list_id` - ID of a managed prefix list destination of the route. Always `""`.
 * `ipv6_cidr_block` - The Ipv6 CIDR block of the route. Always `""`.

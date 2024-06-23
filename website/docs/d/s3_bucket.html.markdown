@@ -37,7 +37,7 @@ In addition to all arguments above, the following attributes are exported:
 * `region` - The region this bucket resides in.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `bucket_domain_name` - The bucket domain name. Contains domain name of format `bucketname.s3.amazonaws.com`.
 * `bucket_regional_domain_name` - The bucket region-specific domain name. Contains domain name based on AWS region.

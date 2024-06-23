@@ -55,7 +55,7 @@ In addition to all arguments above, the following attributes are exported:
 * `names` - A list of the availability zone names available to the account.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `all_availability_zones` - Whether all availability zones and local zones are included regardless of your opt in status. Always empty.
 * `exclude_names` - List of availability zone names to exclude. Always empty.

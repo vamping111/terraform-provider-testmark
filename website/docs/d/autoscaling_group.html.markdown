@@ -40,7 +40,7 @@ data "aws_autoscaling_group" "example" {
 * `vpc_zone_identifier` - The IDs of the subnets in which instances are created.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `enabled_metrics` - The list of metrics enabled for collection. Always empty.
 * `health_check_type` - The service to use for the health checks. Always `""`.

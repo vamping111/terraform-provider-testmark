@@ -43,6 +43,6 @@ In addition to all arguments above, the following attributes are exported:
 * `ids` - List of transit gateway route table IDs.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `tags` - A mapping of tags, each pair of which must exactly match a pair on the desired transit gateway route table. Always empty.

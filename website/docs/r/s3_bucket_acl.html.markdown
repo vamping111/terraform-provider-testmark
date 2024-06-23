@@ -120,7 +120,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The `bucket` and `acl` (if configured) separated by commas (`,`).
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
 

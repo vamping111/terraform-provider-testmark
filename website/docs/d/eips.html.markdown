@@ -47,6 +47,6 @@ For more information about filtering, see the [EC2 API documentation][describe-a
 
 ## Attributes Reference
 
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `allocation_ids` - A list of all the allocation IDs.
 * `public_ips` - A list of all the Elastic IP addresses.

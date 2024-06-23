@@ -74,7 +74,7 @@ For more information about filtering, see the [EC2 API documentation][describe-n
 
 ## Attributes Reference
 
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - A list of all the network ACL ids found.
 
 [describe-network-acls]: https://docs.cloud.croc.ru/en/api/ec2/network_acls/DescribeNetworkAcls.html

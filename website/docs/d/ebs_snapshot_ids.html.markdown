@@ -42,5 +42,5 @@ For more information about filtering, see the [EC2 API documentation][describe-s
 
 ## Attributes Reference
 
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - Set of EBS snapshot IDs, sorted by creation time in descending order.

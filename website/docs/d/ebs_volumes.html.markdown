@@ -64,7 +64,7 @@ For more information about filtering, see the [EC2 API documentation][describe-v
 
 ## Attributes Reference
 
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - A set of all the EBS volume IDs found.
 
 [describe-volumes]: https://docs.cloud.croc.ru/en/api/ec2/volumes/DescribeVolumes.html

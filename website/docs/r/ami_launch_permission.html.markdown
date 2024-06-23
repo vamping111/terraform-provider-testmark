@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_ami_launch_permission"
+page_title: "aws_ami_launch_permission"
 description: |-
   Adds a launch permission to an Amazon Machine Image (AMI).
 ---

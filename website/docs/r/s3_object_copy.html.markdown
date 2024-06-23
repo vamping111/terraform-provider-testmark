@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_object_copy"
+page_title: "aws_s3_object_copy"
 description: |-
   Provides a resource for copying an S3 object.
 ---

@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_vpc_dhcp_options"
+page_title: "aws_vpc_dhcp_options"
 description: |-
   Retrieve information about an EC2 DHCP Options configuration
 ---

@@ -1,7 +1,7 @@
 ---
 subcategory: "ELB (Elastic Load Balancing)"
 layout: "aws"
-page_title: "AWS: aws_lb_target_group_attachment"
+page_title: "aws_lb_target_group_attachment"
 description: |-
   Provides the ability to register instances and containers with a LB
   target group

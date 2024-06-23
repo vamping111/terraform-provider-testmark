@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket_website_configuration"
+page_title: "aws_s3_bucket_website_configuration"
 description: |-
   Provides an S3 bucket website configuration resource.
 ---

@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "CROC Cloud: aws_launch_template"
+page_title: "aws_launch_template"
 description: |-
   Provides an EC2 launch template resource. Can be used to create instances or auto scaling groups.
 ---

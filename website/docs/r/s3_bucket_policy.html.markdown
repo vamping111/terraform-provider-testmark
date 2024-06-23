@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket_policy"
+page_title: "aws_s3_bucket_policy"
 description: |-
   Attaches a policy to an S3 bucket resource.
 ---

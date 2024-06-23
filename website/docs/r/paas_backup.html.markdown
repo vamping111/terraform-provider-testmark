@@ -1,7 +1,7 @@
 ---
 subcategory: "PaaS"
 layout: "aws"
-page_title: "CROC Cloud: aws_paas_backup"
+page_title: "aws_paas_backup"
 description: |-
   Manages a PaaS service backup.
 ---

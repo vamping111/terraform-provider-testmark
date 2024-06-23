@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "CROC Cloud: aws_volume_attachment"
+page_title: "aws_volume_attachment"
 description: |-
   Provides an EBS Volume Attachment
 ---

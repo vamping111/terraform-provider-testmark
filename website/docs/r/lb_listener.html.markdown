@@ -1,7 +1,7 @@
 ---
 subcategory: "ELB (Elastic Load Balancing)"
 layout: "aws"
-page_title: "AWS: aws_lb_listener"
+page_title: "aws_lb_listener"
 description: |-
   Provides a Load Balancer Listener resource.
 ---

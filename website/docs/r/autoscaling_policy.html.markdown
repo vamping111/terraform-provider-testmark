@@ -1,7 +1,7 @@
 ---
 subcategory: "Auto Scaling"
 layout: "aws"
-page_title: "AWS: aws_autoscaling_policy"
+page_title: "aws_autoscaling_policy"
 description: |-
   Provides an Auto Scaling Group resource.
 ---

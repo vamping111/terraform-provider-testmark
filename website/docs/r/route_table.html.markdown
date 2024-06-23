@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_route_table"
+page_title: "aws_route_table"
 description: |-
   Provides a resource to create a VPC routing table.
 ---

@@ -1,7 +1,7 @@
 ---
 subcategory: "VPN (Site-to-Site)"
 layout: "aws"
-page_title: "AWS: aws_customer_gateway"
+page_title: "aws_customer_gateway"
 description: |-
   Provides a customer gateway inside a VPC. These objects can be
   connected to VPN gateways via VPN connections, and allow you to

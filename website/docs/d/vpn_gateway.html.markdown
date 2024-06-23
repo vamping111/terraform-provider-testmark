@@ -1,7 +1,7 @@
 ---
 subcategory: "VPN (Site-to-Site)"
 layout: "aws"
-page_title: "AWS: aws_vpn_gateway"
+page_title: "aws_vpn_gateway"
 description: |-
     Provides details about a specific VPN gateway.
 ---

@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_eip_association"
+page_title: "aws_eip_association"
 description: |-
   Provides an AWS EIP Association
 ---

@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket_versioning"
+page_title: "aws_s3_bucket_versioning"
 description: |-
   Provides an S3 bucket versioning resource.
 ---

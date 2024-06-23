@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_network_acls"
+page_title: "aws_network_acls"
 description: |-
     Provides a list of network ACL ids for a VPC
 ---

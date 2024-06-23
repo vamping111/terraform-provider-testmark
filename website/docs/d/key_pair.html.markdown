@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_key_pair"
+page_title: "aws_key_pair"
 description: |-
     Provides details about a specific EC2 Key Pair.
 ---

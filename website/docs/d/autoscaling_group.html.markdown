@@ -1,7 +1,7 @@
 ---
 subcategory: "Auto Scaling"
 layout: "aws"
-page_title: "AWS: aws_autoscaling_group"
+page_title: "aws_autoscaling_group"
 description: |-
   Get information on an Auto Scaling Group.
 ---

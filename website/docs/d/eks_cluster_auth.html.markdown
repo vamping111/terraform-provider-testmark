@@ -1,7 +1,7 @@
 ---
 subcategory: "EKS (Elastic Kubernetes)"
 layout: "aws"
-page_title: "AWS: aws_eks_cluster_auth"
+page_title: "aws_eks_cluster_auth"
 description: |-
   Get an authentication token to communicate with an EKS Cluster
 ---

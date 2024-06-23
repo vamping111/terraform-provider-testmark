@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "AWS: aws_ebs_volumes"
+page_title: "aws_ebs_volumes"
 description: |-
     Provides identifying information for EBS volumes matching given criteria
 ---

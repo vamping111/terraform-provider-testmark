@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_network_acl_rule"
+page_title: "aws_network_acl_rule"
 description: |-
   Provides a network ACL Rule resource.
 ---

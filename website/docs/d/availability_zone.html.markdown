@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_availability_zone"
+page_title: "aws_availability_zone"
 description: |-
     Provides details about a specific availability zone
 ---

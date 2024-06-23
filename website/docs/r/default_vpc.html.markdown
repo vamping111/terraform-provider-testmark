@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_default_vpc"
+page_title: "aws_default_vpc"
 description: |-
   Manage a default VPC resource.
 ---

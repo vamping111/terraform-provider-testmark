@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "AWS: aws_ebs_snapshot_import"
+page_title: "aws_ebs_snapshot_import"
 description: |-
   Provides an elastic block storage snapshot import resource.
 ---

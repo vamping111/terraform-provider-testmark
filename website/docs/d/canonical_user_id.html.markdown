@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_canonical_user_id"
+page_title: "aws_canonical_user_id"
 description: |-
   Provides the canonical user ID (CROC Cloud S3 User ID) associated with the provider
   connection to CROC Cloud.

@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_network_interfaces"
+page_title: "aws_network_interfaces"
 description: |-
     Provides a list of network interface ids
 ---

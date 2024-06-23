@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_ec2_tag"
+page_title: "aws_ec2_tag"
 description: |-
   Manages an individual EC2 resource tag
 ---

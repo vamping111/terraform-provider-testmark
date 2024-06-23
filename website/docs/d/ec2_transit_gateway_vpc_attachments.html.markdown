@@ -1,7 +1,7 @@
 ---
 subcategory: "Transit Gateway"
 layout: "aws"
-page_title: "CROC Cloud: aws_ec2_transit_gateway_vpc_attachments"
+page_title: "aws_ec2_transit_gateway_vpc_attachments"
 description: |-
   Provides list of transit gateway VPC attachment IDs.
 ---

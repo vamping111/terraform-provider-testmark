@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "CROC Cloud: aws_ami"
+page_title: "aws_ami"
 description: |-
   Creates and manages a custom Amazon Machine Image (AMI).
 ---

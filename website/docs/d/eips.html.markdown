@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_eips"
+page_title: "aws_eips"
 description: |-
     Provides a list of Elastic IPs in a region
 ---

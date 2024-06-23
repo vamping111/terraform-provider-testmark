@@ -1,7 +1,7 @@
 ---
 subcategory: "EKS (Elastic Kubernetes)"
 layout: "aws"
-page_title: "CROC Cloud: aws_eks_cluster"
+page_title: "aws_eks_cluster"
 description: |-
   Retrieves information about an EKS cluster.
 ---

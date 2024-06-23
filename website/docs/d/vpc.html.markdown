@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_vpc"
+page_title: "aws_vpc"
 description: |-
     Provides details about a specific VPC
 ---

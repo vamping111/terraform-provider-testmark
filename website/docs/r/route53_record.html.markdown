@@ -1,7 +1,7 @@
 ---
 subcategory: "Route 53"
 layout: "aws"
-page_title: "CROC Cloud: aws_route53_record"
+page_title: "aws_route53_record"
 description: |-
   Provides a Route53 record resource.
 ---

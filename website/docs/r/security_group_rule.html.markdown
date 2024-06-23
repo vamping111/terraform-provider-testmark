@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_security_group_rule"
+page_title: "aws_security_group_rule"
 description: |-
   Provides a security group rule resource.
 ---

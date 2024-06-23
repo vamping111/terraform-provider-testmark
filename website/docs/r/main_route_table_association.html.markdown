@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_main_route_table_association"
+page_title: "aws_main_route_table_association"
 description: |-
   Provides a resource for managing the main routing table of a VPC.
 ---

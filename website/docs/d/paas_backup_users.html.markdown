@@ -1,7 +1,7 @@
 ---
 subcategory: "PaaS"
 layout: "aws"
-page_title: "CROC Cloud: aws_paas_backup_users"
+page_title: "aws_paas_backup_users"
 description: |-
   Provides information about users with the PaaS Backup User project privileges.
 ---

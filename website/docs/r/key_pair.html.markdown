@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_key_pair"
+page_title: "aws_key_pair"
 description: |-
   Provides a Key Pair resource. Currently this supports importing an existing key pair but not creating a new key pair.
 ---

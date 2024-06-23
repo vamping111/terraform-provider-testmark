@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_placement_group"
+page_title: "aws_placement_group"
 description: |-
   Provides an EC2 placement group.
 ---

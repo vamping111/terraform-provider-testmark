@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_ami_from_instance"
+page_title: "aws_ami_from_instance"
 description: |-
   Creates an Amazon Machine Image (AMI) from an EBS-backed EC2 instance
 ---

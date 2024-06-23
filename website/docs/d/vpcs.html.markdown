@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_vpcs"
+page_title: "aws_vpcs"
 description: |-
     Provides a list of VPC Ids in a region
 ---

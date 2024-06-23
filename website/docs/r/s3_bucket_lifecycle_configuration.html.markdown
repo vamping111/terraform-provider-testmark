@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket_lifecycle_configuration"
+page_title: "aws_s3_bucket_lifecycle_configuration"
 description: |-
   Provides a S3 bucket lifecycle configuration resource.
 ---

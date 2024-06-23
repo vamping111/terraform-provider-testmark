@@ -1,7 +1,7 @@
 ---
 subcategory: "Route 53"
 layout: "aws"
-page_title: "CROC Cloud: aws_route53_zone"
+page_title: "aws_route53_zone"
 description: |-
   Manages a Route53 Hosted Zone
 ---

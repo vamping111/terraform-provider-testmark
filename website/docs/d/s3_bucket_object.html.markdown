@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket_object"
+page_title: "aws_s3_bucket_object"
 description: |-
     Provides metadata and optionally content of an S3 object
 ---

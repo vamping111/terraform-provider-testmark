@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_ami_ids"
+page_title: "aws_ami_ids"
 description: |-
   Provides a list of image IDs.
 ---

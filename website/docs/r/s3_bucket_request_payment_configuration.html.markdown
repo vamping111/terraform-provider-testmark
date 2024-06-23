@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "AWS: aws_s3_bucket_request_payment_configuration"
+page_title: "aws_s3_bucket_request_payment_configuration"
 description: |-
   Provides an S3 bucket request payment configuration resource.
 ---

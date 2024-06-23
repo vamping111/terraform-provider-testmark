@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_network_interface"
+page_title: "aws_network_interface"
 description: |-
   Get information on a Network Interface resource.
 ---

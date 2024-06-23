@@ -1,7 +1,7 @@
 ---
 subcategory: "EKS (Elastic Kubernetes)"
 layout: "aws"
-page_title: "CROC Cloud: aws_eks_node_group"
+page_title: "aws_eks_node_group"
 description: |-
   Manages an EKS node group.
 ---

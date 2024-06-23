@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "CROC Cloud: aws_instances"
+page_title: "aws_instances"
 description: |-
   Provides information about an EC2 instances.
 ---

@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_subnet"
+page_title: "aws_subnet"
 description: |-
     Provides details about a specific VPC subnet
 ---

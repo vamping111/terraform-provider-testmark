@@ -1,7 +1,7 @@
 ---
 subcategory: "PaaS"
 layout: "aws"
-page_title: "CROC Cloud: aws_paas_backups"
+page_title: "aws_paas_backups"
 description: |-
   Provides list of PaaS service backups IDs.
 ---

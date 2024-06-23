@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "CROC Cloud: aws_ebs_snapshot_ids"
+page_title: "aws_ebs_snapshot_ids"
 description: |-
   Provides a list of EBS snapshot IDs.
 ---

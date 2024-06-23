@@ -1024,7 +1024,7 @@ func resourceLaunchTemplateRead(d *schema.ResourceData, meta interface{}) error 
 
 	tags := KeyValueTags(lt.Tags).IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}
@@ -1977,7 +1977,7 @@ func expandLaunchTemplateInstanceNetworkInterfaceSpecificationRequest(tfMap map[
 		apiObject.Ipv6Prefixes = expandIPv6PrefixSpecificationRequests(v.List())
 	}
 
-	// CROC Cloud API does not support `NetworkCardIndex` parameter
+	// С2 API does not support `NetworkCardIndex` parameter
 	// if v, ok := tfMap["network_card_index"].(int); ok {
 	// 	apiObject.NetworkCardIndex = aws.Int64(int64(v))
 	// }

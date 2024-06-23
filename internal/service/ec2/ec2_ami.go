@@ -250,7 +250,7 @@ func ResourceAMI() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				// FIXME: Enable forced replacement on new value
-				// when CROC Cloud API supports the `SriovNetSupport` parameter
+				// when C2 API supports the `SriovNetSupport` parameter
 				ForceNew: false,
 				Default:  "simple",
 			},
@@ -434,7 +434,7 @@ func resourceAMIRead(d *schema.ResourceData, meta interface{}) error {
 
 	tags := KeyValueTags(image.Tags).IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}

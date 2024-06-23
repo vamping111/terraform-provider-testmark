@@ -100,7 +100,7 @@ In addition to all arguments above, the following attributes are exported:
 These exported attributes are currently unsupported:
 
 * `ipv6_cidr_block` - The IPv6 CIDR block. Always `""`.
-* `owner_id` - ID of the CROC Cloud account that owns the Network ACL. Always `""`.
+* `owner_id` - The ID of the project that owns the Network ACL. Always `""`.
 
 ## Import
 

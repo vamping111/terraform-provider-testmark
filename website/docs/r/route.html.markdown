@@ -49,7 +49,7 @@ In addition to all arguments above, the following attributes are exported:
 ~> **NOTE:** Only the arguments that are configured (one of the above) will be exported as an attribute once the resource is created.
 
 * `id` - Route identifier computed from the routing table identifier and route destination.
-* `instance_owner_id` - The CROC Cloud project ID that owns the EC2 instance.
+* `instance_owner_id` - The project ID that owns the EC2 instance.
 * `origin` - How the route was created - `CreateRouteTable`, `CreateRoute` or `EnableVgwRoutePropagation`.
 * `state` - The state of the route - `active` or `blackhole`.
 

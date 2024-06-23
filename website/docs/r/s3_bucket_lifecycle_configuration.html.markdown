@@ -34,7 +34,7 @@ The lifecycle rule applies to a subset of objects based on the key name prefix (
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the prepared provider configuration to connect to S3
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -199,7 +199,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
 resource "aws_s3_bucket" "versioning_bucket" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the prepared provider configuration to connect to S3
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }

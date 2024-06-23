@@ -78,7 +78,7 @@ These exported attributes are currently unsupported:
 ## Import
 
 -> **Unsupported operation**
-Import security group rules is currently unsupported by CROC Cloud
+Import security group rules is currently unsupported.
 
 Security group rules can be imported using the `security_group_id`, `type`, `protocol`, `from_port`, `to_port`, and source(s)/destination(s) (e.g., `cidr_block`) separated by underscores (`_`). All parts are required.
 

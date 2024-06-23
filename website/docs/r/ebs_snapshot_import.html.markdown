@@ -62,7 +62,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `arn` - Amazon Resource Name (ARN) of the EBS snapshot.
 * `id` - The snapshot ID (e.g., snap-12345678).
-* `owner_id` - The CROC Cloud project ID.
+* `owner_id` - The project ID.
 * `owner_alias` - The alias of the EBS snapshot owner.
 * `volume_size` - The size of the drive in GiB.
 * `tags_all` - A map of tags assigned to the resource.

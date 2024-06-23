@@ -64,7 +64,7 @@ In addition to the arguments above, the following attributes are exported:
 ->  **Unsupported attributes**
 These attributes are currently unsupported:
 
-* `owner_id` - ID of the CROC Cloud account that owns the route table. Always `""`.
+* `owner_id` - The ID of the project that owns the route table. Always `""`.
 
 ### routes
 

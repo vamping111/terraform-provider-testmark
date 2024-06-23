@@ -3,14 +3,12 @@ subcategory: "S3 (Simple Storage)"
 layout: "aws"
 page_title: "aws_canonical_user_id"
 description: |-
-  Provides the canonical user ID (CROC Cloud S3 User ID) associated with the provider
-  connection to CROC Cloud.
+  Provides the canonical user ID (S3 User ID) associated with the used account.
 ---
 
 # Data Source: aws_canonical_user_id
 
-The Canonical User ID data source allows access to the CROC Cloud S3 User ID
-for the effective account in which Terraform is working.  
+Provides the canonical user ID (S3 User ID) associated with the used account
 
 ~> **NOTE:** To use this data source, you must have the `s3:ListAllMyBuckets` permission.
 
@@ -32,5 +30,5 @@ There are no arguments available for this data source.
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The canonical user ID (CROC Cloud S3 User ID) associated with the provider connection to CROC Cloud.
+* `id` - The canonical user ID (S3 User ID) associated with the used account.
 * `display_name` - The human-friendly name linked to the canonical user ID. The bucket owner's display name.

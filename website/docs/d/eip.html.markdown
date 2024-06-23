@@ -72,7 +72,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - If VPC Elastic IP, the allocation identifier.
 * `instance_id` - The ID of the instance that the address is associated with (if any).
 * `network_interface_id` - The ID of the network interface.
-* `network_interface_owner_id` - The ID of the CROC Cloud project that owns the network interface.
+* `network_interface_owner_id` - The ID of the project that owns the network interface.
 * `private_ip` - The private IP address associated with the Elastic IP address.
 * `public_ip` - Public IP address of Elastic IP.
 * `public_ipv4_pool` - The ID of an address pool.

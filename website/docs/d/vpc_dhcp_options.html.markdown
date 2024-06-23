@@ -65,6 +65,6 @@ For more information about filtering, see the [EC2 API documentation][describe-d
 ->  **Unsupported attributes**
 These exported attributes are currently unsupported:
 
-* `owner_id` - The ID of the CROC Cloud account that owns the DHCP options set.
+* `owner_id` -The ID of the project that owns the DHCP options. Always `""`.
 
 [describe-dhcp-options]: https://docs.cloud.croc.ru/en/api/ec2/dhcp_options/DescribeDhcpOptions.html

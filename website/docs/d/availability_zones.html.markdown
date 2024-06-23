@@ -3,13 +3,12 @@ subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
 page_title: "aws_availability_zones"
 description: |-
-    Provides a list of availability zones which can be used by an AWS account.
+    Provides a list of availability zones.
 ---
 
 # Data Source: aws_availability_zones
 
-The availability zones data source allows access to the list of CROC Cloud
-availability zones which can be accessed by an CROC Cloud account.
+Provides a list of availability zones.
 
 This is different from the [`aws_availability_zone`][tf-availability-zone] (singular) data source,
 which provides some details about a specific availability zone.

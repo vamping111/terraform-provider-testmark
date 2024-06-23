@@ -25,7 +25,7 @@ For more information about access rights for buckets, see [user documentation][a
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the prepared provider configuration to connect to S3
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -44,7 +44,7 @@ data "aws_canonical_user_id" "current" {}
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the prepared provider configuration to connect to S3
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -108,8 +108,8 @@ The `owner` configuration block supports the following arguments:
 
 The `grantee` configuration block supports the following arguments:
 
-* `email_address` - (Optional) Email address of the grantee (CROC Cloud S3 Project email). Used only when `type` is `AmazonCustomerByEmail`.
-* `id` - (Optional) The canonical user ID of the grantee (CROC Cloud S3 User ID). Used only when `type` is `CanonicalUser`.
+* `email_address` - (Optional) Email address of the grantee (S3 Project email). Used only when `type` is `AmazonCustomerByEmail`.
+* `id` - (Optional) The canonical user ID of the grantee (S3 User ID). Used only when `type` is `CanonicalUser`.
 * `type` - (Required) Type of grantee. Valid values: `CanonicalUser`, `AmazonCustomerByEmail`, `Group`.
 * `uri` - (Optional) URI of the grantee group. Supported groups are `http://acs.amazonaws.com/groups/global/AllUsers` and `http://acs.amazonaws.com/groups/global/AuthenticatedUsers`. Used only when `type` is `Group`.
 

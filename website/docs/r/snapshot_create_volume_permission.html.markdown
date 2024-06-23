@@ -33,7 +33,7 @@ resource "aws_ebs_snapshot" "example_snapshot" {
 The following arguments are supported:
 
 * `snapshot_id` - (required) A snapshot ID.
-* `account_id` - (required) The CROC Cloud project ID (`project@customer`).
+* `account_id` - (required) The project ID (`project@customer`).
 
 ## Attributes Reference
 

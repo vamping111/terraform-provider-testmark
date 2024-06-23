@@ -22,7 +22,7 @@ For more information about network ACLs, see the documentation on [network ACL][
 
 ### Basic Example
 
-The following config gives the Default Network ACL the same rules that CROC Cloud includes but pulls the resource under management by Terraform. This means that any ACL rules added or changed will be detected as drift.
+The following config gives the Default Network ACL the same rules that the cloud includes but pulls the resource under management by Terraform. This means that any ACL rules added or changed will be detected as drift.
 
 ```terraform
 resource "aws_vpc" "mainvpc" {
@@ -113,13 +113,14 @@ resource "aws_default_network_acl" "default" {
 
 ### Removing `aws_default_network_acl` From Your Configuration
 
-Each VPC comes with a default network ACL that cannot be deleted. The `aws_default_network_acl` allows you to manage this Network ACL, but Terraform cannot destroy it. Removing this resource from your configuration will remove it from your statefile and management, **but will not destroy the Network ACL.** All Subnets associations and ingress or egress rules will be left as they are at the time of removal. You can resume managing them via the CROC Cloud Console.
+Each VPC comes with a default network ACL that cannot be deleted. The `aws_default_network_acl` allows you to manage this Network ACL, but Terraform cannot destroy it. Removing this resource from your configuration will remove it from your statefile and management, **but will not destroy the Network ACL.** All Subnets associations and ingress or egress rules will be left as they are at the time of removal. You can resume managing them via the cloud console.
 
 ## Argument Reference
 
 The following arguments are required:
 
-* `default_network_acl_id` - (Required) Network ACL ID to manage. This attribute is exported from `aws_vpc`, or manually found via the CROC Cloud Console.
+* `default_network_acl_id` - (Required) Network ACL ID to manage.
+  This attribute is exported from `aws_vpc`, or manually found via the cloud console.
 
 The following arguments are optional:
 
@@ -161,7 +162,7 @@ In addition to all arguments above, the following attributes are exported:
 These exported attributes are currently unsupported:
 
 * `ipv6_cidr_block` - The IPv6 CIDR block. Always `""`.
-* `owner_id` - ID of the CROC Cloud account that owns the default network ACL. Always `""`.
+* `owner_id` - The ID of the project that owns the default network ACL. Always `""`.
 
 ## Import
 

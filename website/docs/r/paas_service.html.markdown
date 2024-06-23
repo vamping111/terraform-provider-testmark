@@ -272,7 +272,7 @@ resource "aws_subnet" "subnet_comp1p" {
 resource "aws_s3_bucket" "example" {
   bucket = "tf-paas-backup"
 
-  # Use the predefined provider configuration to connect to CROC Cloud object storage
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -894,7 +894,7 @@ The `monitoring` block has the following structure:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `auto_created_security_group_ids` - List of security group IDs that CROC Cloud created for the service.
+* `auto_created_security_group_ids` - List of security group IDs that the cloud created for the service.
 * `endpoints` - List of endpoints for connecting to the service.
 * `error_code` - The service error code.
 * `error_description` - The detailed description of the service error.

@@ -32,7 +32,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `auto_created_security_group_ids` - List of security group IDs that CROC Cloud created for the service.
+* `auto_created_security_group_ids` - List of security group IDs that cloud created for the service.
 * `backup_settings` - The backup settings for the service. The structure of this block is [described below](#backup_settings).
 * `data_volume` - The data volume parameters for the service. The structure of this block is [described below](#data_volume).
 * `endpoints` - List of endpoints for connecting to the service.

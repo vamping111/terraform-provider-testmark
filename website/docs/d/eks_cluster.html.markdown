@@ -36,7 +36,7 @@ data "aws_eks_cluster" "example" {
 * `status` - The status of the EKS cluster. One of `CLAIMED`, `CREATING`, `DELETED`, `DELETING`, `ERROR`, `MODIFYING`, `PENDING`, `PROVISIONING`, `READY`, `REPAIRING`.
 * `version` - The Kubernetes server version for the cluster.
 * `vpc_config` - Nested list containing VPC configuration for the cluster.
-    * `cluster_security_group_id` - The cluster security group that was created by CROC Cloud EKS for the cluster.
+    * `cluster_security_group_id` - The cluster security group that was created by the cloud for the cluster.
     * `security_group_ids` – List of security group IDs.
     * `subnet_ids` – List of subnet IDs.
     * `vpc_id` – The VPC associated with your cluster.

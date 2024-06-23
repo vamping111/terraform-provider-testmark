@@ -68,7 +68,7 @@ In addition to all arguments above, the following attributes are exported:
 ->  **Unsupported attributes**
 These exported attributes are currently unsupported:
 
-* `owner_id` - ID of the CROC Cloud account that owns the DHCP options set.
+* `owner_id` - The ID of the project that owns the DHCP options set.
 
 ## Import
 

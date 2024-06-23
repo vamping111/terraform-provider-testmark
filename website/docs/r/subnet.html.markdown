@@ -62,7 +62,7 @@ These exported attributes are currently unsupported:
 * `map_customer_owned_ip_on_launch` - Whether customer owned IP addresses are assigned on network interface creation. Always `false`.
 * `map_public_ip_on_launch` - Whether public IP addresses are assigned on instance launch. Always `false`.
 * `outpost_arn` - ARN of the Outpost. Always `""`.
-* `owner_id` - ID of the CROC Cloud account that owns the subnet. Always `""`.
+* `owner_id` - The ID of the project that owns the subnet. Always `""`.
 * `private_dns_hostname_type_on_launch` - The type of hostnames assigned to instances in the subnet at launch. Always `""`.
 
 ## Timeouts

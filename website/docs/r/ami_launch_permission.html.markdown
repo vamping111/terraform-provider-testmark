@@ -24,7 +24,7 @@ resource "aws_ami_launch_permission" "example" {
 ### Public Access
 
 ```terraform
-# CROC Cloud currently restricts adding public access permissions to images. 
+# The cloud currently restricts adding public access permissions to images.
 # Applying the resource must throw an error.
 resource "aws_ami_launch_permission" "example" {
   image_id = "cmi-12345678"
@@ -36,7 +36,7 @@ resource "aws_ami_launch_permission" "example" {
 
 The following arguments are supported:
 
-* `account_id` - (Optional) The CROC Cloud project ID for the launch permission.
+* `account_id` - (Optional) The project ID (`project@customer`) for the launch permission.
 * `group` - (Optional) The name of the group for the launch permission. Valid values: `"all"`.
 * `image_id` - (Required) The ID of the image.
 
@@ -55,7 +55,7 @@ These exported attributes are currently unsupported:
 ## Import
 
 -> **Unsupported operation**
-Import image launch permission is currently unsupported by CROC Cloud
+Import image launch permission is currently unsupported.
 
 Image launch permissions can be imported using `[ACCOUNT-ID|GROUP-NAME]/IMAGE-ID`, e.g.,
 

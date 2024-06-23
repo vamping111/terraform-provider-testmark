@@ -75,7 +75,7 @@ In addition to all arguments above, the following attributes are exported:
 * `status` - The status of the EKS cluster. One of `CLAIMED`, `CREATING`, `DELETED`, `DELETING`, `ERROR`, `MODIFYING`, `PENDING`, `PROVISIONING`, `READY`, `REPAIRING`.
 * `tags_all` - Map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 * `vpc_config` -  Nested list containing VPC configuration for the cluster.
-    * `cluster_security_group_id` - The cluster security group that was created by CROC Cloud EKS for the cluster.
+    * `cluster_security_group_id` - The cluster security group that was created by the cloud for the cluster.
     * `vpc_id` - The VPC associated with your cluster.
 
 ->  **Unsupported attributes**

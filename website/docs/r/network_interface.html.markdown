@@ -58,7 +58,7 @@ In addition to all arguments above, the following attributes are exported:
 * `arn` - ARN of the network interface.
 * `id` - ID of the network interface.
 * `mac_address` - MAC address of the network interface.
-* `owner_id` - The CROC Cloud project ID.
+* `owner_id` - The project ID.
 * `private_dns_name` - Private DNS name of the network interface (IPv4).
 * `tags_all` - Map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 

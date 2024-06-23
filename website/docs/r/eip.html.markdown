@@ -85,7 +85,7 @@ case both options are defined as the api only requires one or the other.
 
 In addition to all arguments above, the following attributes are exported:
 
-* `allocation_id` - ID that CROC Cloud assigns to represent the allocation of the elastic IP address for use with instances in a VPC.
+* `allocation_id` - ID that the cloud assigns to represent the allocation of the elastic IP address for use with instances in a VPC.
 * `association_id` - ID representing the association of the address with an instance in a VPC.
 * `domain` - Indicates if this EIP is for use in VPC (`vpc`).
 * `id` - Contains the EIP allocation ID.

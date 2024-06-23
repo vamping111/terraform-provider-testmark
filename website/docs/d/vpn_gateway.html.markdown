@@ -11,7 +11,7 @@ description: |-
 The VPN Gateway data source provides details about
 a specific VPN gateway.
 
--> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+-> The terms VPC, Internet Gateway, VPN Gateway are equivalent
 
 ## Example Usage
 

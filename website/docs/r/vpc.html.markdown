@@ -71,7 +71,7 @@ These exported attributes are currently unsupported:
 * `ipv6_cidr_block_network_border_group` - The Network Border Group Zone name. Always `""`.
 * `ipv6_ipam_pool_id` - IPAM Pool ID for a IPv6 pool. Always `""`.
 * `ipv6_netmask_length` - Netmask length to request from IPAM Pool. Always `0`.
-* `owner_id` - The ID of the CROC Cloud account that owns the VPC. Always `""`.
+* `owner_id` - The ID of the project that owns the VPC. Always `""`.
 
 ## Import
 

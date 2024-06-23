@@ -34,9 +34,10 @@ data "aws_ebs_snapshot" "ebs_snapshot" {
 The following arguments are supported:
 
 * `most_recent` - (Optional) If more than one result is returned, use the most recent snapshot.
-* `owners` - (Optional) Returns the snapshots owned by the specified owner ID. Multiple owners can be specified.
+* `owners` - (Optional) List of the snapshot owners. Valid items are the project ID (`project@customer`) or `self`.  
 * `snapshot_ids` - (Optional) Returns information on a specific snapshot ID.
-* `restorable_by_user_ids` - (Optional) One or more CROC Cloud project IDs that can create volumes from the snapshot.
+* `restorable_by_user_ids` - (Optional) List of the project IDs (`project@customer`).
+  that can create volumes from the snapshot.
 * `filter` - (Optional) One or more name/value pairs to filter.
 
 For more information about filtering, see the [EC2 API documentation][describe-snapshots].
@@ -49,7 +50,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The snapshot ID (e.g., snap-12345678).
 * `snapshot_id` - The snapshot ID (e.g., snap-12345678).
 * `description` - A description for the snapshot
-* `owner_id` - The CROC Cloud project ID.
+* `owner_id` - The project ID.
 * `owner_alias` - The alias of the EBS snapshot owner.
 * `volume_id` - The volume ID (e.g., vol-12345678).
 * `volume_size` - The size of the drive in GiB.

@@ -12,7 +12,7 @@ Get an existing customer gateway.
 
 ## Example Usage
 
--> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+-> The terms VPC, Internet Gateway, VPN Gateway are equivalent.
 
 ```terraform
 data "aws_customer_gateway" "selected" {

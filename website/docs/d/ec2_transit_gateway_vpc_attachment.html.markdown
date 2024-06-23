@@ -56,7 +56,7 @@ In addition to all arguments above, the following attributes are exported:
 * `transit_gateway_id` - The ID of the transit gateway.
 * `tags` - Map of tags assigned to the transit gateway VPC attachment.
 * `vpc_id` - The ID of the VPC.
-* `vpc_owner_id` - The ID of CROC Cloud account that owns the VPC.
+* `vpc_owner_id` - The ID of the project that owns the VPC.
 
 ->  **Unsupported attributes**
 These attributes are currently unsupported:

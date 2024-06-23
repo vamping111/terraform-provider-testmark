@@ -38,7 +38,7 @@ The following arguments are still supported:
 
 * `netbios_name_servers` - (Optional) List of NETBIOS name servers.
 * `netbios_node_type` - (Optional) The NetBIOS node type (1, 2, 4, or 8). AWS recommends to specify 2 since broadcast and multicast are not supported in their network. For more information about these node types, see [RFC 2132](http://www.ietf.org/rfc/rfc2132.txt).
-* `owner_id` - ID of the CROC Cloud account that owns the DHCP options set.
+* `owner_id` - The ID of the project that owns the DHCP options set.
 * `tags` - (Optional) A map of tags to assign to the resource.
 
 ### Removing `aws_default_vpc_dhcp_options` from your configuration
@@ -46,7 +46,7 @@ The following arguments are still supported:
 The `aws_default_vpc_dhcp_options` resource allows you to manage a region's default DHCP Options Set,
 but Terraform cannot destroy it. Removing this resource from your configuration
 will remove it from your statefile and management, but will not destroy the DHCP Options Set.
-You can resume managing the DHCP Options Set via the CROC Cloud Console.
+You can resume managing the DHCP Options Set via the cloud console.
 
 ## Attributes Reference
 

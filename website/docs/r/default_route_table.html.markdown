@@ -102,7 +102,7 @@ These exported attributes are currently unsupported:
 
 * `destination_prefix_list_id` - ID of a managed prefix list destination of the route. Always `""`.
 * `ipv6_cidr_block` - The Ipv6 CIDR block of the route. Always `""`.
-* `owner_id` - ID of the CROC Cloud account that owns the Default Network ACL. Always `""`.
+* `owner_id` - The ID of the project that owns the Default Network ACL. Always `""`.
 * `route`
     * `core_network_arn` - The ARN of a core network. Always `""`.
     * `egress_only_gateway_id` - ID of a VPC Egress Only Internet Gateway. Always `""`.

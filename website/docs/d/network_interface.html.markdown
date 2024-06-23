@@ -38,7 +38,7 @@ Additionally, the following attributes are exported:
 * `availability_zone` - The availability zone.
 * `description` - Description of the network interface.
 * `mac_address` - The MAC address.
-* `owner_id` - The CROC Cloud project ID.
+* `owner_id` - The project ID.
 * `private_dns_name` - The private DNS name.
 * `private_ip` - The private IPv4 address of the network interface within the subnet.
 * `private_ips` - The private IPv4 addresses associated with the network interface.

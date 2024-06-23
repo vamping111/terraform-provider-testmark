@@ -20,7 +20,7 @@ For more information about default security groups, see the documentation on [De
 
 ## Example Usage
 
-The following config gives the default security group the same rules that CROC Cloud provides by default but under management by Terraform. This means that any ingress or egress rules added or changed will be detected as drift.
+The following config gives the default security group the same rules that the cloud provides by default but under management by Terraform. This means that any ingress or egress rules added or changed will be detected as drift.
 
 ```terraform
 resource "aws_vpc" "mainvpc" {
@@ -70,7 +70,7 @@ resource "aws_default_security_group" "example" {
 ### Removing `aws_default_security_group` From Your Configuration
 
 Removing this resource from your configuration will remove it from your statefile and management, but will not destroy the security group.
-All ingress or egress rules will be left as they are at the time of removal. You can resume managing them via the CROC Cloud Console.
+All ingress or egress rules will be left as they are at the time of removal. You can resume managing them via the cloud console.
 
 ## Argument Reference
 
@@ -104,7 +104,7 @@ In addition to all arguments above, the following attributes are exported:
 * `description` - Description of the security group.
 * `id` - ID of the security group.
 * `name` - Name of the security group.
-* `owner_id` - The CROC Cloud project name.
+* `owner_id` - The project ID.
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**

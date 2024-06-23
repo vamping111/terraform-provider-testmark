@@ -55,9 +55,9 @@ In addition to all arguments above, the following attributes are exported:
 * `default_route_table_association` - Indicates whether the association with default association route table is created automatically.
 * `default_route_table_propagation` - Indicates whether the routes are automatically propagated to the default propagation route table.
 * `description` - The description of the transit gateway
-* `owner_id` - The ID of CROC Cloud account that owns the transit gateway.
+* `owner_id` - The ID of the project that owns the transit gateway.
 * `propagation_default_route_table_id` - The ID of the default propagation route table.
-* `shared_owners` - List of CROC Cloud account IDs that are granted access to the transit gateway.
+* `shared_owners` - List of project IDs that are granted access to the transit gateway.
 * `tags` - Map of tags assigned to the transit gateway.
 
 ->  **Unsupported attributes**

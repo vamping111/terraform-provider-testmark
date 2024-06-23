@@ -54,7 +54,7 @@ resource "aws_security_group" "allow_tls" {
 }
 ```
 
-~> **NOTE on Egress rules:** By default, CROC Cloud creates an `ALLOW ALL` egress rule when creating a new security group inside a VPC. When creating a new Security Group inside a VPC, **Terraform will remove this default rule**, and require you specifically re-create it if you desire that rule. We feel this leads to fewer surprises in terms of controlling your egress rules. If you desire this rule to be in place, you can use this `egress` block:
+~> **NOTE on Egress rules:** By default, the cloud creates an `ALLOW ALL` egress rule when creating a new security group inside a VPC. When creating a new Security Group inside a VPC, **Terraform will remove this default rule**, and require you specifically re-create it if you desire that rule. We feel this leads to fewer surprises in terms of controlling your egress rules. If you desire this rule to be in place, you can use this `egress` block:
 
 ```terraform
 resource "aws_security_group" "example" {
@@ -142,7 +142,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `arn` - ARN of the security group.
 * `id` - ID of the security group.
-* `owner_id` - The CROC Cloud project name.
+* `owner_id` - The project ID.
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**

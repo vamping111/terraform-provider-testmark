@@ -34,8 +34,9 @@ data "aws_ebs_snapshot_ids" "ebs_snapshot_ids" {
 
 The following arguments are supported:
 
-* `owners` - (Optional) Returns the snapshots owned by the specified owner ID. Multiple owners can be specified.
-* `restorable_by_user_ids` - (Optional) One or more CROC Cloud project IDs that can create volumes from the snapshot.
+* `owners` - (Optional) List of the snapshot owners. Valid items are the project ID (`project@customer`) or `self`.
+* `restorable_by_user_ids` - (Optional) List of the project IDs (`project@customer`).
+  that can create volumes from the snapshot.
 * `filter` - (Optional) One or more name/value pairs to filter.
 
 For more information about filtering, see the [EC2 API documentation][describe-snapshots].

@@ -86,16 +86,16 @@ To find out more information for an existing image to override the configuration
 
 Each `block_device_mappings` supports the following:
 
-* `device_name` - The name of the device to mount.
-* `ebs` - Configure EBS volume properties.
-* `no_device` - Suppresses the specified device included in the block device mapping.
+* `device_name` - (Optional) The name of the device to mount.
+* `ebs` - (Optional) Configure EBS volume properties.
+* `no_device` - (Optional) Suppresses the specified device included in the block device mapping.
 
 The `ebs` block supports the following:
 
-* `delete_on_termination` - Whether the volume should be destroyed on instance termination.
-* `iops` - The amount of provisioned IOPS. This must be set with a volume_type of `io2`.
-* `snapshot_id` - The snapshot ID to mount.
-* `volume_size` - The size of the volume in gigabytes.
+* `delete_on_termination` - (Optional) Whether the volume should be destroyed on instance termination.
+* `iops` - (Optional) The amount of provisioned IOPS. This must be set with a volume_type of `io2`.
+* `snapshot_id` - (Optional) The snapshot ID to mount.
+* `volume_size` - (Optional) The size of the volume in gigabytes.
 * `volume_type` - (Optional) Type of volume. Valid values are `st2`, `gp2`, `io2`.
 
 ### Monitoring
@@ -112,16 +112,16 @@ For the details about configuring network interfaces when creating an auto scali
 
 Each `network_interfaces` block supports the following:
 
-* `associate_public_ip_address` - Whether a public IP address should be associated with the network interface.
+* `associate_public_ip_address` - (Optional) Whether a public IP address should be associated with the network interface.
   The address will be assigned to the `eth0` interface if there are free allocated external addresses.
   This operation is available only for instances running in the VPC and for new network interfaces.
-* `delete_on_termination` - Whether the network interface should be destroyed on instance termination.
-* `description` - Description of the network interface.
-* `device_index` - The integer index of the network interface attachment.
-* `network_interface_id` - The ID of the network interface to attach.
-* `private_ip_address` - The primary private IPv4 address.
-* `security_groups` - A list of security group IDs to associate.
-* `subnet_id` - The VPC subnet ID to associate.
+* `delete_on_termination` - (Optional) Whether the network interface should be destroyed on instance termination.
+* `description` - (Optional) Description of the network interface.
+* `device_index` - (Optional) The integer index of the network interface attachment.
+* `network_interface_id` - (Optional) The ID of the network interface to attach.
+* `private_ip_address` - (Optional) The primary private IPv4 address.
+* `security_groups` - (Optional) A list of security group IDs to associate.
+* `subnet_id` - (Optional) The VPC subnet ID to associate.
 
 ### Placement
 
@@ -130,8 +130,8 @@ The placement group of the instance.
 The `placement` block supports the following:
 
 * `affinity` - (Optional) The affinity setting for an instance on a dedicated host. The parameter could be set to `host` only if `tenancy` is `host`.
-* `availability_zone` - The availability zone for the instance.
-* `group_name` - The name of the placement group for the instance.
+* `availability_zone` - (Optional) The availability zone for the instance.
+* `group_name` - (Optional) The name of the placement group for the instance.
 * `host_id` - (Optional) The ID of the dedicated host for the instance.
 * `tenancy` - (Optional) The tenancy of the instance (if the instance is running in a VPC). Valid values are `default`, `host`. Defaults to `default`.
 
@@ -143,8 +143,8 @@ The tags to apply to the resources during launch. You can tag instances and volu
 
 Each `tag_specifications` block supports the following:
 
-* `resource_type` - The type of resource to tag. Valid values are `instance`, `volume`.
-* `tags` - A map of tags to assign to the resource.
+* `resource_type` - (Optional) The type of resource to tag. Valid values are `instance`, `volume`.
+* `tags` - (Optional) A map of tags to assign to the resource.
 
 ## Attributes Reference
 

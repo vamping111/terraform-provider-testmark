@@ -14,7 +14,7 @@ description: |-
 [doc-transaction_isolation]: https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_transaction_isolation
 
 [paas]: https://docs.cloud.croc.ru/en/services/paas/index.html
-[technical support]: https://support.croc.ru/app/#/project/CS
+[technical support]: https://support.k2int.ru/app/#/project/CS
 [timeouts]: https://www.terraform.io/docs/configuration/blocks/resources/syntax.html#operation-timeouts
 
 [Elasticsearch]: #elasticsearch-argument-reference

@@ -1,7 +1,7 @@
-# Terraform C2 Provider
+# Terraform Rockit Cloud Provider
 
 Адаптация [Terraform AWS Provider](https://github.com/hashicorp/terraform-provider-aws) от **HashiCorp**
-под **Облако КРОК** (C2).
+под **Rockit Cloud**.
 
 | Upstream Name | Upstream Version |
 |------|---------|
@@ -43,14 +43,14 @@
 ресурсами некоего сервиса (например, облака или БД) через его API. Для каждого ресурса в провайдер добавляется
 схема и CRUD операции. Информация об API предоставляется в виде отдельного модуля.
 
-**Terraform C2 Provider** реализуется на базе **Terraform AWS Provider**.
+**Terraform Rockit Cloud Provider** реализуется на базе **Terraform AWS Provider**.
 Также создан форк модуля с AWS API: [C2Devel/aws-sdk-go](https://github.com/C2Devel/aws-sdk-go).
 
 Для публикации провайдера в официальном [terraform registry](https://registry.terraform.io/) под новым именем
 (ранее - *aws*) форк переименован в  
-*terraform-provider-croccloud*.
+*terraform-provider-rockitcloud*.
 
-Опубликованный провайдер: https://registry.terraform.io/providers/C2Devel/croccloud
+Опубликованный провайдер: https://registry.terraform.io/providers/C2Devel/rockitcloud
 
 ## Начало работы
 
@@ -59,7 +59,7 @@
 Клонирование репозитория и сборка провайдера:
 
 ```
-$ git clone git@github.com:C2Devel/terraform-provider-croccloud.git && cd terraform-provider-croccloud
+$ git clone git@github.com:C2Devel/terraform-provider-rockitcloud.git && cd terraform-provider-rockitcloud
 ...
 $ make build
 ```
@@ -80,10 +80,10 @@ $ ls $GOPATH/bin/terraform-provider-aws
 Для сборки проекта также можно использовать команду:
 
 ```
-$ go build -o terraform-provider-croccloud
+$ go build -o terraform-provider-rockitcloud
 ```
 
-Артефакт `terraform-provider-croccloud` будет создан в директории запуска.
+Артефакт `terraform-provider-rockitcloud` будет создан в директории запуска.
 
 ### Установка линтеров
 
@@ -262,7 +262,7 @@ $ make docscheck
 **Важно!** Не допускается обновление уже выпущенных версий, т.к. могут возникнуть проблемы со скачиванием провайдера
 из terraform registry.
 
-Стартовая версия: **v24.0.0**
+Стартовая версия: **v24.1.0**
 
 ### Релиз
 
@@ -302,13 +302,13 @@ $ make docscheck
 
 8. **Опционально.** Если на шаге 2 **не** была включена автопубликация (`release.draft: true`):
    создание релиза на github и загрузка артефактов:
-    - `dist/terraform-provider-croccloud_{VERSION}_{OS}_{ARCH}.zip`
+    - `dist/terraform-provider-rockitcloud_{VERSION}_{OS}_{ARCH}.zip`
         - Для всех архитектур и ОС.
-    - `dist/terraform-provider-croccloud_{VERSION}_SHA256SUMS`
-    - `dist/terraform-provider-croccloud_{VERSION}_SHA256SUMS.sig`
-    - `terraform-provider-croccloud_{VERSION}_manifest.json`
+    - `dist/terraform-provider-rockitcloud_{VERSION}_SHA256SUMS`
+    - `dist/terraform-provider-rockitcloud_{VERSION}_SHA256SUMS.sig`
+    - `terraform-provider-rockitcloud_{VERSION}_manifest.json`
         - Файл создается вручную:
-        - `cp terraform-registry-manifest.json terraform-provider-croccloud_{VERSION}_manifest.json`
+        - `cp terraform-registry-manifest.json terraform-provider-rockitcloud_{VERSION}_manifest.json`
 
 ## Публикация провайдера в официальном terraform registry
 
@@ -342,14 +342,14 @@ $ make docscheck
 **Важно!** Terraform не позволяет самостоятельно удалять опубликованный провайдер или одну из его версий.
 Не допускается обновление уже выпущенных версий.
 
-Опубликованный провайдер: https://registry.terraform.io/providers/C2Devel/croccloud
+Опубликованный провайдер: https://registry.terraform.io/providers/C2Devel/rockitcloud
 
 ## Публикация провайдера в private terraform registry
 
 Terraform registry может быть организован в виде s3 бакета.
 
 **Важно!** У бакета должен быть настроен доступ по https
-([инструкция от CROC](https://docs.cloud.croc.ru/en/services/object_storage/instructions.html#filestorage-https-for-website-buckets)).
+([инструкция](https://docs.cloud.croc.ru/en/services/object_storage/instructions.html#filestorage-https-for-website-buckets)).
 При включении web-доступа в качестве индексной страницы требуется указать `index.json`.
 
 Согласно [описанию](https://www.terraform.io/internals/provider-registry-protocol) протокола,
@@ -364,12 +364,12 @@ terraform registry содержит в себе файлы с версиями �
 
 providers/
 |-- c2devel/                                       # разработчик
-     |-- croccloud/                                # имя провайдера
-          |-- 1.0.0-CROC0/
+     |-- rockitcloud/                                # имя провайдера
+          |-- 1.0.0/
           |    |-- download/
           |         |-- linux/
           |         |    |-- amd64/
-          |         |    |    |-- index.json       # метаинформация для сборки 1.0.0-CROC0_linux_amd64
+          |         |    |    |-- index.json       # метаинформация для сборки 1.0.0_linux_amd64
           |         |    |-- ...
           |         |-- ...
           |    
@@ -391,10 +391,10 @@ providers/
 Исходный вид файла с версиями провайдера:
 
 ```
-# providers/c2devel/croccloud/versions/index.json
+# providers/c2devel/rockitcloud/versions/index.json
 
 {
-    "id": "c2devel/croccloud",
+    "id": "c2devel/rockitcloud",
     "versions": [],
     "warnings": null
 }
@@ -415,28 +415,28 @@ providers/
 1. Получение версий провайдера. В файле должна присутствовать загружаемая версия
 
    ```
-   $ curl https://registry.terraform.io/v1/providers/c2devel/croccloud/versions --output versions.json
+   $ curl https://registry.terraform.io/v1/providers/c2devel/rockitcloud/versions --output versions.json
    ```
 
    В блоке `versions.<version>.platforms` указаны архитектуры и ОС, под которые версия собиралась.
 2. Получение метаинформации для выбранных сборок провайдера
 
    ```
-   $ curl https://registry.terraform.io/v1/providers/c2devel/croccloud/<version>/download/<os>/<arch> --output <version>_<os>_<arch>.json
+   $ curl https://registry.terraform.io/v1/providers/c2devel/rockitcloud/<version>/download/<os>/<arch> --output <version>_<os>_<arch>.json
    ```
 
 3. **Опционально.** Сохранение артефактов в собственное хранилище.
    Артефакты можно скачать по ссылкам в метаинформации или скопировать из директории `dist/`:
-   - `dist/terraform-provider-croccloud_{VERSION}_{OS}_{ARCH}.zip`
+   - `dist/terraform-provider-rockitcloud_{VERSION}_{OS}_{ARCH}.zip`
       - Для всех архитектур и ОС.
-   - `dist/terraform-provider-croccloud_{VERSION}_SHA256SUMS`
-   - `dist/terraform-provider-croccloud_{VERSION}_SHA256SUMS.sig`
+   - `dist/terraform-provider-rockitcloud_{VERSION}_SHA256SUMS`
+   - `dist/terraform-provider-rockitcloud_{VERSION}_SHA256SUMS.sig`
 
 4. **Опционально.** Если был выполнен шаг 3: обновление ссылок в метаинформации
 5. Обновление s3 бакета:
-   - обновление файла с версиями: `version.json` -> `providers/c2devel/croccloud/versions/index.json`
+   - обновление файла с версиями: `version.json` -> `providers/c2devel/rockitcloud/versions/index.json`
    - загрузка метаинформации для сборок версии:  
-     `<version>_<os>_<arch>.json` -> `providers/c2devel/croccloud/<version>/download/<os>/<arch>/index.json`
+     `<version>_<os>_<arch>.json` -> `providers/c2devel/rockitcloud/<version>/download/<os>/<arch>/index.json`
    **Важно!** Файлы должны быть загружены с mime-типом "application/json". Для файлов должен быть
    открыт доступ на чтение без аутентификации.
 
@@ -452,7 +452,7 @@ providers/
 **Важно!** Файл с версиями в s3 бакете будет приведен к виду официального registry.
 
 Для запуска скрипта требуется установка и настройка утилиты [s3cmd](https://s3tools.org/s3cmd)
-([инструкция от CROC](https://docs.cloud.croc.ru/ru/api/tools/s3cmd.html?highlight=s3cmd))
+([инструкция](https://docs.cloud.croc.ru/ru/api/tools/s3cmd.html?highlight=s3cmd))
 и созданный s3 бакет (см. [структура s3 бакета](#структура-s3-бакета)).
 
 Переменные окружения скрипта:
@@ -460,7 +460,7 @@ providers/
 - `TF_REGISTRY_URL` - url terraform registry, по умолчанию: `"https://registry.terraform.io/"`
 - `S3_REGISTRY_URL` - url s3 registry, обязательно
 - `S3_BUCKET_NAME` - имя бакета, обязательно
-- `PROVIDER_NAME` - имя провайдера, по умолчанию: `"c2devel/croccloud"`
+- `PROVIDER_NAME` - имя провайдера, по умолчанию: `"c2devel/rockitcloud"`
 - `S3_BACKUP_DIR` - директория для бэкапа бакета, опционально. Если директория не указана,
    бэкап сделан не будет
 
@@ -474,11 +474,11 @@ $ ./update-s3-registry.sh
 
 ## Использование провайдера
 
-Провайдер в terraform registry: https://registry.terraform.io/providers/C2Devel/croccloud
+Провайдер в terraform registry: https://registry.terraform.io/providers/C2Devel/rockitcloud
 
 Примеры использования **Terraform** для C2: [C2Devel/terraform-examples](https://github.com/C2Devel/terraform-examples)
 
-Конфигурация провайдера **C2Devel/croccloud** после его публикации в официальном terraform registry:
+Конфигурация провайдера **C2Devel/rockitcloud** после его публикации в официальном terraform registry:
 
 ```
 # provider.tf
@@ -487,8 +487,8 @@ terraform {
   required_providers {
     aws = {
       # case-insensistive
-      source = "c2devel/croccloud"
-      version = "4.14.0-CROC1"
+      source = "c2devel/rockitcloud"
+      version = "24.1.0"
     }
   }
 }
@@ -499,11 +499,11 @@ provider "aws" {
 ```
 
 **Важно!** В конфигурации в качестве имени провадйера используется `aws`, т.к. сохранена схема
-именования terraform ресурсов: **aws_***. Если используется другое имя (например, `croccloud`),
+именования terraform ресурсов: **aws_***. Если используется другое имя (например, `rockitcloud`),
 **Terraform** автоматически попытается загрузить провайдер **hashicorp/aws**.
 
 Если провайдер опубликован в s3 бакете, в поле `source` добавляется url бакета без схемы. Например,  
-`tf-registry.croc.ru/c2devel/croccloud`.
+`tf-registry.rockitcloud.ru/c2devel/rockitcloud`.
 
 ### Локальная сборка
 
@@ -544,6 +544,6 @@ $ export TF_CLI_CONFIG_FILE=<path-to-dev.tfrc>
 2. Доработка acceptance тестов для запуска на C2
 3. Использовать в `make build` команду `go build` вместо `go install` для того,
    чтобы иметь возможность задать имя артефакта
-4. Обновить схему именования ресурсов: **aws_*** -> **croccloud_***,
-   чтобы иметь возможность использовать в конфигурации в качестве имени провайдера `croccloud`.
+4. Обновить схему именования ресурсов: **aws_*** -> **rockitcloud_***,
+   чтобы иметь возможность использовать в конфигурации в качестве имени провайдера `rockitcloud`.
    Потребуется проверка совместимости с aws конфигурациями

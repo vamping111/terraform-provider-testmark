@@ -8,7 +8,7 @@ set -euo pipefail
 TF_REGISTRY_URL=${TF_REGISTRY_URL:-"https://registry.terraform.io/"}
 S3_REGISTRY_URL=${S3_REGISTRY_URL:-}
 S3_BUCKET_NAME=${S3_BUCKET_NAME:-}
-PROVIDER_NAME=${PROVIDER_NAME:-"c2devel/croccloud"}
+PROVIDER_NAME=${PROVIDER_NAME:-"c2devel/rockitcloud"}
 
 S3_BACKUP_DIR=${S3_BACKUP_DIR:-}
 TMP_DIR="/tmp/"

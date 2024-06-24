@@ -1,7 +1,7 @@
 ---
 subcategory: "VPN (Site-to-Site)"
 layout: "aws"
-page_title: "CROC Cloud: aws_vpn_connection"
+page_title: "aws_vpn_connection"
 description: |-
   Manages a Site-to-Site VPN connection. A Site-to-Site VPN connection is an Internet Protocol security (IPSec) VPN connection between a VPC and an on-premises network.
 ---
@@ -13,7 +13,7 @@ description: |-
 # Resource: aws_vpn_connection
 
 -> **Unsupported resource**
-This resource is currently unsupported by CROC Cloud
+This resource is currently unsupported.
 
 Manages a Site-to-Site VPN connection. A Site-to-Site VPN connection is an Internet Protocol security (IPSec) VPN connection between a VPC and an on-premises network.
 
@@ -24,7 +24,7 @@ For more information about VPN connections, see [user documentation][vpn-connect
 
 ~> **Note:** The CIDR blocks in the arguments `tunnel1_inside_cidr` and `tunnel2_inside_cidr` must have a prefix of /30 and be a part of a specific range.
 
--> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+-> The terms VPC, Internet Gateway, VPN Gateway are equivalent
 
 ## Example Usage
 
@@ -70,7 +70,7 @@ The following arguments are required:
 Other arguments:
 
 * `local_ipv4_network_cidr` - (Optional, Default `0.0.0.0/0`) The IPv4 CIDR on the customer gateway (on-premises) side of the VPN connection. Valid value must not fall within the range of 169.254.0.0/16.
-* `remote_ipv4_network_cidr` - (Optional, Default `0.0.0.0/0`) The IPv4 CIDR on the CROC Cloud side of the VPN connection. Valid value must not fall within the range of 169.254.0.0/16.
+* `remote_ipv4_network_cidr` - (Optional, Default `0.0.0.0/0`) The IPv4 CIDR on the cloud side of the VPN connection. Valid value must not fall within the range of 169.254.0.0/16.
 * `tags` - (Optional) Tags to apply to the connection. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
 * `tunnel1_ike_versions` - (Optional) The IKE versions that are permitted for the first VPN tunnel. Valid values are `ikev1 | ikev2`.
 * `tunnel2_ike_versions` - (Optional) The IKE versions that are permitted for the second VPN tunnel. Valid values are `ikev1 | ikev2`.
@@ -134,7 +134,7 @@ In addition to all arguments above, the following attributes are exported:
 * `status_message` - If an error occurs, a description of the error.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported.:
 
 * `core_network_arn` - The ARN of the core network. Always `""`.
 * `core_network_attachment_arn` - The ARN of the core network attachment. Always `""`.

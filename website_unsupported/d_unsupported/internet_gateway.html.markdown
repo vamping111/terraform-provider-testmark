@@ -9,11 +9,11 @@ description: |-
 # Data Source: aws_internet_gateway
 
 -> **Unsupported resource**
-This resource is currently unsupported by CROC Cloud
+This resource is currently unsupported.
 
 `aws_internet_gateway` provides details about a specific Internet Gateway.
 
--> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+-> The terms VPC, Internet Gateway, VPN Gateway are equivalent
 
 ## Example Usage
 

@@ -9,7 +9,7 @@ description: |-
 # Data Source: aws_autoscaling_groups
 
 -> **Unsupported resource**
-This resource is currently unsupported by CROC Cloud
+This resource is currently unsupported.
 
 The Autoscaling Groups data source allows access to the list of AWS
 ASGs within a specific region. This will allow you to pass a list of AutoScaling Groups to other resources.

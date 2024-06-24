@@ -9,7 +9,7 @@ description: |-
 # Resource: aws_cloudtrail
 
 -> **Unsupported resource**
-This resource is currently unsupported by CROC Cloud
+This resource is currently unsupported.
 
 Provides a CloudTrail resource.
 

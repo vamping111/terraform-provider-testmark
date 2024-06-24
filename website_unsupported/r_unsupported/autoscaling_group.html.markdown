@@ -9,7 +9,7 @@ description: |-
 # Resource: aws_autoscaling_group
 
 -> **Unsupported resource**
-This resource is currently unsupported by CROC Cloud
+This resource is currently unsupported.
 
 Provides an Auto Scaling Group resource.
 

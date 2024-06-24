@@ -127,7 +127,7 @@ Each `network_interfaces` block supports the following:
 
 The placement group of the instance.
 
-The `placement block supports the following:
+The `placement` block supports the following:
 
 * `affinity` - (Optional) The affinity setting for an instance on a dedicated host. The parameter could be set to `host` only if `tenancy` is `host`.
 * `availability_zone` - The availability zone for the instance.

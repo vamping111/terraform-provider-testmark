@@ -135,7 +135,7 @@ The `placement` block supports the following:
 * `host_id` - (Optional) The ID of the dedicated host for the instance.
 * `tenancy` - (Optional) The tenancy of the instance (if the instance is running in a VPC). Valid values are `default`, `host`. Defaults to `default`.
 
-->**NOTE:** If you use the `host` value, you must provide the ID of the dedicated host in the `host_id` attribute and the availability zone of this dedicated host in the `availability_zone` attribute.
+~> **NOTE:** If you use the `host` value, you may encounter the `NotEnoughResourcesForInstanceType` error when running an instance. To avoid this, it is recommended to provide either the `subnet_id` argument or the `availability_zone` argument.
 
 ### Tag Specifications
 

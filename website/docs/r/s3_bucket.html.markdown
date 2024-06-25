@@ -55,7 +55,7 @@ Configuring with both will cause inconsistencies and may overwrite configuration
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -81,7 +81,7 @@ resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "public-read"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -113,7 +113,7 @@ resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "public-read"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -137,7 +137,7 @@ resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "private"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -157,7 +157,7 @@ resource "aws_s3_bucket" "bucket" {
   bucket = "tf-example"
   acl    = "private"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -192,7 +192,7 @@ resource "aws_s3_bucket" "versioning_bucket" {
   bucket = "tf-example"
   acl    = "private"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -222,7 +222,7 @@ data "aws_canonical_user_id" "current_user" {}
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 

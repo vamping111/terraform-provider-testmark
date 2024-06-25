@@ -24,7 +24,7 @@ resource "aws_kms_key" "mykey" {
 resource "aws_s3_bucket" "mybucket" {
   bucket = "mybucket"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }

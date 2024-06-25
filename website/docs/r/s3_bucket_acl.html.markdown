@@ -25,7 +25,7 @@ For more information about access rights for buckets, see [user documentation][a
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -44,7 +44,7 @@ data "aws_canonical_user_id" "current" {}
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }

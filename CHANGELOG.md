@@ -1,3 +1,30 @@
+## 24.1.0
+
+NOTES:
+
+* Rockit Cloud rebranding
+
+FEATURES:
+
+* **New Data Source:** `aws_ec2_host`
+
+ENHANCEMENTS:
+
+
+* datasource/aws_route53_zone: make the `IsTruncated` parameter optional as it is not supported
+* datasource/aws_instance: add `tenancy`, `affinity` and `host_id` attributes support
+* resource/aws_route53_record: remove the `StartRecordName`, `StartRecordType`, `MaxItems` parameters as they are not supported
+* resource/aws_instance: add `tenancy`, `affinity` and `host_id` arguments support
+* resource/aws_launch_template: add `tenancy`, `affinity` and `host_id` arguments of the `placement` block support
+* resource/aws_ami: update possible virtualization type values and the default value
+* resource/aws_ami: update volume type default value
+
+DOCUMENTATION FIXES:
+
+* datasource/aws_ami, datasource/aws_ami_ids: `executable_users` description: add `all` to the list of possible values
+* datasource/aws_ebs_snapshot, datasource/aws_ebs_snapshot_ids: `owners` description: add `self` to the list of possible values
+* resource/aws_route53_record: fix description in documentation about records that contain more than 255 characters
+
 ## 24.0.1
 
 BUG FIXES:

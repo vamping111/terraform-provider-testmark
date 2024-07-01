@@ -51,6 +51,13 @@ func ResourceInstance() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"affinity": {
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Computed:     true,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{ec2.AffinityDefault, ec2.AffinityHost}, false),
+			},
 			"ami": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
@@ -616,7 +623,7 @@ func ResourceInstance() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice(ec2.Tenancy_Values(), false),
+				ValidateFunc: validation.StringInSlice([]string{ec2.TenancyDefault, ec2.TenancyHost}, false),
 			},
 			"user_data": {
 				Type:          schema.TypeString,
@@ -906,6 +913,10 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 
 	if v := instance.Placement; v != nil {
 		d.Set("availability_zone", v.AvailabilityZone)
+
+		if v := v.Affinity; v != nil {
+			d.Set("affinity", v)
+		}
 
 		if v := v.GroupName; v != nil {
 			d.Set("placement_group", v)
@@ -2568,10 +2579,7 @@ func buildInstanceOpts(d *schema.ResourceData, meta interface{}) (*awsInstanceOp
 
 	// Placement is used for aws_instance; SpotPlacement is used for
 	// aws_spot_instance_request. They represent the same data. :-|
-	opts.Placement = &ec2.Placement{
-		AvailabilityZone: aws.String(d.Get("availability_zone").(string)),
-		GroupName:        aws.String(d.Get("placement_group").(string)),
-	}
+	opts.Placement = &ec2.Placement{}
 
 	if v, ok := d.GetOk("placement_partition_number"); ok {
 		opts.Placement.PartitionNumber = aws.Int64(int64(v.(int)))
@@ -2582,6 +2590,15 @@ func buildInstanceOpts(d *schema.ResourceData, meta interface{}) (*awsInstanceOp
 		GroupName:        aws.String(d.Get("placement_group").(string)),
 	}
 
+	if v := d.Get("availability_zone").(string); v != "" {
+		opts.Placement.AvailabilityZone = aws.String(v)
+	}
+	if v := d.Get("placement_group").(string); v != "" {
+		opts.Placement.GroupName = aws.String(v)
+	}
+	if v := d.Get("affinity").(string); v != "" {
+		opts.Placement.Affinity = aws.String(v)
+	}
 	if v := d.Get("tenancy").(string); v != "" {
 		opts.Placement.Tenancy = aws.String(v)
 	}

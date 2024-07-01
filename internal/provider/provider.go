@@ -384,7 +384,7 @@ func Provider() *schema.Provider {
 			//"aws_ec2_client_vpn_endpoint":                    ec2.DataSourceClientVPNEndpoint(),
 			//"aws_ec2_coip_pool":                              ec2.DataSourceCoIPPool(),
 			//"aws_ec2_coip_pools":                             ec2.DataSourceCoIPPools(),
-			//"aws_ec2_host":                                   ec2.DataSourceHost(),
+			"aws_ec2_host": ec2.DataSourceHost(),
 			//"aws_ec2_instance_type_offering":                 ec2.DataSourceInstanceTypeOffering(),
 			//"aws_ec2_instance_type_offerings":                ec2.DataSourceInstanceTypeOfferings(),
 			//"aws_ec2_instance_type":                          ec2.DataSourceInstanceType(),

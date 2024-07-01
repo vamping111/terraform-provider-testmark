@@ -90,6 +90,7 @@ resource "aws_instance" "example" {
 
 The following arguments are supported:
 
+* `affinity` - (Optional) The affinity setting for an instance on a dedicated host. Valid values are `default`, `host`. The parameter could be set to `host` only if `tenancy` is `host`.
 * `ami` - (Optional) An image to use for the instance. Required unless `launch_template` is specified.
   If an image is specified in the launch template, setting `ami` will override it.
 * `associate_public_ip_address` - (Optional, Conflicts with `network_interface`) Whether to associate a public IP address with an instance in a VPC.
@@ -99,6 +100,7 @@ The following arguments are supported:
 * `disable_api_termination` - (Optional) If `true`, disables the possibility to terminate an instance via API.
 * `ebs_block_device` - (Optional) One or more configuration blocks with additional EBS block devices to attach to the instance. Block device configurations only apply on resource creation. See [Block Devices](#ebs-ephemeral-and-root-block-devices) below for details on attributes and drift detection. When accessing this as an attribute reference, it is a set of objects.
 * `ephemeral_block_device` - (Optional) One or more configuration blocks to customize ephemeral volumes on the instance. See [Block Devices](#ebs-ephemeral-and-root-block-devices) below for details. When accessing this as an attribute reference, it is a set of objects.
+* `host_id` - (Optional) The ID of the dedicated host that the instance will be assigned to.
 * `instance_initiated_shutdown_behavior` - (Optional) Shutdown behavior for the instance. Valid values are `stop`, `terminate`.
 * `instance_type` - (Optional) The instance type to use for the instance. Updates to this field will trigger a stop/start of the EC2 instance.
 * `key_name` - (Optional) Key name of the key pair to use for the instance; which can be managed using [the `aws_key_pair` resource](key_pair.html.markdown).
@@ -113,6 +115,10 @@ The following arguments are supported:
 * `source_dest_check` - (Optional) Controls if traffic is routed to the instance when the destination address does not match the instance. Defaults to `true`.
 * `subnet_id` - (Optional) VPC subnet ID to launch in.
 * `tags` - (Optional) A map of tags to assign to the resource. Note that these tags apply to the instance and not block storage devices. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
+* `tenancy` - (Optional) The placement type. Valid values are `default`, `host`.
+
+~> **NOTE:** If you use the `host` value, you may encounter the `NotEnoughResourcesForInstanceType` error when running an instance. To avoid this, it is recommended to provide either the `subnet_id` argument or the `availability_zone` argument.
+
 * `user_data` - (Optional, Conflicts with `user_data_base64`) User data to provide when launching the instance. Do not pass gzip-compressed data via this argument; see `user_data_base64` instead. Updates to this field will trigger a stop/start of the EC2 instance by default. If the `user_data_replace_on_change` is set then updates to this field will trigger a destroy and recreate.
 * `user_data_base64` - (Optional, Conflicts with `user_data`) Can be used instead of `user_data` to pass base64-encoded binary data directly. Use this instead of `user_data` whenever the value is not a valid UTF-8 string. For example, gzip-encoded user data must be base64-encoded and passed via this argument to avoid corruption. Updates to this field will trigger a stop/start of the EC2 instance by default. If the `user_data_replace_on_change` is set then updates to this field will trigger a destroy and recreate.
 * `user_data_replace_on_change` - (Optional) When used in combination with `user_data` or `user_data_base64` will trigger a destroy and recreate when set to `true`. Defaults to `false`.
@@ -229,7 +235,6 @@ These exported attributes are currently unsupported by CROC Cloud:
     * `enabled` - Whether Nitro Enclaves will be enabled on the instance.
 * `get_password_data` - If true, wait for password data to become available and retrieve it. Always `false`.
 * `hibernation` - If true, the launched EC2 instance will support hibernation. Always empty.
-* `host_id` - ID of a dedicated host that the instance will be assigned to. Always empty.
 * `iam_instance_profile` - IAM Instance Profile to launch the instance with. Always `""`.
 * `ipv6_address_count`- A number of IPv6 addresses to associate with the primary network interface. Always `0`.
 * `ipv6_addresses` - Specify one or more IPv6 addresses from the range of the subnet to associate with the primary network interface. Always empty.
@@ -249,7 +254,6 @@ These exported attributes are currently unsupported by CROC Cloud:
     * `encrypted` - Whether to enable volume encryption. Always `false`.
     * `kms_key_id` - The ARN of the KMS Key to use when encrypting the volume. Always `""`.
     * `throughput` - Throughput to provision for a volume in mebibytes per second (MiB/s). Always `0`.
-* `tenancy` - Tenancy of the instance (if the instance is running in a VPC). Always empty.
 
 ### Timeouts
 

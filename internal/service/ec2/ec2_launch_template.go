@@ -816,8 +816,10 @@ func ResourceLaunchTemplate() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"affinity": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      ec2.AffinityDefault,
+							ValidateFunc: validation.StringInSlice([]string{ec2.AffinityDefault, ec2.AffinityHost}, false),
 						},
 						"availability_zone": {
 							Type:     schema.TypeString,
@@ -848,7 +850,8 @@ func ResourceLaunchTemplate() *schema.Resource {
 						"tenancy": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringInSlice(ec2.Tenancy_Values(), false),
+							Default:      ec2.TenancyDefault,
+							ValidateFunc: validation.StringInSlice([]string{ec2.TenancyDefault, ec2.TenancyHost}, false),
 						},
 					},
 				},

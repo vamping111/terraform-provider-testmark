@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_ami_from_instance"
+page_title: "aws_ami_from_instance"
 description: |-
   Creates an Amazon Machine Image (AMI) from an EBS-backed EC2 instance
 ---
@@ -58,7 +58,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the created image.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `snapshot_without_reboot` - Whether the behavior of stopping the instance before snapshotting is overrided. Always empty.
 

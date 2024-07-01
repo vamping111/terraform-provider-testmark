@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket_lifecycle_configuration"
+page_title: "aws_s3_bucket_lifecycle_configuration"
 description: |-
   Provides a S3 bucket lifecycle configuration resource.
 ---
@@ -34,7 +34,7 @@ The lifecycle rule applies to a subset of objects based on the key name prefix (
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -199,7 +199,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
 resource "aws_s3_bucket" "versioning_bucket" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -307,7 +307,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The `bucket`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
 * `rule`:

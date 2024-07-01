@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "AWS: aws_s3_bucket_cors_configuration"
+page_title: "aws_s3_bucket_cors_configuration"
 description: |-
   Provides an S3 bucket CORS configuration resource.
 ---
@@ -20,7 +20,7 @@ Provides an S3 bucket CORS configuration resource. For more information about CO
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -68,7 +68,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The `bucket`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
 

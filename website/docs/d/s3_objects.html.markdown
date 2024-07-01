@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_objects"
+page_title: "aws_s3_objects"
 description: |-
     Returns keys and metadata of S3 objects
 ---

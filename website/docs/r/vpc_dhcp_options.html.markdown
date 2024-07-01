@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_vpc_dhcp_options"
+page_title: "aws_vpc_dhcp_options"
 description: |-
   Provides a VPC DHCP Options resource.
 ---
@@ -66,9 +66,9 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
-* `owner_id` - ID of the CROC Cloud account that owns the DHCP options set.
+* `owner_id` - The ID of the project that owns the DHCP options set.
 
 ## Import
 

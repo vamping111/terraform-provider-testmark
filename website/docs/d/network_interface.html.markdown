@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_network_interface"
+page_title: "aws_network_interface"
 description: |-
   Get information on a Network Interface resource.
 ---
@@ -38,7 +38,7 @@ Additionally, the following attributes are exported:
 * `availability_zone` - The availability zone.
 * `description` - Description of the network interface.
 * `mac_address` - The MAC address.
-* `owner_id` - The CROC Cloud project ID.
+* `owner_id` - The project ID.
 * `private_dns_name` - The private DNS name.
 * `private_ip` - The private IPv4 address of the network interface within the subnet.
 * `private_ips` - The private IPv4 addresses associated with the network interface.
@@ -48,7 +48,7 @@ Additionally, the following attributes are exported:
 * `vpc_id` - The ID of the VPC.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `interface_type` - The type of interface. Always `"interface"`.
 * `ipv6_addresses` - List of IPv6 addresses to assign to the ENI. Always empty.
@@ -65,7 +65,7 @@ These exported attributes are currently unsupported by CROC Cloud:
 * `public_ip` - The address of the elastic IP address bound to the network interface.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_ip` - The carrier IP address associated with the network interface. This attribute is only set when the network interface is in a subnet which is associated with a Wavelength Zone.
 

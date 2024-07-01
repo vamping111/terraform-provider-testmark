@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_key_pair"
+page_title: "aws_key_pair"
 description: |-
   Provides a Key Pair resource. Currently this supports importing an existing key pair but not creating a new key pair.
 ---
@@ -11,7 +11,7 @@ description: |-
 Provides an EC2 key pair resource. A key pair is used to control login access to EC2 instances.
 
 Currently, this resource requires an existing user-supplied key pair.
-This key pair's public key will be registered with CROC Cloud to allow logging-in to EC2 instances.
+This key pair's public key will be registered to allow logging-in to EC2 instances.
 
 When importing an existing key pair the public key material .
 

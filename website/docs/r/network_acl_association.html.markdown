@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_network_acl_association"
+page_title: "aws_network_acl_association"
 description: |-
   Provides a network ACL association resource.
 ---

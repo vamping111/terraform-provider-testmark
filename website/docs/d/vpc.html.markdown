@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_vpc"
+page_title: "aws_vpc"
 description: |-
     Provides details about a specific VPC
 ---
@@ -72,13 +72,13 @@ The following attribute is additionally exported:
 * `main_route_table_id` - ID of the main route table associated with this VPC.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `enable_dns_hostnames` - Whether the VPC has DNS hostname support. Always `true`.
 * `instance_tenancy` - The allowed tenancy of instances launched into the selected VPC. Always `default`.
 * `ipv6_association_id` - The association ID for the IPv6 CIDR block. Always `""`.
 * `ipv6_cidr_block` - The IPv6 CIDR block. Always `""`.
-* `owner_id` - ID of the CROC Cloud account that owns the VPC. Always `""`.
+* `owner_id` - The ID of the project that owns the VPC. Always `""`.
 
 `cidr_block_associations` is also exported with the following attributes:
 

@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "CROC Cloud: aws_instance"
+page_title: "aws_instance"
 description: |-
   Provides information about an EC2 instance.
 ---
@@ -104,7 +104,7 @@ interpolation.
 * `vpc_security_group_ids` - The associated security groups in a non-default VPC.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `credit_specification` - Configuration block for customizing the credit specification of the instance. Always empty.
 * `ebs_block_device`:

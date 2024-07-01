@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_network_interfaces"
+page_title: "aws_network_interfaces"
 description: |-
     Provides a list of network interface ids
 ---
@@ -65,7 +65,7 @@ For more information about filtering, see the [EC2 API documentation][describe-n
 
 ## Attributes Reference
 
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - A list of all the network interface IDs found.
 
 [describe-network-interfaces]: https://docs.cloud.croc.ru/en/api/ec2/network_interfaces/DescribeNetworkInterfaces.html

@@ -1,7 +1,7 @@
 ---
 subcategory: "Transit Gateway"
 layout: "aws"
-page_title: "CROC Cloud: aws_ec2_transit_gateway_vpc_attachment"
+page_title: "aws_ec2_transit_gateway_vpc_attachment"
 description: |-
   Manages a transit gateway VPC attachment.
 ---
@@ -76,10 +76,10 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the transit gateway attachment.
 * `tags_all` - Map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
-* `vpc_owner_id` - The ID of CROC Cloud account that owns the VPC.
+* `vpc_owner_id` - The ID of the project that owns the VPC.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `appliance_mode_support` - Whether Appliance Mode support is enabled. Always empty.
 * `dns_support` - Whether DNS support is enabled. Always empty.

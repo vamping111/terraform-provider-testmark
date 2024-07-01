@@ -1,7 +1,7 @@
 ---
 subcategory: "Transit Gateway"
 layout: "aws"
-page_title: "CROC Cloud: aws_ec2_transit_gateway_route_table"
+page_title: "aws_ec2_transit_gateway_route_table"
 description: |-
   Manages a transit gateway route table.
 ---

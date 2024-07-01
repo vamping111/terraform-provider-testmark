@@ -1,7 +1,7 @@
 ---
 subcategory: "VPN (Site-to-Site)"
 layout: "aws"
-page_title: "AWS: aws_customer_gateway"
+page_title: "aws_customer_gateway"
 description: |-
   Get an existing Customer Gateway.
 ---
@@ -12,7 +12,7 @@ Get an existing customer gateway.
 
 ## Example Usage
 
--> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+-> The terms VPC, Internet Gateway, VPN Gateway are equivalent.
 
 ```terraform
 data "aws_customer_gateway" "selected" {
@@ -54,7 +54,7 @@ In addition to the arguments above, the following attributes are exported:
 * `type` - The type of customer gateway. Possible values: `ipsec.1`, `ipsec.legacy`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `certificate_arn` - The ARN for the customer gateway certificate. Always `""`.
 * `device_name` - A name for the customer gateway device. Always `""`.

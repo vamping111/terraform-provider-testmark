@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "AWS: aws_s3_bucket_request_payment_configuration"
+page_title: "aws_s3_bucket_request_payment_configuration"
 description: |-
   Provides an S3 bucket request payment configuration resource.
 ---
@@ -9,7 +9,7 @@ description: |-
 # Resource: aws_s3_bucket_request_payment_configuration
 
 ->  **Unsupported resource**
-This resource is currently unsupported by CROC Cloud
+This resource is currently unsupported.
 
 Provides an S3 bucket request payment configuration resource. For more information, see [Requester Pays Buckets](https://docs.aws.amazon.com/AmazonS3/latest/dev/RequesterPaysBuckets.html).
 

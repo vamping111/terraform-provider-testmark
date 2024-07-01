@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_subnet_ids"
+page_title: "aws_subnet_ids"
 description: |-
     Provides a set of subnet IDs for a VPC
 ---

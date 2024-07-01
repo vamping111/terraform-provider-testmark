@@ -1,7 +1,7 @@
 ---
 subcategory: "EKS (Elastic Kubernetes)"
 layout: "aws"
-page_title: "CROC Cloud: aws_eks_cluster"
+page_title: "aws_eks_cluster"
 description: |-
   Manages an EKS cluster.
 ---
@@ -75,11 +75,11 @@ In addition to all arguments above, the following attributes are exported:
 * `status` - The status of the EKS cluster. One of `CLAIMED`, `CREATING`, `DELETED`, `DELETING`, `ERROR`, `MODIFYING`, `PENDING`, `PROVISIONING`, `READY`, `REPAIRING`.
 * `tags_all` - Map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 * `vpc_config` -  Nested list containing VPC configuration for the cluster.
-    * `cluster_security_group_id` - The cluster security group that was created by CROC Cloud EKS for the cluster.
+    * `cluster_security_group_id` - The cluster security group that was created by the cloud for the cluster.
     * `vpc_id` - The VPC associated with your cluster.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `enabled_cluster_log_types` - The enabled control plane logs. Always empty.
 * `encryption_config` - Configuration block with encryption configuration for the cluster. Always empty.

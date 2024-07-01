@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_security_groups"
+page_title: "aws_security_groups"
 description: |-
   Get information about a set of Security Groups.
 ---
@@ -47,7 +47,7 @@ For more information about filtering, see the [EC2 API documentation][describe-s
 ## Attributes Reference
 
 * `arns` - ARNs of the matched security groups.
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - IDs of the matches security groups.
 * `vpc_ids` - The VPC IDs of the matched security groups. The data source's tag or filter *will span VPCs* unless the `vpc-id` filter is also used.
 

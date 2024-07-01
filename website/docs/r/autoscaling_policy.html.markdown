@@ -1,7 +1,7 @@
 ---
 subcategory: "Auto Scaling"
 layout: "aws"
-page_title: "AWS: aws_autoscaling_policy"
+page_title: "aws_autoscaling_policy"
 description: |-
   Provides an Auto Scaling Group resource.
 ---
@@ -47,7 +47,7 @@ In addition to all arguments above, the following attributes are exported:
 * `policy_type` - The scaling policy's type.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `estimated_instance_warmup` - The estimated time, in seconds, until a newly launched instance will contribute CloudWatch metrics. Always `0`.
 * `metric_aggregation_type` - The aggregation type for the policy's metrics. Always `""`.

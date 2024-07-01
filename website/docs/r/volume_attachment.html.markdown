@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "CROC Cloud: aws_volume_attachment"
+page_title: "aws_volume_attachment"
 description: |-
   Provides an EBS Volume Attachment
 ---
@@ -55,7 +55,7 @@ In addition to all arguments above, the following attributes are exported:
 * `volume_id` - ID of the volume.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `force_detach` - Whether force volume detaching is enabled. Always empty.
 

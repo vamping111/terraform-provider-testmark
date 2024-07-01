@@ -1,7 +1,7 @@
 ---
 subcategory: "EKS (Elastic Kubernetes)"
 layout: "aws"
-page_title: "CROC Cloud: aws_eks_node_groups"
+page_title: "aws_eks_node_groups"
 description: |-
   Retrieves the EKS node groups names associated with a named EKS cluster.
 ---

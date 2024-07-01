@@ -1,8 +1,8 @@
 ---
 layout: "aws"
-page_title: "Provider: CROC Cloud"
+page_title: "Provider: Rockit Cloud"
 description: |-
-  Use the Terraform CROC Cloud Provider to interact with the various resources supported by CROC Cloud. You must configure the provider with the proper credentials before you can use it.
+  Use the Terraform Rockit Cloud Provider to interact with the various resources supported by Rockit Cloud. You must configure the provider with the proper credentials before you can use it.
 ---
 
 [hashicorp-tutorials]: https://learn.hashicorp.com/tutorials/terraform/infrastructure-as-code?in=terraform/aws-get-started&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS
@@ -11,24 +11,24 @@ description: |-
 [aws-configure-files]: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
 [terraform]: https://docs.cloud.croc.ru/en/api/tools/terraform.html
 
-# CROC Cloud Provider
+# Rockit Cloud Provider
 
-The CROC Cloud Provider is based on the AWS Provider.
-Use it to interact with CROC Cloud services.
+The Rockit Cloud Provider is based on the AWS Provider.
+Use it to interact with Rockit Cloud services.
 The provider needs to be configured with the proper credentials before you can use it.
 
 Use the navigation to the left to read about the available resources.
 
 ~> **NOTE**
-Resource names in the navigation bar have an automatically generated prefix that matches the *croccloud* name.
+Resource names in the navigation bar have an automatically generated prefix that matches the *rockitcloud* name.
 For compatibility with AWS provider configurations, we retained the ``aws`` prefix in resource description and usage examples.
 
 To learn the basics of Terraform using this provider, follow the
 hands-on [get started tutorials][hashicorp-tutorials] on HashiCorp's Learn platform.
 
-Examples of using CROC Cloud services with Terraform can be found in [reference test suite on GitHub][c2-tutorials].
+Examples of using Rockit Cloud services with Terraform can be found in [reference test suite on GitHub][c2-tutorials].
 
-CROC Cloud API is based on AWS API so you can also see examples of using AWS services with Terraform: [AWS services tutorials][aws-tutorials].
+Rockit Cloud API is based on AWS API so you can also see examples of using AWS services with Terraform: [AWS services tutorials][aws-tutorials].
 
 ## Example Usage
 
@@ -38,19 +38,19 @@ For Terraform 0.13 and later:
 terraform {
   required_providers {
     aws = {
-      source  = "c2devel/croccloud"
-      version = "4.14.0-CROC1"
+      source  = "c2devel/rockitcloud"
+      version = "24.1.0"
     }
   }
 }
 
-# Configure the croccloud provider.
+# Configure the rockitcloud provider.
 # The section is named `aws` for backward compatibility.
 provider "aws" {
-  region = "croc"
+  region = "region-1"
 }
 
-# Create a VPC
+# Create a VPC.
 resource "aws_vpc" "example" {
   cidr_block = "10.0.0.0/16"
 }
@@ -58,7 +58,7 @@ resource "aws_vpc" "example" {
 
 ## Authentication and Configuration
 
-Configuration for the CROC Cloud Provider can be derived from several sources,
+Configuration for the Rockit Cloud Provider can be derived from several sources,
 which are applied in the following order:
 
 1. Parameters in the provider configuration.
@@ -77,7 +77,7 @@ Usage:
 
 ```terraform
 provider "aws" {
-  region     = "croc"
+  region     = "region-1"
   access_key = "my-access-key"
   secret_key = "my-secret-key"
 }
@@ -97,13 +97,13 @@ provider "aws" {}
 ```sh
 $ export AWS_ACCESS_KEY_ID="my-access-key"
 $ export AWS_SECRET_ACCESS_KEY="my-secret-key"
-$ export AWS_REGION="croc"
+$ export AWS_REGION="region-1"
 $ terraform plan
 ```
 
 ### Shared Configuration and Credentials Files
 
-CROC Cloud Provider can use [AWS shared configuration and credentials files][aws-configure-files] and source credentials and other settings from them.
+Rockit Cloud Provider can use [AWS shared configuration and credentials files][aws-configure-files] and source credentials and other settings from them.
 By default, these files are located at `$HOME/.aws/config` and `$HOME/.aws/credentials` on Linux and macOS,
 and `"%USERPROFILE%\.aws\config"` and `"%USERPROFILE%\.aws\credentials"` on Windows.
 
@@ -124,6 +124,6 @@ provider "aws" {
 }
 ```
 
-## CROC Cloud Provider Full Configuration
+## Rocki Cloud Provider Full Configuration
 
-For more information about the CROC Cloud Provider configuration, see the documentation on [using Terraform in CROC Cloud][terraform].
+For more information about the Rockit Cloud Provider configuration, see the documentation on [using Terraform][terraform].

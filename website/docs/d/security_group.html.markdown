@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_security_group"
+page_title: "aws_security_group"
 description: |-
     Provides details about a specific Security Group
 ---

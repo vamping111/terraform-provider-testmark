@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "AWS: aws_ebs_snapshot_import"
+page_title: "aws_ebs_snapshot_import"
 description: |-
   Provides an elastic block storage snapshot import resource.
 ---
@@ -62,13 +62,13 @@ In addition to all arguments above, the following attributes are exported:
 
 * `arn` - Amazon Resource Name (ARN) of the EBS snapshot.
 * `id` - The snapshot ID (e.g., snap-12345678).
-* `owner_id` - The CROC Cloud project ID.
+* `owner_id` - The project ID.
 * `owner_alias` - The alias of the EBS snapshot owner.
 * `volume_size` - The size of the drive in GiB.
 * `tags_all` - A map of tags assigned to the resource.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `client_data` - The client-specific data. Always empty.
 * `data_encryption_key_id` - The data encryption key identifier for the snapshot. Always `""`.

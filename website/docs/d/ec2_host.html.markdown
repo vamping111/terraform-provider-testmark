@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_ec2_host"
+page_title: "aws_ec2_host"
 description: |-
   Provides information about a dedicated host.
 ---
@@ -28,7 +28,7 @@ data "aws_ec2_host" "selected" {
     name   = "auto-placement"
     values = ["on"]
   }
-  
+
   filter {
     name   = "state"
     values = ["available"]
@@ -61,6 +61,6 @@ In addition to all arguments above, the following attributes are exported:
 * `host_recovery` - Indicates whether host recovery is enabled or disabled for the dedicated host.
 * `id` - The ID of the dedicated host.
 * `instance_family` - Instance family supported by the dedicated host.
-* `owner_id` - The ID of the account that owns the dedicated host.
+* `owner_id` - The ID of the project that owns the dedicated host.
 * `sockets` - Number of sockets on the dedicated host.
 * `total_vcpus` - Total number of vCPUs on the dedicated host.

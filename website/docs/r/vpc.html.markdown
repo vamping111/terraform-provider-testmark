@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_vpc"
+page_title: "aws_vpc"
 description: |-
   Provides a VPC resource.
 ---
@@ -57,7 +57,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `assign_generated_ipv6_cidr_block` - (Optional) Requests an Amazon-provided IPv6 CIDR block with a /56 prefix length for the VPC. Always `false`.
 * `enable_classiclink` - Whether the VPC has Classiclink enabled. Always `false`.
@@ -71,7 +71,7 @@ These exported attributes are currently unsupported by CROC Cloud:
 * `ipv6_cidr_block_network_border_group` - The Network Border Group Zone name. Always `""`.
 * `ipv6_ipam_pool_id` - IPAM Pool ID for a IPv6 pool. Always `""`.
 * `ipv6_netmask_length` - Netmask length to request from IPAM Pool. Always `0`.
-* `owner_id` - The ID of the CROC Cloud account that owns the VPC. Always `""`.
+* `owner_id` - The ID of the project that owns the VPC. Always `""`.
 
 ## Import
 

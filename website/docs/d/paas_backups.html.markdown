@@ -1,7 +1,7 @@
 ---
 subcategory: "PaaS"
 layout: "aws"
-page_title: "CROC Cloud: aws_paas_backups"
+page_title: "aws_paas_backups"
 description: |-
   Provides list of PaaS service backups IDs.
 ---
@@ -38,4 +38,4 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `backup_ids` - List of backup IDs.
-* `id` - The region (e.g., `croc`).
+* `id` - The region (e.g., `region-1`).

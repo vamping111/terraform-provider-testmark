@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_route_tables"
+page_title: "aws_route_tables"
 description: |-
     Get information on route tables.
 ---
@@ -43,7 +43,7 @@ For more information about filtering, see the [EC2 API documentation][describe-r
 
 ## Attributes Reference
 
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - A list of all the route table ids found.
 
 [describe-route-tables]: https://docs.cloud.croc.ru/en/api/ec2/routes/DescribeRouteTables.html

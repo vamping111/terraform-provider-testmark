@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket"
+page_title: "aws_s3_bucket"
 description: |-
     Provides details about a specific S3 bucket.
 ---
@@ -37,7 +37,7 @@ In addition to all arguments above, the following attributes are exported:
 * `region` - The region this bucket resides in.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `bucket_domain_name` - The bucket domain name. Contains domain name of format `bucketname.s3.amazonaws.com`.
 * `bucket_regional_domain_name` - The bucket region-specific domain name. Contains domain name based on AWS region.

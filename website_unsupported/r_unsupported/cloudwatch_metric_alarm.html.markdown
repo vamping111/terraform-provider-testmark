@@ -9,7 +9,7 @@ description: |-
 # Resource: aws_cloudwatch_metric_alarm
 
 -> **Unsupported resource**
-This resource is currently unsupported by CROC Cloud
+This resource is currently unsupported.
 
 Provides a CloudWatch Metric Alarm resource.
 

@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_subnet"
+page_title: "aws_subnet"
 description: |-
   Provides an VPC subnet resource.
 ---
@@ -48,7 +48,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `arn` - ARN of the subnet. Always `""`.
 * `assign_ipv6_address_on_creation` - Whether an IPv6 address is assigned on creation. Always `false`.
@@ -62,7 +62,7 @@ These exported attributes are currently unsupported by CROC Cloud:
 * `map_customer_owned_ip_on_launch` - Whether customer owned IP addresses are assigned on network interface creation. Always `false`.
 * `map_public_ip_on_launch` - Whether public IP addresses are assigned on instance launch. Always `false`.
 * `outpost_arn` - ARN of the Outpost. Always `""`.
-* `owner_id` - ID of the CROC Cloud account that owns the subnet. Always `""`.
+* `owner_id` - The ID of the project that owns the subnet. Always `""`.
 * `private_dns_hostname_type_on_launch` - The type of hostnames assigned to instances in the subnet at launch. Always `""`.
 
 ## Timeouts

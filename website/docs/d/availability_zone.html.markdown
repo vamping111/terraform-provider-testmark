@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_availability_zone"
+page_title: "aws_availability_zone"
 description: |-
     Provides details about a specific availability zone
 ---
@@ -56,7 +56,7 @@ In addition to all arguments above, the following attributes are exported:
 * `state` - A specific availability zone state to require. Possible values: `"available"`, `"information"`, `"impaired"`, `"unavailable"`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `all_availability_zones` - Whether all availability zones and local zones are included regardless of your opt in status. Always empty.
 * `group_name` - Group name. Always `""`.

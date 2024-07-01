@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_route_table"
+page_title: "aws_route_table"
 description: |-
   Provides a resource to create a VPC routing table.
 ---
@@ -107,12 +107,12 @@ attribute once the route resource is created.
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_gateway_id` - ID of a carrier gateway. Always `""`.
 * `destination_prefix_list_id` - ID of a managed prefix list destination of the route. Always `""`.
 * `ipv6_cidr_block` - The Ipv6 CIDR block of the route. Always `""`.
-* `owner_id` - ID of the CROC Cloud account that owns the Default Network ACL. Always `""`.
+* `owner_id` - The ID of the project that owns the Default Network ACL. Always `""`.
 * `route`
     * `core_network_arn` - ARN of a core network. Always `""`.
     * `egress_only_gateway_id` - ID of a VPC Egress Only Internet Gateway. Always `""`.

@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "AWS: aws_ebs_volumes"
+page_title: "aws_ebs_volumes"
 description: |-
     Provides identifying information for EBS volumes matching given criteria
 ---
@@ -64,7 +64,7 @@ For more information about filtering, see the [EC2 API documentation][describe-v
 
 ## Attributes Reference
 
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - A set of all the EBS volume IDs found.
 
 [describe-volumes]: https://docs.cloud.croc.ru/en/api/ec2/volumes/DescribeVolumes.html

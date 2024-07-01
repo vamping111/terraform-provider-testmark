@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "AWS: aws_ebs_volume"
+page_title: "aws_ebs_volume"
 description: |-
   Provides an elastic block storage resource.
 ---
@@ -46,7 +46,7 @@ In addition to all arguments above, the following attributes are exported:
 * `throughput` - The throughput that the volume supports, in MiB/s.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `encrypted` - Whether the disk is encrypted. Always `false`.
 * `kms_key_id` - The ARN for the KMS encryption key. Always `""`.

@@ -1,7 +1,7 @@
 ---
 subcategory: "PaaS"
 layout: "aws"
-page_title: "CROC Cloud: aws_paas_backup_users"
+page_title: "aws_paas_backup_users"
 description: |-
   Provides information about users with the PaaS Backup User project privileges.
 ---
@@ -32,7 +32,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The region (e.g., `croc`).
+* `id` - The region (e.g., `region-1`).
 * `users` - List of users. Each user has the following structure:
     * `email` - The user email.
     * `enabled` - Indicates whether the user is active.

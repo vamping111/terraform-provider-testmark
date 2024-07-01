@@ -1,7 +1,7 @@
 ---
 subcategory: "Route 53"
 layout: "aws"
-page_title: "CROC Cloud: aws_route53_zone"
+page_title: "aws_route53_zone"
 description: |-
   Manages a Route53 Hosted Zone
 ---
@@ -87,7 +87,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block](/docs/providers/aws/index.html#default_tags-configuration-block).
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `vpc`
     * `vpc_region` - Region of the VPC to associate. Defaults to AWS provider region. Always `""`.

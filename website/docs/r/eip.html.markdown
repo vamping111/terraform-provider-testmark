@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "CROC Cloud: aws_eip"
+page_title: "aws_eip"
 description: |-
   Provides an Elastic IP resource.
 ---
@@ -85,7 +85,7 @@ case both options are defined as the api only requires one or the other.
 
 In addition to all arguments above, the following attributes are exported:
 
-* `allocation_id` - ID that CROC Cloud assigns to represent the allocation of the elastic IP address for use with instances in a VPC.
+* `allocation_id` - ID that the cloud assigns to represent the allocation of the elastic IP address for use with instances in a VPC.
 * `association_id` - ID representing the association of the address with an instance in a VPC.
 * `domain` - Indicates if this EIP is for use in VPC (`vpc`).
 * `id` - Contains the EIP allocation ID.
@@ -94,7 +94,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_ip` - Carrier IP address. Always `""`.
 * `customer_owned_ip` - Customer owned IP. Always `""`.

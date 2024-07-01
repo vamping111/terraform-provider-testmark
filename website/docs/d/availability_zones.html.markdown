@@ -1,15 +1,14 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_availability_zones"
+page_title: "aws_availability_zones"
 description: |-
-    Provides a list of availability zones which can be used by an AWS account.
+    Provides a list of availability zones.
 ---
 
 # Data Source: aws_availability_zones
 
-The availability zones data source allows access to the list of CROC Cloud
-availability zones which can be accessed by an CROC Cloud account.
+Provides a list of availability zones.
 
 This is different from the [`aws_availability_zone`][tf-availability-zone] (singular) data source,
 which provides some details about a specific availability zone.
@@ -55,7 +54,7 @@ In addition to all arguments above, the following attributes are exported:
 * `names` - A list of the availability zone names available to the account.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `all_availability_zones` - Whether all availability zones and local zones are included regardless of your opt in status. Always empty.
 * `exclude_names` - List of availability zone names to exclude. Always empty.

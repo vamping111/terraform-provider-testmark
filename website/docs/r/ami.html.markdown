@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "CROC Cloud: aws_ami"
+page_title: "aws_ami"
 description: |-
   Creates and manages a custom Amazon Machine Image (AMI).
 ---
@@ -13,7 +13,7 @@ description: |-
 
 The AMI (Amazon Machine Image) resource allows the creation and management of images.
 
-If you just want to share an existing image with another CROC Cloud account,
+If you just want to share an existing image with another project,
 it's better to use [`aws_ami_launch_permission`](ami_launch_permission.html.markdown) instead.
 
 For more information about images, see [user documentation][images].
@@ -87,15 +87,15 @@ In addition to all arguments above, the following attributes are exported:
 * `arn` - The ARN of the image.
 * `id` - The ID of the created image.
 * `root_snapshot_id` - The Snapshot ID for the root volume (for EBS-backed images)
-* `image_owner_alias` - The owner alias (for example, `self`) or the CROC Cloud project ID.
+* `image_owner_alias` - The owner alias (for example, `self`) or the project ID.
 * `image_type` - The type of image.
-* `owner_id` - The CROC Cloud project ID.
+* `owner_id` - The project ID.
 * `platform` - This value is set to windows for Windows images; otherwise, it is blank.
 * `public` - Indicates whether the image has public launch permissions.
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `boot_mode` - The boot mode of the image. Always `""`.
 * `deprecation_time` - The date and time to deprecate the image. Always `""`.

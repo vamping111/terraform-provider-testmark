@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_security_group_rule"
+page_title: "aws_security_group_rule"
 description: |-
   Provides a security group rule resource.
 ---
@@ -71,14 +71,14 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the security group rule.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `prefix_list_ids` - List of prefix list IDs (for allowing access to VPC endpoints). Always empty.
 
 ## Import
 
 -> **Unsupported operation**
-Import security group rules is currently unsupported by CROC Cloud
+Import security group rules is currently unsupported.
 
 Security group rules can be imported using the `security_group_id`, `type`, `protocol`, `from_port`, `to_port`, and source(s)/destination(s) (e.g., `cidr_block`) separated by underscores (`_`). All parts are required.
 

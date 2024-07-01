@@ -1,7 +1,7 @@
 ---
 subcategory: "ELB (Elastic Load Balancing)"
 layout: "aws"
-page_title: "AWS: aws_lb"
+page_title: "aws_lb"
 description: |-
   Provides a Load Balancer data source.
 ---

@@ -1,7 +1,7 @@
 ---
 subcategory: "EBS (EC2)"
 layout: "aws"
-page_title: "AWS: aws_snapshot_create_volume_permission"
+page_title: "aws_snapshot_create_volume_permission"
 description: |-
   Adds create volume permission to an EBS Snapshot
 ---
@@ -33,7 +33,7 @@ resource "aws_ebs_snapshot" "example_snapshot" {
 The following arguments are supported:
 
 * `snapshot_id` - (required) A snapshot ID.
-* `account_id` - (required) The CROC Cloud project ID (`project@customer`).
+* `account_id` - (required) The project ID (`project@customer`).
 
 ## Attributes Reference
 

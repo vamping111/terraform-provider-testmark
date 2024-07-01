@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "CROC Cloud: aws_instances"
+page_title: "aws_instances"
 description: |-
   Provides information about an EC2 instances.
 ---
@@ -55,7 +55,7 @@ For more information about filtering, see the [EC2 API documentation][describe-i
 
 ## Attributes Reference
 
-* `id` - Region (for example, `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - IDs of instances found through the filter.
 * `private_ips` - Private IP addresses of instances found through the filter.
 * `public_ips` - Public IP addresses of instances found through the filter.

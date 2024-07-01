@@ -1,7 +1,7 @@
 ---
 subcategory: "Route 53"
 layout: "aws"
-page_title: "CROC Cloud: aws_route53_record"
+page_title: "aws_route53_record"
 description: |-
   Provides a Route53 record resource.
 ---
@@ -66,7 +66,7 @@ In addition to all arguments above, the following attributes are exported:
 * `fqdn` - [FQDN](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) built using the zone domain and `name`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `set_identifier` - Unique identifier to differentiate records with routing policies from one another. Always empty.
 * `health_check_id` - The health check the record should be associated with. Always empty.

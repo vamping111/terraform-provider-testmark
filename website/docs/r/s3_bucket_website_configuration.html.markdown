@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket_website_configuration"
+page_title: "aws_s3_bucket_website_configuration"
 description: |-
   Provides an S3 bucket website configuration resource.
 ---
@@ -100,7 +100,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The `bucket`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
 * `redirect`:

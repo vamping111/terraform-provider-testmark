@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_route"
+page_title: "aws_route"
 description: |-
   Provides a resource to create a routing entry in a VPC routing table.
 ---
@@ -49,12 +49,12 @@ In addition to all arguments above, the following attributes are exported:
 ~> **NOTE:** Only the arguments that are configured (one of the above) will be exported as an attribute once the resource is created.
 
 * `id` - Route identifier computed from the routing table identifier and route destination.
-* `instance_owner_id` - The CROC Cloud project ID that owns the EC2 instance.
+* `instance_owner_id` - The project ID that owns the EC2 instance.
 * `origin` - How the route was created - `CreateRouteTable`, `CreateRoute` or `EnableVgwRoutePropagation`.
 * `state` - The state of the route - `active` or `blackhole`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_gateway_id` - ID of a carrier gateway. Always `""`.
 * `core_network_arn` - ARN of a core network. Always `""`.

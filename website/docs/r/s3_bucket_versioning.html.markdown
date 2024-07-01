@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket_versioning"
+page_title: "aws_s3_bucket_versioning"
 description: |-
   Provides an S3 bucket versioning resource.
 ---
@@ -24,7 +24,7 @@ For more information about S3 versioning, see [user documentation][s3-versioning
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -48,7 +48,7 @@ resource "aws_s3_bucket_versioning" "versioning_example" {
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -78,7 +78,7 @@ This example shows the `aws_s3_object.example` depending implicitly on the versi
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 }
@@ -121,7 +121,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The `bucket`.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `expected_bucket_owner` - The account ID of the expected bucket owner. Always `""`.
 * `mfa` - The concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device. Always empty.

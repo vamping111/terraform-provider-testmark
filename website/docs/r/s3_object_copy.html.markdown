@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_object_copy"
+page_title: "aws_s3_object_copy"
 description: |-
   Provides a resource for copying an S3 object.
 ---
@@ -52,8 +52,8 @@ This configuration block has the following required arguments:
 
 This configuration block has the following optional arguments (one of the three is required):
 
-* `email` - (Optional) Email address of the grantee (CROC Cloud S3 Project email). Used only when `type` is `AmazonCustomerByEmail`.
-* `id` - (Optional) The canonical user ID of the grantee (CROC Cloud S3 User ID). Used only when `type` is `CanonicalUser`.
+* `email` - (Optional) Email address of the grantee (S3 Project email). Used only when `type` is `AmazonCustomerByEmail`.
+* `id` - (Optional) The canonical user ID of the grantee (S3 User ID). Used only when `type` is `CanonicalUser`.
 * `uri` - (Optional) URI of the grantee group. Supported groups are `http://acs.amazonaws.com/groups/global/AllUsers` and `http://acs.amazonaws.com/groups/global/AuthenticatedUsers`. Used only when `type` is `Group`.
 
 -> **Note:** Terraform ignores all leading `/`s in the object's `key` and treats multiple `/`s in the rest of the object's `key` as a single `/`, so values of `/index.html` and `index.html` correspond to the same S3 object as do `first//second///third//` and `first/second/third/`.
@@ -68,7 +68,7 @@ In addition to all arguments above, the following attributes are exported:
 * `version_id` - Version ID of the newly created copy.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `cache_control` - Specifies caching behavior along the request/reply chain. Read [w3c cache_control] for further details. Always `""`.
 * `content_disposition` - Specifies presentational information for the object. Read [w3c content_disposition] for further information. Always `""`.

@@ -1,7 +1,7 @@
 ---
 subcategory: "EC2 (Elastic Compute Cloud)"
 layout: "aws"
-page_title: "AWS: aws_eip"
+page_title: "aws_eip"
 description: |-
     Provides details about a specific Elastic IP
 ---
@@ -72,14 +72,14 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - If VPC Elastic IP, the allocation identifier.
 * `instance_id` - The ID of the instance that the address is associated with (if any).
 * `network_interface_id` - The ID of the network interface.
-* `network_interface_owner_id` - The ID of the CROC Cloud project that owns the network interface.
+* `network_interface_owner_id` - The ID of the project that owns the network interface.
 * `private_ip` - The private IP address associated with the Elastic IP address.
 * `public_ip` - Public IP address of Elastic IP.
 * `public_ipv4_pool` - The ID of an address pool.
 * `tags` - Key-value map of tags associated with Elastic IP.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `carrier_ip` - Carrier IP address. Always `""`.
 * `customer_owned_ip` - Customer owned IP. Always `""`.

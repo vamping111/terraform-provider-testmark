@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_network_interface"
+page_title: "aws_network_interface"
 description: |-
   Provides an elastic network interface (ENI) resource.
 ---
@@ -58,12 +58,12 @@ In addition to all arguments above, the following attributes are exported:
 * `arn` - ARN of the network interface.
 * `id` - ID of the network interface.
 * `mac_address` - MAC address of the network interface.
-* `owner_id` - The CROC Cloud project ID.
+* `owner_id` - The project ID.
 * `private_dns_name` - Private DNS name of the network interface (IPv4).
 * `tags_all` - Map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `interface_type` - Type of network interface to create. Always `"interface"`.
 * `ipv4_prefix_count` - Number of IPv4 prefixes that AWS automatically assigns to the network interface. Always `0`.

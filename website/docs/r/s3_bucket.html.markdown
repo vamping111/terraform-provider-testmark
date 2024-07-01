@@ -1,7 +1,7 @@
 ---
 subcategory: "S3 (Simple Storage)"
 layout: "aws"
-page_title: "CROC Cloud: aws_s3_bucket"
+page_title: "aws_s3_bucket"
 description: |-
   Provides a S3 bucket resource.
 ---
@@ -55,7 +55,7 @@ Configuring with both will cause inconsistencies and may overwrite configuration
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -81,7 +81,7 @@ resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "public-read"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -113,7 +113,7 @@ resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "public-read"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -137,7 +137,7 @@ resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
   acl    = "private"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -157,7 +157,7 @@ resource "aws_s3_bucket" "bucket" {
   bucket = "tf-example"
   acl    = "private"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -192,7 +192,7 @@ resource "aws_s3_bucket" "versioning_bucket" {
   bucket = "tf-example"
   acl    = "private"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -222,7 +222,7 @@ data "aws_canonical_user_id" "current_user" {}
 resource "aws_s3_bucket" "example" {
   bucket = "tf-example"
 
-  # Use the prepared provider configuration to connect to CROC Cloud S3
+  # Use the predefined provider configuration to connect to object storage
   # https://docs.cloud.croc.ru/en/api/tools/terraform.html#providers-tf
   provider = aws.noregion
 
@@ -278,7 +278,7 @@ The `cors_rule` configuration block supports the following arguments:
 
 The `grant` configuration block supports the following arguments:
 
-* `id` - (Optional) Canonical user ID to grant for (CROC Cloud S3 User ID). Used only when `type` is `CanonicalUser`.
+* `id` - (Optional) Canonical user ID to grant for (S3 User ID). Used only when `type` is `CanonicalUser`.
 * `type` - (Required) Type of grantee to apply for. Valid values are `CanonicalUser` and `Group`. `AmazonCustomerByEmail` is not supported.
 * `permissions` - (Required) List of permissions to apply for grantee. Valid values are `READ`, `WRITE`, `READ_ACP`, `WRITE_ACP`, `FULL_CONTROL`.
 * `uri` - (Optional) Uri address to grant for. Supported groups are `http://acs.amazonaws.com/groups/global/AllUsers` and `http://acs.amazonaws.com/groups/global/AuthenticatedUsers`. Used only when `type` is `Group`.
@@ -340,7 +340,7 @@ In addition to all arguments above, the following attributes are exported:
 * `tags_all` - A map of tags assigned to the resource, including those inherited from the provider [`default_tags` configuration block][default-tags].
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `acceleration_status` - Sets the accelerate configuration of an existing bucket. Always `""`.
 * `bucket_domain_name` - The bucket domain name. Contains domain name of format `bucketname.s3.amazonaws.com`.

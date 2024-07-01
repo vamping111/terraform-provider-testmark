@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC (Virtual Private Cloud)"
 layout: "aws"
-page_title: "AWS: aws_route_table_association"
+page_title: "aws_route_table_association"
 description: |-
   Provides a resource to create an association between a route table and a subnet.
 ---
@@ -48,7 +48,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the association
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported by CROC Cloud:
+These exported attributes are currently unsupported:
 
 * `gateway_id` - Gateway ID to create an association. Always `""`.
 

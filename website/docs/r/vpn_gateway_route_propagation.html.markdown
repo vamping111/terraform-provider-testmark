@@ -1,7 +1,7 @@
 ---
 subcategory: "VPN (Site-to-Site)"
 layout: "aws"
-page_title: "AWS: aws_vpn_gateway_route_propagation"
+page_title: "aws_vpn_gateway_route_propagation"
 description: |-
   Requests automatic route propagation between a VPN gateway and a route table.
 ---
@@ -16,7 +16,7 @@ propagation not explicitly listed in its value will be removed.
 
 ## Example Usage
 
--> In CROC Cloud the terms VPC, Internet Gateway, VPN Gateway are equivalent
+-> The terms VPC, Internet Gateway, VPN Gateway are equivalent
 
 ```terraform
 resource "aws_vpc" "example" {

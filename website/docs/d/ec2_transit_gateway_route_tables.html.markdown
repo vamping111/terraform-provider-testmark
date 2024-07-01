@@ -1,7 +1,7 @@
 ---
 subcategory: "Transit Gateway"
 layout: "aws"
-page_title: "CROC Cloud: aws_ec2_transit_gateway_route_tables"
+page_title: "aws_ec2_transit_gateway_route_tables"
 description: |-
   Provides list of transit gateway route table IDs.
 ---
@@ -39,10 +39,10 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The region (e.g., `croc`).
+* `id` - The region (e.g., `region-1`).
 * `ids` - List of transit gateway route table IDs.
 
 ->  **Unsupported attributes**
-These attributes are currently unsupported by CROC Cloud:
+These attributes are currently unsupported:
 
 * `tags` - A mapping of tags, each pair of which must exactly match a pair on the desired transit gateway route table. Always empty.

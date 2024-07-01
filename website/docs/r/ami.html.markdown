@@ -6,7 +6,7 @@ description: |-
   Creates and manages a custom Amazon Machine Image (AMI).
 ---
 
-[images]: https://docs.cloud.croc.ru/en/services/instances_and_volumes/images.html
+[images]: https://docs.cloud.croc.ru/en/services/storage/images.html
 [default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
 
 # Resource: aws_ami
@@ -44,7 +44,7 @@ The following arguments are supported:
 * `name` - (Required) An unique name for the image.
 * `description` - (Optional) A longer, human-readable description for the image.
 * `root_device_name` - (Optional) The name of the root device. Valid values are `disk<N>`, `cdrom<N>`, `floppy<N>`, `menu` (N - disk number). Defaults to `disk1`.
-* `virtualization_type` - (Optional) Keyword to choose what virtualization mode created instances will use. Valid values: `hvm`.
+* `virtualization_type` - (Optional) Keyword to choose what virtualization mode created instances will use. Valid values are `hvm`, `hvm-legacy`. Defaults to `hvm`.
 * `architecture` - (Optional) Machine architecture for created instances. Defaults to `x86_64`.
 * `ebs_block_device` - (Optional) Nested block describing an EBS block device that should be
   attached to created instances. The structure of this block is described below.
@@ -65,7 +65,7 @@ Nested `ebs_block_device` blocks have the following structure:
 * `volume_size` - (Required unless `snapshot_id` is set) The size of created volumes in GiB.
   If `snapshot_id` is set and `volume_size` is omitted then the volume will have the same size
   as the selected snapshot.
-* `volume_type` - (Optional) The type of EBS volume to create. Valid values are `st2`, `gp2`, `io2`.
+* `volume_type` - (Optional) The type of EBS volume to create. Valid values are `st2`, `gp2`, `io2`. Defaults to `st2`.
 
 Nested `ephemeral_block_device` blocks have the following structure:
 

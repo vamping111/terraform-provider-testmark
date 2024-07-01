@@ -32,7 +32,7 @@ var (
 )
 
 func ResourceRecord() *schema.Resource {
-	//lintignore:R011
+	// lintignore:R011
 	return &schema.Resource{
 		Create: resourceRecordCreate,
 		Read:   resourceRecordRead,
@@ -652,16 +652,13 @@ func findRecord(d *schema.ResourceData, meta interface{}) (*route53.ResourceReco
 	// If this isn't a Weighted, Latency, Geo, or Failover resource with
 	// a SetIdentifier we only need to look at the first record in the response since there can be
 	// only one
-	maxItems := "1"
+	// maxItems := "1"
 	// if recordSetIdentifier != "" {
 	// 	maxItems = "100"
 	// }
 
 	lopts := &route53.ListResourceRecordSetsInput{
-		HostedZoneId:    aws.String(CleanZoneID(zone)),
-		StartRecordName: aws.String(recordName),
-		StartRecordType: aws.String(recordType),
-		MaxItems:        aws.String(maxItems),
+		HostedZoneId: aws.String(CleanZoneID(zone)),
 	}
 
 	log.Printf("[DEBUG] List resource records sets for zone: %s, opts: %s",

@@ -117,7 +117,7 @@ dax,dax,dax,dax,,dax,,,DAX,DAX,,1,,aws_dax_,,dax_,DynamoDB Accelerator (DAX),Ama
 dynamodbstreams,dynamodbstreams,dynamodbstreams,dynamodbstreams,,dynamodbstreams,,,DynamoDBStreams,DynamoDBStreams,,1,,aws_dynamodbstreams_,,dynamodbstreams_,DynamoDB Streams,Amazon,,,,,
 ,,,,,ec2ebs,ec2,,,,,,aws_(ebs_|volume_attach|snapshot_create),aws_ec2ebs_,ebs_,ebs_;volume_attachment;snapshot_,EBS (EC2),Amazon,x,x,,,Part of EC2
 ebs,ebs,ebs,ebs,,ebs,,,EBS,EBS,,1,,aws_ebs_,,changewhenimplemented,EBS (Elastic Block Store),Amazon,,,,,
-ec2,ec2,ec2,ec2,,ec2,ec2,,EC2,EC2,,1,aws_(ami|availability_zone|ec2_(availability|capacity|fleet|host|instance|serial|spot|tag)|eip|instance|key_pair|launch_template|placement_group|spot),aws_ec2_,ec2_,ami;availability_zone;ec2_availability_;ec2_capacity_;ec2_fleet;ec2_host;ec2_instance_;ec2_serial_;ec2_spot_;ec2_tag;eip;instance;key_pair;launch_template;placement_group;spot_,EC2 (Elastic Compute Cloud),Amazon,,,,,
+ec2,ec2,ec2,ec2,,ec2,ec2,,EC2,EC2,,1,aws_(ami|availability_zone|ec2_(availability|capacity|fleet|host|instance|serial|spot|tag)|eip|instance|key_pair|launch_template|placement_group|spot),aws_ec2_,ec2_,ami;availability_zone;ec2_availability_;ec2_capacity_;ec2_fleet;ec2_host;ec2_instance_;ec2_serial_;ec2_spot_;ec2_tag;eip;instance;key_pair;launch_template;placement_group;spot_,EC2 (Elastic Compute Cloud),Amazon,,,,EC2_URL,
 imagebuilder,imagebuilder,imagebuilder,imagebuilder,,imagebuilder,,,ImageBuilder,Imagebuilder,,1,,aws_imagebuilder_,,imagebuilder_,EC2 Image Builder,Amazon,,,,,
 ec2-instance-connect,ec2instanceconnect,ec2instanceconnect,ec2instanceconnect,,ec2instanceconnect,,,EC2InstanceConnect,EC2InstanceConnect,,1,,aws_ec2instanceconnect_,,ec2instanceconnect_,EC2 Instance Connect,AWS,,,,,
 ecr,ecr,ecr,ecr,,ecr,,,ECR,ECR,,1,,aws_ecr_,,ecr_,ECR (Elastic Container Registry),Amazon,,,,,
@@ -255,7 +255,7 @@ opsworks-cm,opsworkscm,opsworkscm,opsworkscm,,opsworkscm,,,OpsWorksCM,OpsWorksCM
 organizations,organizations,organizations,organizations,,organizations,,,Organizations,Organizations,,1,,aws_organizations_,,organizations_,Organizations,AWS,,,,,
 outposts,outposts,outposts,outposts,,outposts,,,Outposts,Outposts,,1,,aws_outposts_,,outposts_,Outposts,AWS,,,,,
 ,,,,,ec2outposts,ec2,,,,,,aws_ec2_(coip_pool|local_gateway),aws_ec2outposts_,outposts_,ec2_coip_pool;ec2_local_gateway,Outposts (EC2),AWS,x,x,,,Part of EC2
-paas,paas,paas,paas,,paas,,,PaaS,PaaS,,1,,aws_paas_,,paas_,PaaS,,,,,,
+paas,paas,paas,paas,,paas,,,PaaS,PaaS,,1,,aws_paas_,,paas_,PaaS,,,,,PAAS_URL,
 panorama,panorama,panorama,panorama,,panorama,,,Panorama,Panorama,,1,,aws_panorama_,,panorama_,Panorama,AWS,,,,,
 ,,,,,,,,,,,,,,,,ParallelCluster,AWS,x,,,,No SDK support
 personalize,personalize,personalize,personalize,,personalize,,,Personalize,Personalize,,1,,aws_personalize_,,personalize_,Personalize,Amazon,,,,,

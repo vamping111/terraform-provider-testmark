@@ -266,6 +266,7 @@ func (s service) DataSourceSchema() *schema.Schema {
 					"monitoring_labels": {
 						Type:     schema.TypeMap,
 						Computed: true,
+						Elem:     &schema.Schema{Type: schema.TypeString},
 					},
 				},
 			},

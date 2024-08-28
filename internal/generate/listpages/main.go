@@ -46,6 +46,7 @@ type TemplateData struct {
 }
 
 func main() {
+	log.SetPrefix("generate/listpage: ")
 	log.SetFlags(0)
 	flag.Usage = usage
 	flag.Parse()
@@ -62,6 +63,8 @@ func main() {
 	}
 
 	servicePackage := filepath.Base(wd)
+	log.SetPrefix(fmt.Sprintf("generate/listpage: %s: ", servicePackage))
+
 	awsService, err := names.AWSGoV1Package(servicePackage)
 
 	if err != nil {
@@ -140,7 +143,7 @@ func (g *Generator) printHeader(headerInfo HeaderInfo) {
 
 func (g *Generator) parsePackage(sourcePackage string) {
 	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedSyntax,
+		Mode: packages.NeedName | packages.NeedTypes | packages.NeedSyntax,
 	}
 	pkgs, err := packages.Load(cfg, sourcePackage)
 	if err != nil {

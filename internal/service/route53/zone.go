@@ -254,7 +254,7 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 
 	tags = tags.IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}
@@ -427,13 +427,13 @@ func deleteAllRecordsInHostedZoneId(hostedZoneId, hostedZoneName string, conn *r
 	return nil
 }
 
+//nolint:unparam // Unsupported r53 api methods are commented out.
 func dnsSECStatus(conn *route53.Route53, hostedZoneID string) (string, error) {
 	// input := &route53.GetDNSSECInput{
 	// 	HostedZoneId: aws.String(hostedZoneID),
 	// }
 
-	var output *route53.GetDNSSECOutput
-	output = &route53.GetDNSSECOutput{
+	output := &route53.GetDNSSECOutput{
 		// FIXME: 1 = NOT_SIGNING. Remove after DNSSEC implementation.
 		Status: &route53.DNSSECStatus{ServeSignature: aws.String("1")},
 	}
@@ -649,6 +649,7 @@ func flattenVPCs(vpcs []*route53.VPC) []interface{} {
 	return l
 }
 
+//nolint:unparam // Unsupported r53 api methods are commented out.
 func hostedZoneVPCAssociate(conn *route53.Route53, zoneID string, vpc *route53.VPC) error {
 	input := &route53.AssociateVPCWithHostedZoneInput{
 		HostedZoneId: aws.String(zoneID),
@@ -671,6 +672,7 @@ func hostedZoneVPCAssociate(conn *route53.Route53, zoneID string, vpc *route53.V
 	return nil
 }
 
+//nolint:unparam // Unsupported r53 api methods are commented out.
 func hostedZoneVPCDisassociate(conn *route53.Route53, zoneID string, vpc *route53.VPC) error {
 	input := &route53.DisassociateVPCFromHostedZoneInput{
 		HostedZoneId: aws.String(zoneID),

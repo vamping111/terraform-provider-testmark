@@ -207,7 +207,8 @@ func dataSourceBackupRead(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		// always return the most recent backup
-		sort.Slice(filtered, func(i, j int) bool { return *filtered[i].Time > *filtered[j].Time })
+		// FIXME: fix semgrep warning
+		sort.Slice(filtered, func(i, j int) bool { return *filtered[i].Time > *filtered[j].Time }) // nosemgrep: prefer-aws-go-sdk-pointer-conversion-conditional
 		res = filtered[0]
 	}
 

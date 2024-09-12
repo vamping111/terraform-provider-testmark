@@ -54,7 +54,7 @@ func dataSourceUsersRead(d *schema.ResourceData, meta interface{}) error {
 
 	for _, r := range results {
 		names = append(names, aws.StringValue(r.UserName))
-		arns = append(arns, aws.StringValue(r.Arn))
+		arns = append(arns, aws.StringValue(r.UserArn))
 	}
 
 	if err := d.Set("names", names); err != nil {

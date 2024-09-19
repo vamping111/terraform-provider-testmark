@@ -1,5 +1,6 @@
 package iam
 
 const (
-	UserNotFoundCode = "UserNotFound"
+	PolicyNotFoundCode = "InvalidPolicy.NotFound"
+	UserNotFoundCode   = "UserNotFound"
 )

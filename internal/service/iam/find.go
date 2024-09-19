@@ -100,7 +100,7 @@ func FindPolicies(conn *iam.IAM, arn, name, pathPrefix string) ([]*iam.Policy, e
 				continue
 			}
 
-			if arn != "" && arn != aws.StringValue(p.Arn) {
+			if arn != "" && arn != aws.StringValue(p.PolicyArn) {
 				continue
 			}
 
@@ -115,6 +115,31 @@ func FindPolicies(conn *iam.IAM, arn, name, pathPrefix string) ([]*iam.Policy, e
 	})
 
 	return results, err
+}
+
+func FindPolicyByArn(conn *iam.IAM, arn string) (*iam.Policy, error) {
+	input := &iam.GetPolicyInput{
+		PolicyArn: aws.String(arn),
+	}
+
+	output, err := conn.GetPolicy(input)
+
+	if tfawserr.ErrCodeEquals(err, PolicyNotFoundCode) {
+		return nil, &retry.NotFoundError{
+			LastError:   err,
+			LastRequest: input,
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil || output.Policy == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Policy, nil
 }
 
 func FindUsers(conn *iam.IAM, nameRegex, pathPrefix string) ([]*iam.User, error) {

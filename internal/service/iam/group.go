@@ -3,23 +3,27 @@ package iam
 import (
 	"fmt"
 	"log"
-	"regexp"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2/tfawserr"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
 )
 
+const (
+	groupNameMaxLen = 128
+)
+
 func ResourceGroup() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGroupCreate,
 		Read:   resourceGroupRead,
-		Update: resourceGroupUpdate,
+		// FIXME: Test after UpdateGroup is supported in C2 IAM API.
+		// Update: resourceGroupUpdate,
 		Delete: resourceGroupDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -30,22 +34,34 @@ func ResourceGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"unique_id": {
+			"create_date": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"group_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validResourceName(groupNameMaxLen),
+			},
+			"owner": {
 				Type:     schema.TypeString,
-				Required: true,
-				ValidateFunc: validation.StringMatch(
-					regexp.MustCompile(`^[0-9A-Za-z=,.@\-_+]+$`),
-					"must only contain alphanumeric characters, hyphens, underscores, commas, periods, @ symbols, plus and equals signs",
-				),
+				Computed: true,
 			},
 			"path": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "/",
+				ForceNew: true,
+			},
+			"type": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice(iam.GrantsTypeType_Values(), false),
 			},
 		},
 	}
@@ -54,82 +70,62 @@ func ResourceGroup() *schema.Resource {
 func resourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
 	name := d.Get("name").(string)
-	path := d.Get("path").(string)
 
 	request := &iam.CreateGroupInput{
-		Path:      aws.String(path),
 		GroupName: aws.String(name),
+		Type:      aws.String(d.Get("type").(string)),
 	}
 
-	createResp, err := conn.CreateGroup(request)
-	if err != nil {
-		return fmt.Errorf("Error creating IAM Group %s: %s", name, err)
+	if v, ok := d.GetOk("path"); ok {
+		request.Path = aws.String(v.(string))
 	}
-	d.SetId(aws.StringValue(createResp.Group.GroupName))
+
+	log.Printf("[DEBUG] Creating IAM group: %s", request)
+	createResp, err := conn.CreateGroup(request)
+
+	if err != nil {
+		return fmt.Errorf("error creating IAM group %s: %w", name, err)
+	}
+
+	d.SetId(aws.StringValue(createResp.Group.GroupArn))
 
 	return resourceGroupRead(d, meta)
 }
 
 func resourceGroupRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
+	arn := d.Id()
 
-	request := &iam.GetGroupInput{
-		GroupName: aws.String(d.Id()),
-	}
+	group, _, err := FindGroupByArn(conn, arn)
 
-	var getResp *iam.GetGroupOutput
-
-	err := resource.Retry(propagationTimeout, func() *resource.RetryError {
-		var err error
-
-		getResp, err = conn.GetGroup(request)
-
-		if d.IsNewResource() && tfawserr.ErrCodeEquals(err, iam.ErrCodeNoSuchEntityException) {
-			return resource.RetryableError(err)
-		}
-
-		if err != nil {
-			return resource.NonRetryableError(err)
-		}
-
-		return nil
-	})
-
-	if tfresource.TimedOut(err) {
-		getResp, err = conn.GetGroup(request)
-	}
-
-	if !d.IsNewResource() && tfawserr.ErrCodeEquals(err, iam.ErrCodeNoSuchEntityException) {
-		log.Printf("[WARN] IAM Group (%s) not found, removing from state", d.Id())
+	if !d.IsNewResource() && tfresource.NotFound(err) {
+		log.Printf("[WARN] IAM group (%s) not found, removing from state", arn)
 		d.SetId("")
 		return nil
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading IAM Group (%s): %w", d.Id(), err)
+		return fmt.Errorf("error reading IAM group (%s): %w", arn, err)
 	}
 
-	if getResp == nil || getResp.Group == nil {
-		return fmt.Errorf("error reading IAM Group (%s): empty response", d.Id())
+	d.Set("arn", group.GroupArn)
+
+	if group.CreateDate != nil {
+		d.Set("create_date", aws.TimeValue(group.CreateDate).Format(time.RFC3339))
+	} else {
+		d.Set("create_date", nil)
 	}
 
-	group := getResp.Group
+	d.Set("group_id", group.GroupId)
+	d.Set("name", group.GroupName)
+	d.Set("owner", group.Owner)
+	d.Set("path", group.Path)
+	d.Set("type", group.Type)
 
-	if err := d.Set("name", group.GroupName); err != nil {
-		return err
-	}
-	if err := d.Set("arn", group.Arn); err != nil {
-		return err
-	}
-	if err := d.Set("path", group.Path); err != nil {
-		return err
-	}
-	if err := d.Set("unique_id", group.GroupId); err != nil {
-		return err
-	}
 	return nil
 }
 
+//nolint:unused // UpdateGroup is unsupported.
 func resourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChanges("name", "path") {
 		conn := meta.(*conns.AWSClient).IAMConn
@@ -153,14 +149,36 @@ func resourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
+	arn := d.Id()
 
-	request := &iam.DeleteGroupInput{
-		GroupName: aws.String(d.Id()),
+	// need group name for delete
+	group, _, err := FindGroupByArn(conn, arn)
+
+	if tfresource.NotFound(err) {
+		log.Printf("[WARN] IAM group (%s) not found, removing from state", arn)
+		return nil
 	}
 
-	if _, err := conn.DeleteGroup(request); err != nil {
-		return fmt.Errorf("Error deleting IAM Group %s: %s", d.Id(), err)
+	if err != nil {
+		return fmt.Errorf("error reding IAM group (%s) for deleting: %w", arn, err)
 	}
+
+	input := &iam.DeleteGroupInput{
+		GroupName: group.GroupName,
+	}
+
+	log.Printf("[DEBUG] Deleting IAM group: %s", input)
+	_, err = conn.DeleteGroup(input)
+
+	if tfawserr.ErrCodeEquals(err, GroupNotFoundCode) {
+		log.Printf("[WARN] IAM group (%s) not found, removing from state", arn)
+		return nil
+	}
+
+	if err != nil {
+		return fmt.Errorf("error deleting IAM group (%s): %w", arn, err)
+	}
+
 	return nil
 }
 

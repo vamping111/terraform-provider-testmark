@@ -199,6 +199,59 @@ func FindPolicyByArn(conn *iam.IAM, arn string) (*iam.Policy, error) {
 	return output.Policy, nil
 }
 
+func FindGroups(conn *iam.IAM, name string) ([]*iam.Group, error) {
+	input := &iam.ListGroupsInput{}
+
+	var results []*iam.Group
+
+	err := conn.ListGroupsPages(input, func(page *iam.ListGroupsOutput, lastPage bool) bool {
+		if page == nil {
+			return !lastPage
+		}
+
+		for _, g := range page.Groups {
+			if g == nil {
+				continue
+			}
+
+			if name != "" && name != aws.StringValue(g.GroupName) {
+				continue
+			}
+
+			results = append(results, g)
+		}
+
+		return !lastPage
+	})
+
+	return results, err
+}
+
+func FindGroupByArn(conn *iam.IAM, arn string) (*iam.Group, []*iam.User, error) {
+	input := &iam.GetGroupInput{
+		GroupArn: aws.String(arn),
+	}
+
+	output, err := conn.GetGroup(input)
+
+	if tfawserr.ErrCodeEquals(err, GroupNotFoundCode) {
+		return nil, nil, &retry.NotFoundError{
+			LastError:   err,
+			LastRequest: input,
+		}
+	}
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if output == nil || output.Group == nil {
+		return nil, nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Group, output.Users, nil
+}
+
 func FindUsers(conn *iam.IAM, nameRegex, pathPrefix string) ([]*iam.User, error) {
 	input := &iam.ListUsersInput{}
 

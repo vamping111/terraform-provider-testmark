@@ -2,12 +2,14 @@ package iam
 
 import (
 	"fmt"
-	"log"
+	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
+	"github.com/hashicorp/terraform-provider-aws/internal/verify"
 )
 
 func DataSourceGroup() *schema.Resource {
@@ -16,10 +18,13 @@ func DataSourceGroup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"arn": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"name"},
+				ValidateFunc:  verify.ValidARN,
 			},
-			"path": {
+			"create_date": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -27,9 +32,23 @@ func DataSourceGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"group_name": {
+			"name": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"arn"},
+			},
+			"owner": {
 				Type:     schema.TypeString,
-				Required: true,
+				Computed: true,
+			},
+			"path": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"type": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"users": {
 				Type:     schema.TypeList,
@@ -62,36 +81,51 @@ func DataSourceGroup() *schema.Resource {
 func dataSourceGroupRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
 
-	groupName := d.Get("group_name").(string)
+	arn := d.Get("arn").(string)
+	name := d.Get("name").(string)
 
-	req := &iam.GetGroupInput{
-		GroupName: aws.String(groupName),
-	}
+	if arn == "" {
+		groups, err := FindGroups(conn, name, "")
 
-	var users []*iam.User
-	var group *iam.Group
-
-	log.Printf("[DEBUG] Reading IAM Group: %s", req)
-	err := conn.GetGroupPages(req, func(page *iam.GetGroupOutput, lastPage bool) bool {
-		if group == nil {
-			group = page.Group
+		if err != nil {
+			return fmt.Errorf("error reading IAM group (%s): %w", GroupSearchDetails(arn, name), err)
 		}
-		users = append(users, page.Users...)
-		return !lastPage
-	})
-	if err != nil {
-		return fmt.Errorf("Error getting group: %w", err)
-	}
-	if group == nil {
-		return fmt.Errorf("no IAM group found")
+
+		if len(groups) == 0 {
+			return fmt.Errorf("no IAM group found matching criteria (%s); try different search", GroupSearchDetails(arn, name))
+		}
+
+		if len(groups) > 1 {
+			return fmt.Errorf("multiple IAM groups found matching criteria (%s); try different search", GroupSearchDetails(arn, name))
+		}
+
+		arn = aws.StringValue(groups[0].GroupArn)
 	}
 
-	d.SetId(aws.StringValue(group.GroupId))
-	d.Set("arn", group.Arn)
-	d.Set("path", group.Path)
+	group, users, err := FindGroupByArn(conn, arn)
+
+	if err != nil {
+		return fmt.Errorf("error reading IAM group (%s): %w", arn, err)
+	}
+
+	d.SetId(aws.StringValue(group.GroupArn))
+
+	d.Set("arn", group.GroupArn)
+
+	if group.CreateDate != nil {
+		d.Set("create_date", aws.TimeValue(group.CreateDate).Format(time.RFC3339))
+	} else {
+		d.Set("create_date", nil)
+	}
+
 	d.Set("group_id", group.GroupId)
+	d.Set("name", group.GroupName)
+	d.Set("owner", group.Owner)
+	d.Set("path", group.Path)
+	d.Set("type", group.Type)
+
 	if err := d.Set("users", dataSourceGroupUsersRead(users)); err != nil {
-		return fmt.Errorf("error setting users: %w", err)
+		return fmt.Errorf("error setting users from IAM group (%s): %w", arn, err)
 	}
 
 	return nil
@@ -101,11 +135,23 @@ func dataSourceGroupUsersRead(iamUsers []*iam.User) []map[string]interface{} {
 	users := make([]map[string]interface{}, 0, len(iamUsers))
 	for _, i := range iamUsers {
 		u := make(map[string]interface{})
-		u["arn"] = aws.StringValue(i.Arn)
+		u["arn"] = aws.StringValue(i.UserArn)
 		u["user_id"] = aws.StringValue(i.UserId)
 		u["user_name"] = aws.StringValue(i.UserName)
 		u["path"] = aws.StringValue(i.Path)
 		users = append(users, u)
 	}
 	return users
+}
+
+func GroupSearchDetails(arn, name string) string {
+	var groupDetails []string
+	if arn != "" {
+		groupDetails = append(groupDetails, fmt.Sprintf("ARN: %s", arn))
+	}
+	if name != "" {
+		groupDetails = append(groupDetails, fmt.Sprintf("Name: %s", name))
+	}
+
+	return strings.Join(groupDetails, ", ")
 }

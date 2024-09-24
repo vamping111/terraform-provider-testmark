@@ -46,6 +46,63 @@ func FindGroupAttachedPolicy(conn *iam.IAM, groupName string, policyARN string) 
 	return result, nil
 }
 
+func FindUserAttachedGlobalPolicy(conn *iam.IAM, userName, policyARN string) (*iam.Policy, error) {
+	input := &iam.ListUserGlobalPoliciesInput{
+		UserName: aws.String(userName),
+	}
+
+	output, err := conn.ListUserGlobalPolicies(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	for _, policy := range output.Policies {
+		if policy == nil {
+			continue
+		}
+
+		if aws.StringValue(policy.PolicyArn) == policyARN {
+			return policy, nil
+		}
+	}
+
+	return nil, &retry.NotFoundError{}
+}
+
+func FindUserAttachedProjectPolicy(conn *iam.IAM, userName, policyARN, projectName string) (*iam.Policy, error) {
+	input := &iam.ListUserProjectPoliciesInput{
+		UserName:    aws.String(userName),
+		ProjectName: aws.String(projectName),
+	}
+
+	output, err := conn.ListUserProjectPolicies(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	for _, policy := range output.Policies {
+		if policy == nil {
+			continue
+		}
+
+		if aws.StringValue(policy.PolicyArn) == policyARN {
+			return policy, nil
+		}
+	}
+
+	return nil, &retry.NotFoundError{}
+}
+
 // FindUserAttachedPolicy returns the AttachedPolicy corresponding to the specified user and policy ARN.
 func FindUserAttachedPolicy(conn *iam.IAM, userName string, policyARN string) (*iam.AttachedPolicy, error) {
 	input := &iam.ListAttachedUserPoliciesInput{

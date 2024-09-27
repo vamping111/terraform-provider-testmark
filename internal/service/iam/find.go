@@ -199,8 +199,12 @@ func FindPolicyByArn(conn *iam.IAM, arn string) (*iam.Policy, error) {
 	return output.Policy, nil
 }
 
-func FindGroups(conn *iam.IAM, name string) ([]*iam.Group, error) {
+func FindGroups(conn *iam.IAM, name, groupType string) ([]*iam.Group, error) {
 	input := &iam.ListGroupsInput{}
+
+	if groupType != "" {
+		input.Type = aws.String(groupType)
+	}
 
 	var results []*iam.Group
 
@@ -250,6 +254,43 @@ func FindGroupByArn(conn *iam.IAM, arn string) (*iam.Group, []*iam.User, error) 
 	}
 
 	return output.Group, output.Users, nil
+}
+
+func FindUserGlobalGroups(conn *iam.IAM, userName string) ([]*iam.Group, error) {
+	input := &iam.ListUserGlobalGroupsInput{
+		UserName: aws.String(userName),
+	}
+
+	output, err := conn.ListUserGlobalGroups(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Groups, nil
+}
+
+func FindUserProjectGroups(conn *iam.IAM, userName, projectName string) ([]*iam.Group, error) {
+	input := &iam.ListUserProjectGroupsInput{
+		UserName:    aws.String(userName),
+		ProjectName: aws.String(projectName),
+	}
+
+	output, err := conn.ListUserProjectGroups(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Groups, nil
 }
 
 func FindUsers(conn *iam.IAM, nameRegex, pathPrefix string) ([]*iam.User, error) {

@@ -8,10 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2/tfawserr"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
+	"github.com/hashicorp/terraform-provider-aws/internal/verify"
 )
 
 func ResourceGroupPolicyAttachment() *schema.Resource {
@@ -24,15 +24,17 @@ func ResourceGroupPolicyAttachment() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"group": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+			"group_arn": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: verify.ValidARN,
 			},
 			"policy_arn": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: verify.ValidARN,
 			},
 		},
 	}
@@ -41,73 +43,48 @@ func ResourceGroupPolicyAttachment() *schema.Resource {
 func resourceGroupPolicyAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
 
-	group := d.Get("group").(string)
-	arn := d.Get("policy_arn").(string)
+	groupArn := d.Get("group_arn").(string)
+	policyArn := d.Get("policy_arn").(string)
 
-	err := attachPolicyToGroup(conn, group, arn)
+	// need group name for attaching policy
+	group, _, err := FindGroupByArn(conn, groupArn)
+
 	if err != nil {
-		return fmt.Errorf("Error attaching policy %s to IAM group %s: %v", arn, group, err)
+		return fmt.Errorf("error reding IAM group (%s) for attaching policy: %w", groupArn, err)
 	}
 
-	//lintignore:R016 // Allow legacy unstable ID usage in managed resource
-	d.SetId(resource.PrefixedUniqueId(fmt.Sprintf("%s-", group)))
+	input := &iam.AttachGroupPolicyInput{
+		GroupName: group.GroupName,
+		PolicyArn: aws.String(policyArn),
+	}
+
+	log.Printf("[DEBUG] Attaching IAM policy to IAM group: %s", input)
+	if _, err := conn.AttachGroupPolicy(input); err != nil {
+		return fmt.Errorf("error attaching IAM policy (%s) to IAM group (%s): %w", policyArn, groupArn, err)
+	}
+
+	d.SetId(composeUserGroupAttachmentId(groupArn, policyArn))
 
 	return resourceGroupPolicyAttachmentRead(d, meta)
 }
 
 func resourceGroupPolicyAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
-	group := d.Get("group").(string)
-	arn := d.Get("policy_arn").(string)
-	// Human friendly ID for error messages since d.Id() is non-descriptive
-	id := fmt.Sprintf("%s:%s", group, arn)
 
-	var attachedPolicy *iam.AttachedPolicy
+	id := d.Id()
+	groupArn := d.Get("group_arn").(string)
+	policyArn := d.Get("policy_arn").(string)
 
-	err := resource.Retry(propagationTimeout, func() *resource.RetryError {
-		var err error
+	_, err := FindGroupAttachedPolicy(conn, groupArn, policyArn)
 
-		attachedPolicy, err = FindGroupAttachedPolicy(conn, group, arn)
-
-		if d.IsNewResource() && tfawserr.ErrCodeEquals(err, iam.ErrCodeNoSuchEntityException) {
-			return resource.RetryableError(err)
-		}
-
-		if err != nil {
-			return resource.NonRetryableError(err)
-		}
-
-		if d.IsNewResource() && attachedPolicy == nil {
-			return resource.RetryableError(&resource.NotFoundError{
-				LastError: fmt.Errorf("IAM Group Managed Policy Attachment (%s) not found", id),
-			})
-		}
-
-		return nil
-	})
-
-	if tfresource.TimedOut(err) {
-		attachedPolicy, err = FindGroupAttachedPolicy(conn, group, arn)
-	}
-
-	if !d.IsNewResource() && tfawserr.ErrCodeEquals(err, iam.ErrCodeNoSuchEntityException) {
-		log.Printf("[WARN] IAM User Managed Policy Attachment (%s) not found, removing from state", id)
+	if !d.IsNewResource() && (tfresource.NotFound(err) || tfawserr.ErrCodeEquals(err, GroupNotFoundCode)) {
+		log.Printf("[WARN] IAM group managed policy attachment (%s) not found, removing from state", id)
 		d.SetId("")
 		return nil
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading IAM Group Managed Policy Attachment (%s): %w", id, err)
-	}
-
-	if attachedPolicy == nil {
-		if d.IsNewResource() {
-			return fmt.Errorf("error reading IAM User Managed Policy Attachment (%s): not found after creation", id)
-		}
-
-		log.Printf("[WARN] IAM Group Managed Policy Attachment (%s) not found, removing from state", id)
-		d.SetId("")
-		return nil
+		return fmt.Errorf("error reading IAM group managed policy attachment (%s): %w", id, err)
 	}
 
 	return nil
@@ -115,41 +92,56 @@ func resourceGroupPolicyAttachmentRead(d *schema.ResourceData, meta interface{})
 
 func resourceGroupPolicyAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
-	group := d.Get("group").(string)
-	arn := d.Get("policy_arn").(string)
 
-	err := detachPolicyFromGroup(conn, group, arn)
-	if err != nil {
-		return fmt.Errorf("Error removing policy %s from IAM Group %s: %v", arn, group, err)
+	id := d.Id()
+	groupArn := d.Get("group_arn").(string)
+	policyArn := d.Get("policy_arn").(string)
+
+	// need group name for detaching policy
+	group, _, err := FindGroupByArn(conn, groupArn)
+
+	if tfresource.NotFound(err) {
+		log.Printf("[WARN] IAM group managed policy attachment (%s) not found, removing from state", id)
+		return nil
 	}
+
+	if err != nil {
+		return fmt.Errorf("error reding IAM group (%s) for detaching policy: %w", groupArn, err)
+	}
+
+	input := &iam.DetachGroupPolicyInput{
+		GroupName: group.GroupName,
+		PolicyArn: aws.String(policyArn),
+	}
+
+	log.Printf("[DEBUG] Detaching IAM policy from IAM group: %s", input)
+	if _, err := conn.DetachGroupPolicy(input); err != nil {
+		return fmt.Errorf("error detaching IAM policy (%s) from IAM group (%s): %w", policyArn, groupArn, err)
+	}
+
 	return nil
 }
 
 func resourceGroupPolicyAttachmentImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	idParts := strings.SplitN(d.Id(), "/", 2)
+	idParts := strings.SplitN(d.Id(), "#", 2)
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
-		return nil, fmt.Errorf("unexpected format of ID (%q), expected <group-name>/<policy_arn>", d.Id())
+		return nil, fmt.Errorf("unexpected format of ID (%q), expected <group-arn>#<policy_arn>", d.Id())
 	}
-	groupName := idParts[0]
-	policyARN := idParts[1]
-	d.Set("group", groupName)
-	d.Set("policy_arn", policyARN)
-	d.SetId(fmt.Sprintf("%s-%s", groupName, policyARN))
+
+	groupArn := idParts[0]
+	policyArn := idParts[1]
+
+	d.Set("group_arn", groupArn)
+	d.Set("policy_arn", policyArn)
+
+	d.SetId(composeUserGroupAttachmentId(groupArn, policyArn))
+
 	return []*schema.ResourceData{d}, nil
 }
 
-func attachPolicyToGroup(conn *iam.IAM, group string, arn string) error {
-	_, err := conn.AttachGroupPolicy(&iam.AttachGroupPolicyInput{
-		GroupName: aws.String(group),
-		PolicyArn: aws.String(arn),
-	})
-	return err
-}
-
-func detachPolicyFromGroup(conn *iam.IAM, group string, arn string) error {
-	_, err := conn.DetachGroupPolicy(&iam.DetachGroupPolicyInput{
-		GroupName: aws.String(group),
-		PolicyArn: aws.String(arn),
-	})
-	return err
+// composeUserPolicyAttachmentId constructs an id for a group policy attachment.
+//
+// Format: groupArn#policyArn
+func composeUserGroupAttachmentId(groupArn, policyArn string) string {
+	return fmt.Sprintf("%s#%s", groupArn, policyArn)
 }

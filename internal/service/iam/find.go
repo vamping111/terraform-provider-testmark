@@ -12,38 +12,32 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
 )
 
-// FindGroupAttachedPolicy returns the AttachedPolicy corresponding to the specified group and policy ARN.
-func FindGroupAttachedPolicy(conn *iam.IAM, groupName string, policyARN string) (*iam.AttachedPolicy, error) {
-	input := &iam.ListAttachedGroupPoliciesInput{
-		GroupName: aws.String(groupName),
+func FindGroupAttachedPolicy(conn *iam.IAM, groupARN string, policyARN string) (*iam.Policy, error) {
+	input := &iam.ListGroupPoliciesInput{
+		GroupArn: aws.String(groupARN),
 	}
 
-	var result *iam.AttachedPolicy
-
-	err := conn.ListAttachedGroupPoliciesPages(input, func(page *iam.ListAttachedGroupPoliciesOutput, lastPage bool) bool {
-		if page == nil {
-			return !lastPage
-		}
-
-		for _, attachedPolicy := range page.AttachedPolicies {
-			if attachedPolicy == nil {
-				continue
-			}
-
-			if aws.StringValue(attachedPolicy.PolicyArn) == policyARN {
-				result = attachedPolicy
-				return false
-			}
-		}
-
-		return !lastPage
-	})
+	output, err := conn.ListGroupPolicies(input)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	for _, policy := range output.Policies {
+		if policy == nil {
+			continue
+		}
+
+		if aws.StringValue(policy.PolicyArn) == policyARN {
+			return policy, nil
+		}
+	}
+
+	return nil, &retry.NotFoundError{}
 }
 
 func FindUserAttachedGlobalPolicy(conn *iam.IAM, userName, policyARN string) (*iam.Policy, error) {

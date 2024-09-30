@@ -344,6 +344,37 @@ func FindUserByName(conn *iam.IAM, name string) (*iam.User, error) {
 	return output.User, nil
 }
 
+func FindProjectByName(conn *iam.IAM, name string) (*iam.Project, error) {
+	input := &iam.GetProjectInput{
+		ProjectName: aws.String(name),
+	}
+
+	output, err := conn.GetProject(input)
+
+	if tfawserr.ErrCodeEquals(err, ProjectNotFoundCode) {
+		return nil, &retry.NotFoundError{
+			LastError:   err,
+			LastRequest: input,
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil || output.Project == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	project := output.Project
+
+	if aws.StringValue(project.State) == iam.ProjectStateTypeDeleted {
+		return nil, &retry.NotFoundError{}
+	}
+
+	return project, nil
+}
+
 func FindRoleByName(conn *iam.IAM, name string) (*iam.Role, error) {
 	input := &iam.GetRoleInput{
 		RoleName: aws.String(name),

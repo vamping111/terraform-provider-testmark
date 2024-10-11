@@ -151,24 +151,12 @@ func resourceGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
 	arn := d.Id()
 
-	// need group name for delete
-	group, _, err := FindGroupByArn(conn, arn)
-
-	if tfresource.NotFound(err) {
-		log.Printf("[WARN] IAM group (%s) not found, removing from state", arn)
-		return nil
-	}
-
-	if err != nil {
-		return fmt.Errorf("error reding IAM group (%s) for deleting: %w", arn, err)
-	}
-
 	input := &iam.DeleteGroupInput{
-		GroupName: group.GroupName,
+		GroupName: aws.String(d.Get("name").(string)),
 	}
 
 	log.Printf("[DEBUG] Deleting IAM group: %s", input)
-	_, err = conn.DeleteGroup(input)
+	_, err := conn.DeleteGroup(input)
 
 	if tfawserr.ErrCodeEquals(err, GroupNotFoundCode) {
 		log.Printf("[WARN] IAM group (%s) not found, removing from state", arn)

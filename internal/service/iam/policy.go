@@ -258,16 +258,8 @@ func resourcePolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	arn := d.Id()
 
 	if d.HasChanges("description", "policy") {
-
-		// need policy name for update
-		policy, err := FindPolicyByArn(conn, arn)
-
-		if err != nil {
-			return fmt.Errorf("error reding IAM policy (%s) for updating: %w", arn, err)
-		}
-
 		input := &iam.UpdatePolicyInput{
-			PolicyName: policy.PolicyName,
+			PolicyName: aws.String(d.Get("name").(string)),
 		}
 
 		if d.HasChange("description") {
@@ -285,7 +277,7 @@ func resourcePolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		log.Printf("[DEBUG] Modifying IAM policy: %s", input)
-		_, err = conn.UpdatePolicy(input)
+		_, err := conn.UpdatePolicy(input)
 
 		if err != nil {
 			return fmt.Errorf("error modifying IAM policy (%s): %s", arn, err)
@@ -328,24 +320,12 @@ func resourcePolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	// 	return err
 	// }
 
-	// need policy name for delete
-	policy, err := FindPolicyByArn(conn, arn)
-
-	if tfresource.NotFound(err) {
-		log.Printf("[WARN] IAM policy (%s) not found, removing from state", arn)
-		return nil
-	}
-
-	if err != nil {
-		return fmt.Errorf("error reding IAM policy (%s) for deleting: %w", arn, err)
-	}
-
 	request := &iam.DeletePolicyInput{
-		PolicyName: policy.PolicyName,
+		PolicyName: aws.String(d.Get("name").(string)),
 	}
 
 	log.Printf("[DEBUG] Deleting IAM policy: %s", request)
-	_, err = conn.DeletePolicy(request)
+	_, err := conn.DeletePolicy(request)
 
 	if tfawserr.ErrCodeEquals(err, PolicyNotFoundCode) {
 		log.Printf("[WARN] IAM policy (%s) not found, removing from state", arn)

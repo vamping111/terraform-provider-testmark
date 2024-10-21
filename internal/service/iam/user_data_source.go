@@ -31,10 +31,6 @@ func DataSourceUser() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"identity_provider": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"last_login_date": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -93,7 +89,6 @@ func dataSourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("display_name", user.DisplayName)
 	d.Set("email", user.Email)
 	d.Set("enabled", user.Enabled)
-	d.Set("identity_provider", user.IdentityProvider)
 
 	if user.LastLoginDate != nil {
 		d.Set("last_login_date", aws.TimeValue(user.LastLoginDate).Format(time.RFC3339))

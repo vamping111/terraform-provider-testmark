@@ -31,7 +31,6 @@ data "aws_iam_user" "selected" {
 * `email` - The email of the user.
 * `enabled` - Indicates whether the user is **not** locked.
 * `id` - The name of the user.
-* `identity_provider` - The ID of the identity provider of the user. It is specified only for IdP users.
 * `last_login_date` - The time in [RFC3339 format] when the user last logged in to the web interface.
 * `login` - The login of the user.
 * `otp_required` -  Indicates whether the user is required to use two-factor authentication to log in to the web interface.

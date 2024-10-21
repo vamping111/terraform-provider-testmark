@@ -64,7 +64,6 @@ In addition to all arguments above, the following attributes are exported:
 * `arn` - The Amazon Resource Name (ARN) of the user.
 * `id` - The name of the user.
 * `enabled` - Indicates whether the user is **not** locked.
-* `identity_provider` - The ID of the identity provider of the user. It is specified only for IdP users.
 * `last_login_date` - The time in [RFC3339 format] when the user last logged in to the web interface.
 * `login` - The login of the user.
 * `secret_key` - The secret key of the user.

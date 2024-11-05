@@ -8,10 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2/tfawserr"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
+	"github.com/hashicorp/terraform-provider-aws/internal/verify"
 )
 
 func ResourceUserPolicyAttachment() *schema.Resource {
@@ -24,15 +24,21 @@ func ResourceUserPolicyAttachment() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"policy_arn": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: verify.ValidARN,
+			},
+			"project": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"user": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
-			},
-			"policy_arn": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
 			},
 		},
 	}
@@ -40,74 +46,60 @@ func ResourceUserPolicyAttachment() *schema.Resource {
 
 func resourceUserPolicyAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
+	userName := d.Get("user").(string)
+	policyArn := d.Get("policy_arn").(string)
 
-	user := d.Get("user").(string)
-	arn := d.Get("policy_arn").(string)
-
-	err := attachPolicyToUser(conn, user, arn)
-	if err != nil {
-		return fmt.Errorf("Error attaching policy %s to IAM User %s: %v", arn, user, err)
+	input := &iam.AttachUserPolicyInput{
+		UserName:  aws.String(userName),
+		PolicyArn: aws.String(policyArn),
 	}
 
-	//lintignore:R016 // Allow legacy unstable ID usage in managed resource
-	d.SetId(resource.PrefixedUniqueId(fmt.Sprintf("%s-", user)))
+	var projectName string
+	if v, ok := d.GetOk("project"); ok {
+		projectName = v.(string)
+		input.ProjectName = aws.String(projectName)
+	}
+
+	log.Printf("[DEBUG] Attaching IAM policy to IAM user: %s", input)
+	_, err := conn.AttachUserPolicy(input)
+	if err != nil {
+		if projectName == "" {
+			return fmt.Errorf("error attaching IAM policy (%s) to IAM user (%s): %w", policyArn, userName, err)
+		}
+
+		return fmt.Errorf(
+			"error attaching IAM policy (%s) to IAM user (%s) for IAM project (%s): %w",
+			policyArn, userName, projectName, err,
+		)
+	}
+
+	d.SetId(composeUserPolicyAttachmentId(userName, projectName, policyArn))
 
 	return resourceUserPolicyAttachmentRead(d, meta)
 }
 
 func resourceUserPolicyAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
-	user := d.Get("user").(string)
-	arn := d.Get("policy_arn").(string)
-	// Human friendly ID for error messages since d.Id() is non-descriptive
-	id := fmt.Sprintf("%s:%s", user, arn)
+	id := d.Id()
+	userName := d.Get("user").(string)
+	projectName := d.Get("project").(string)
+	policyArn := d.Get("policy_arn").(string)
 
-	var attachedPolicy *iam.AttachedPolicy
-
-	err := resource.Retry(propagationTimeout, func() *resource.RetryError {
-		var err error
-
-		attachedPolicy, err = FindUserAttachedPolicy(conn, user, arn)
-
-		if d.IsNewResource() && tfawserr.ErrCodeEquals(err, iam.ErrCodeNoSuchEntityException) {
-			return resource.RetryableError(err)
-		}
-
-		if err != nil {
-			return resource.NonRetryableError(err)
-		}
-
-		if d.IsNewResource() && attachedPolicy == nil {
-			return resource.RetryableError(&resource.NotFoundError{
-				LastError: fmt.Errorf("IAM User Managed Policy Attachment (%s) not found", id),
-			})
-		}
-
-		return nil
-	})
-
-	if tfresource.TimedOut(err) {
-		attachedPolicy, err = FindUserAttachedPolicy(conn, user, arn)
+	var err error
+	if projectName == "" {
+		_, err = FindUserAttachedGlobalPolicy(conn, userName, policyArn)
+	} else {
+		_, err = FindUserAttachedProjectPolicy(conn, userName, policyArn, projectName)
 	}
 
-	if !d.IsNewResource() && tfawserr.ErrCodeEquals(err, iam.ErrCodeNoSuchEntityException) {
-		log.Printf("[WARN] IAM User Managed Policy Attachment (%s) not found, removing from state", id)
+	if !d.IsNewResource() && (tfresource.NotFound(err) || tfawserr.ErrCodeEquals(err, UserNotFoundCode)) {
+		log.Printf("[WARN] IAM user managed policy attachment (%s) not found, removing from state", id)
 		d.SetId("")
 		return nil
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading IAM User Managed Policy Attachment (%s): %w", id, err)
-	}
-
-	if attachedPolicy == nil {
-		if d.IsNewResource() {
-			return fmt.Errorf("error reading IAM User Managed Policy Attachment (%s): not found after creation", id)
-		}
-
-		log.Printf("[WARN] IAM User Managed Policy Attachment (%s) not found, removing from state", id)
-		d.SetId("")
-		return nil
+		return fmt.Errorf("error reading IAM user managed policy attachment (%s): %w", id, err)
 	}
 
 	return nil
@@ -115,38 +107,67 @@ func resourceUserPolicyAttachmentRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceUserPolicyAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).IAMConn
-	user := d.Get("user").(string)
-	arn := d.Get("policy_arn").(string)
+	userName := d.Get("user").(string)
+	policyArn := d.Get("policy_arn").(string)
 
-	err := DetachPolicyFromUser(conn, user, arn)
-	if err != nil {
-		return fmt.Errorf("Error removing policy %s from IAM User %s: %v", arn, user, err)
+	input := &iam.DetachUserPolicyInput{
+		UserName:  aws.String(userName),
+		PolicyArn: aws.String(policyArn),
 	}
+
+	var projectName string
+	if v, ok := d.GetOk("project"); ok {
+		projectName = v.(string)
+		input.ProjectName = aws.String(projectName)
+	}
+
+	log.Printf("[DEBUG] Detaching IAM policy from IAM user: %s", input)
+	_, err := conn.DetachUserPolicy(input)
+
+	if tfawserr.ErrCodeEquals(err, UserNotFoundCode, ProjectNotFoundCode) {
+		log.Printf("[WARN] IAM user managed policy attachment (%s) not found, removing from state", d.Id())
+		return nil
+	}
+
+	if err != nil {
+		if projectName == "" {
+			return fmt.Errorf("error detaching IAM policy (%s) from IAM user (%s): %w", policyArn, userName, err)
+		}
+
+		return fmt.Errorf(
+			"error detaching IAM policy (%s) from IAM user (%s) for IAM project (%s): %w",
+			policyArn, userName, projectName, err,
+		)
+	}
+
 	return nil
 }
 
 func resourceUserPolicyAttachmentImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	idParts := strings.SplitN(d.Id(), "/", 2)
-	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
-		return nil, fmt.Errorf("unexpected format of ID (%q), expected <user-name>/<policy_arn>", d.Id())
+	idParts := strings.SplitN(d.Id(), "#", 3)
+	if len(idParts) < 2 || len(idParts) > 3 || idParts[0] == "" || idParts[1] == "" {
+		return nil, fmt.Errorf(
+			"unexpected format of ID (%q), expected <user-name>[#<project-name>]#<policy-arn>", d.Id(),
+		)
 	}
 
 	userName := idParts[0]
-	policyARN := idParts[1]
+
+	var projectName, policyArn string
+	if len(idParts) == 3 {
+		projectName = idParts[1]
+		policyArn = idParts[2]
+	} else {
+		policyArn = idParts[1]
+	}
 
 	d.Set("user", userName)
-	d.Set("policy_arn", policyARN)
-	d.SetId(fmt.Sprintf("%s-%s", userName, policyARN))
+	d.Set("policy_arn", policyArn)
+	d.Set("project", projectName)
+
+	d.SetId(composeUserPolicyAttachmentId(userName, projectName, policyArn))
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func attachPolicyToUser(conn *iam.IAM, user string, arn string) error {
-	_, err := conn.AttachUserPolicy(&iam.AttachUserPolicyInput{
-		UserName:  aws.String(user),
-		PolicyArn: aws.String(arn),
-	})
-	return err
 }
 
 func DetachPolicyFromUser(conn *iam.IAM, user string, arn string) error {
@@ -155,4 +176,15 @@ func DetachPolicyFromUser(conn *iam.IAM, user string, arn string) error {
 		PolicyArn: aws.String(arn),
 	})
 	return err
+}
+
+// composeUserPolicyAttachmentId constructs an id for a user policy attachment.
+//
+// Format: userName[#projectName]#policyArn
+func composeUserPolicyAttachmentId(userName, projectName, policyArn string) string {
+	if projectName == "" {
+		return fmt.Sprintf("%s#%s", userName, policyArn)
+	}
+
+	return fmt.Sprintf("%s#%s#%s", userName, projectName, policyArn)
 }

@@ -458,7 +458,7 @@ One of the following blocks with service parameters must be specified:
 * `redis` - Redis parameters. The structure of this block is [described below](#redis-argument-reference).
 
 ### backup_settings
-mongo
+
 ~> All the parameters in the `backup_settings` block are editable.
 
 The `backup_settings` block has the following structure:

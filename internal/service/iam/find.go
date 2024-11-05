@@ -8,41 +8,93 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2/tfawserr"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
 )
 
-// FindGroupAttachedPolicy returns the AttachedPolicy corresponding to the specified group and policy ARN.
-func FindGroupAttachedPolicy(conn *iam.IAM, groupName string, policyARN string) (*iam.AttachedPolicy, error) {
-	input := &iam.ListAttachedGroupPoliciesInput{
-		GroupName: aws.String(groupName),
+func FindGroupAttachedPolicy(conn *iam.IAM, groupARN string, policyARN string) (*iam.Policy, error) {
+	input := &iam.ListGroupPoliciesInput{
+		GroupArn: aws.String(groupARN),
 	}
 
-	var result *iam.AttachedPolicy
-
-	err := conn.ListAttachedGroupPoliciesPages(input, func(page *iam.ListAttachedGroupPoliciesOutput, lastPage bool) bool {
-		if page == nil {
-			return !lastPage
-		}
-
-		for _, attachedPolicy := range page.AttachedPolicies {
-			if attachedPolicy == nil {
-				continue
-			}
-
-			if aws.StringValue(attachedPolicy.PolicyArn) == policyARN {
-				result = attachedPolicy
-				return false
-			}
-		}
-
-		return !lastPage
-	})
+	output, err := conn.ListGroupPolicies(input)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	for _, policy := range output.Policies {
+		if policy == nil {
+			continue
+		}
+
+		if aws.StringValue(policy.PolicyArn) == policyARN {
+			return policy, nil
+		}
+	}
+
+	return nil, &retry.NotFoundError{}
+}
+
+func FindUserAttachedGlobalPolicy(conn *iam.IAM, userName, policyARN string) (*iam.Policy, error) {
+	input := &iam.ListUserGlobalPoliciesInput{
+		UserName: aws.String(userName),
+	}
+
+	output, err := conn.ListUserGlobalPolicies(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	for _, policy := range output.Policies {
+		if policy == nil {
+			continue
+		}
+
+		if aws.StringValue(policy.PolicyArn) == policyARN {
+			return policy, nil
+		}
+	}
+
+	return nil, &retry.NotFoundError{}
+}
+
+func FindUserAttachedProjectPolicy(conn *iam.IAM, userName, policyARN, projectName string) (*iam.Policy, error) {
+	input := &iam.ListUserProjectPoliciesInput{
+		UserName:    aws.String(userName),
+		ProjectName: aws.String(projectName),
+	}
+
+	output, err := conn.ListUserProjectPolicies(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	for _, policy := range output.Policies {
+		if policy == nil {
+			continue
+		}
+
+		if aws.StringValue(policy.PolicyArn) == policyARN {
+			return policy, nil
+		}
+	}
+
+	return nil, &retry.NotFoundError{}
 }
 
 // FindUserAttachedPolicy returns the AttachedPolicy corresponding to the specified user and policy ARN.
@@ -99,7 +151,7 @@ func FindPolicies(conn *iam.IAM, arn, name, pathPrefix string) ([]*iam.Policy, e
 				continue
 			}
 
-			if arn != "" && arn != aws.StringValue(p.Arn) {
+			if arn != "" && arn != aws.StringValue(p.PolicyArn) {
 				continue
 			}
 
@@ -114,6 +166,125 @@ func FindPolicies(conn *iam.IAM, arn, name, pathPrefix string) ([]*iam.Policy, e
 	})
 
 	return results, err
+}
+
+func FindPolicyByArn(conn *iam.IAM, arn string) (*iam.Policy, error) {
+	input := &iam.GetPolicyInput{
+		PolicyArn: aws.String(arn),
+	}
+
+	output, err := conn.GetPolicy(input)
+
+	if tfawserr.ErrCodeEquals(err, PolicyNotFoundCode) {
+		return nil, &retry.NotFoundError{
+			LastError:   err,
+			LastRequest: input,
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil || output.Policy == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Policy, nil
+}
+
+func FindGroups(conn *iam.IAM, name, groupType string) ([]*iam.Group, error) {
+	input := &iam.ListGroupsInput{}
+
+	if groupType != "" {
+		input.Type = aws.String(groupType)
+	}
+
+	var results []*iam.Group
+
+	err := conn.ListGroupsPages(input, func(page *iam.ListGroupsOutput, lastPage bool) bool {
+		if page == nil {
+			return !lastPage
+		}
+
+		for _, g := range page.Groups {
+			if g == nil {
+				continue
+			}
+
+			if name != "" && name != aws.StringValue(g.GroupName) {
+				continue
+			}
+
+			results = append(results, g)
+		}
+
+		return !lastPage
+	})
+
+	return results, err
+}
+
+func FindGroupByArn(conn *iam.IAM, arn string) (*iam.Group, []*iam.User, error) {
+	input := &iam.GetGroupInput{
+		GroupArn: aws.String(arn),
+	}
+
+	output, err := conn.GetGroup(input)
+
+	if tfawserr.ErrCodeEquals(err, GroupNotFoundCode) {
+		return nil, nil, &retry.NotFoundError{
+			LastError:   err,
+			LastRequest: input,
+		}
+	}
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if output == nil || output.Group == nil {
+		return nil, nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Group, output.Users, nil
+}
+
+func FindUserGlobalGroups(conn *iam.IAM, userName string) ([]*iam.Group, error) {
+	input := &iam.ListUserGlobalGroupsInput{
+		UserName: aws.String(userName),
+	}
+
+	output, err := conn.ListUserGlobalGroups(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Groups, nil
+}
+
+func FindUserProjectGroups(conn *iam.IAM, userName, projectName string) ([]*iam.Group, error) {
+	input := &iam.ListUserProjectGroupsInput{
+		UserName:    aws.String(userName),
+		ProjectName: aws.String(projectName),
+	}
+
+	output, err := conn.ListUserProjectGroups(input)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.Groups, nil
 }
 
 func FindUsers(conn *iam.IAM, nameRegex, pathPrefix string) ([]*iam.User, error) {
@@ -146,6 +317,62 @@ func FindUsers(conn *iam.IAM, nameRegex, pathPrefix string) ([]*iam.User, error)
 	})
 
 	return results, err
+}
+
+func FindUserByName(conn *iam.IAM, name string) (*iam.User, error) {
+	input := &iam.GetUserInput{
+		UserName: aws.String(name),
+	}
+
+	output, err := conn.GetUser(input)
+
+	if tfawserr.ErrCodeEquals(err, UserNotFoundCode) {
+		return nil, &retry.NotFoundError{
+			LastError:   err,
+			LastRequest: input,
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil || output.User == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	return output.User, nil
+}
+
+func FindProjectByName(conn *iam.IAM, name string) (*iam.Project, error) {
+	input := &iam.GetProjectInput{
+		ProjectName: aws.String(name),
+	}
+
+	output, err := conn.GetProject(input)
+
+	if tfawserr.ErrCodeEquals(err, ProjectNotFoundCode) {
+		return nil, &retry.NotFoundError{
+			LastError:   err,
+			LastRequest: input,
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if output == nil || output.Project == nil {
+		return nil, tfresource.NewEmptyResultError(input)
+	}
+
+	project := output.Project
+
+	if aws.StringValue(project.State) == iam.ProjectStateTypeDeleted {
+		return nil, &retry.NotFoundError{}
+	}
+
+	return project, nil
 }
 
 func FindRoleByName(conn *iam.IAM, name string) (*iam.Role, error) {

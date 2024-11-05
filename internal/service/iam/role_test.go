@@ -975,7 +975,7 @@ func testAccCheckRolePolicyAttachManagedPolicy(role *iam.Role, policyName string
 		err := conn.ListPoliciesPages(input, func(page *iam.ListPoliciesOutput, lastPage bool) bool {
 			for _, v := range page.Policies {
 				if *v.PolicyName == policyName {
-					managedARN = *v.Arn
+					managedARN = *v.PolicyArn
 					break
 				}
 			}

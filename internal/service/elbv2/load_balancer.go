@@ -678,6 +678,7 @@ func resourceLoadBalancerDelete(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
+//nolint:unused // Unsupported elb api parameters that use this method are commented out.
 func removeAttribute(attributes []*elbv2.LoadBalancerAttribute, key string) []*elbv2.LoadBalancerAttribute {
 	for i, a := range attributes {
 		if aws.StringValue(a.Key) == key {
@@ -930,7 +931,7 @@ func flattenResource(d *schema.ResourceData, meta interface{}, lb *elbv2.LoadBal
 
 	tags = tags.IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}

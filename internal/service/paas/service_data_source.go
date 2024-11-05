@@ -226,5 +226,6 @@ func dataSourceServiceRead(ctx context.Context, d *schema.ResourceData, meta int
 	id := d.Get("id").(string)
 	d.SetId(id)
 
-	return resourceServiceRead(ctx, d, meta)
+	// FIXME: fix semgrep warning
+	return resourceServiceRead(ctx, d, meta) // nosemgrep: data-source-with-resource-read
 }

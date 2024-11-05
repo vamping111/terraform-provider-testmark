@@ -251,6 +251,7 @@ func (s mySQLManager) serviceParametersDataSourceSchema() map[string]*schema.Sch
 		"galera_options": {
 			Type:     schema.TypeMap,
 			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 		"gcache_size": {
 			Type:     schema.TypeInt,
@@ -339,6 +340,7 @@ func (s mySQLManager) serviceParametersDataSourceSchema() map[string]*schema.Sch
 		"options": {
 			Type:     schema.TypeMap,
 			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 		"pxc_strict_mode": {
 			Type:     schema.TypeString,

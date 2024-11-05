@@ -213,6 +213,8 @@ func waitNodegroupDeleted(ctx context.Context, conn *eks.EKS, clusterName, nodeG
 }
 
 // This is a temporary solution for C2 Nodegroups until DescribeUpdate is implemented.
+//
+//nolint:unparam // A waiter return value should include an object (*eks.Nodegroup) even if it is never used.
 func waitC2NodegroupUpdated(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName string, timeout time.Duration) (*eks.Nodegroup, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{eks.NodegroupStatusPending, eks.NodegroupStatusUpdating},

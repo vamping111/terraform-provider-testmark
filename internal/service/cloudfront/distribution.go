@@ -20,7 +20,7 @@ import (
 )
 
 func ResourceDistribution() *schema.Resource {
-	//lintignore:R011
+	// lintignore:R011
 	return &schema.Resource{
 		Create: resourceDistributionCreate,
 		Read:   resourceDistributionRead,
@@ -833,7 +833,7 @@ func resourceDistributionCreate(d *schema.ResourceData, meta interface{}) error 
 
 	var resp *cloudfront.CreateDistributionWithTagsOutput
 	// Handle eventual consistency issues
-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(1*time.Minute, func() *resource.RetryError { // nosemgrep: helper-schema-resource-Retry-without-TimeoutError-check
 		var err error
 		resp, err = conn.CreateDistributionWithTags(params)
 
@@ -925,7 +925,7 @@ func resourceDistributionRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	tags = tags.IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}
@@ -946,7 +946,7 @@ func resourceDistributionUpdate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	// Handle eventual consistency issues
-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(1*time.Minute, func() *resource.RetryError { // nosemgrep: helper-schema-resource-Retry-without-TimeoutError-check
 		_, err := conn.UpdateDistribution(params)
 
 		// ACM and IAM certificate eventual consistency

@@ -770,6 +770,7 @@ func DeleteRecordSet(conn *route53.Route53, input *route53.ChangeResourceRecordS
 	return out, err
 }
 
+//nolint:unparam // Unsupported r53 api parameters are commented out.
 func resourceRecordBuildSet(d *schema.ResourceData, zoneName string) (*route53.ResourceRecordSet, error) {
 	// get expanded name
 	en := ExpandRecordName(d.Get("name").(string), zoneName)
@@ -941,6 +942,8 @@ func resourceAliasRecordHash(v interface{}) int {
 // nilString takes a string as an argument and returns a string
 // pointer. The returned pointer is nil if the string argument is
 // empty. Otherwise, it is a pointer to a copy of the string.
+//
+//nolint:unused // Unsupported r53 api parameters that use this method are commented out.
 func nilString(s string) *string {
 	if s == "" {
 		return nil

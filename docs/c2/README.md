@@ -3,14 +3,14 @@
 Адаптация [Terraform AWS Provider](https://github.com/hashicorp/terraform-provider-aws) от **HashiCorp**
 под **Rockit Cloud**.
 
-| Upstream Name | Upstream Version |
-|------|---------|
+| Upstream Name                                                                 | Upstream Version                                                           |
+|-------------------------------------------------------------------------------|----------------------------------------------------------------------------|
 | [Terraform AWS Provider](https://github.com/hashicorp/terraform-provider-aws) | [4.14.0](https://github.com/hashicorp/terraform-provider-aws/tree/v4.14.0) |
 
 - [Требования](#требования)
 - [Общая информация](#общая-информация)
 - [Начало работы](#начало-работы)
-    - [Установка линтеров](#установка-линтеров)
+    - [Установка и запуск линтеров](#установка-и-запуск-линтеров)
 - [aws-sdk-go](#aws-sdk-go)
     - [Изменение версии aws-sdk-go](#изменение-версии-aws-sdk-go)
 - [Тесты](#тесты)
@@ -18,6 +18,7 @@
     - [Acceptance](#acceptance)
 - [Документация](#документация)
     - [Запуск линтеров](#запуск-линтеров)
+    - [Директория website_unsupported](#директория-website_unsupported)
 - [Выпуск релиза](#выпуск-релиза)
     - [Настройка окружения](#настройка-окружения)
     - [Версионирование](#версионирование)
@@ -34,7 +35,7 @@
 ## Требования
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.13+ (запуск приемочных тестов)
-- [Go](https://golang.org/doc/install) 1.17+ (сборка провайдера)
+- [Go](https://golang.org/doc/install) 1.21 (сборка провайдера)
 - [Docker](https://docs.docker.com/get-docker/) (запуск линтеров для документации)
 
 ## Общая информация
@@ -85,7 +86,7 @@ $ go build -o terraform-provider-rockitcloud
 
 Артефакт `terraform-provider-rockitcloud` будет создан в директории запуска.
 
-### Установка линтеров
+### Установка и запуск линтеров
 
 **Опционально.** Установка дополнительных библиотек (линтеры, форматтеры и т.д.): `make tools`
 
@@ -98,6 +99,18 @@ $ go build -o terraform-provider-rockitcloud
 ```
 $ make lint
 $ make semgrep
+```
+
+**Важно!** `make lint` может выполняться очень долго, тк линтеры анализируют директорию `internal/service` целиком.
+Можно запускать линтеры по отдельности и на конкретной директории:
+
+```
+$ golangci-lint run -v ./internal/service/paas/... 
+
+# в команде нужно будет укзаать все игнорируемые проверки
+$ providerlint -c 1 -XS001=false ./internal/service/paas/...
+
+$ make importlint
 ```
 
 ## aws-sdk-go
@@ -184,10 +197,15 @@ website/
 |-- allowed-subcategories.txt        # разделы документации
 ```
 
+**Важно!** `allowed-subcategories.txt` генерируется при запуске таргета `make gen`
+и содержит информацию обо всех доступных разделах документации. После публикации отображаться будут только непустые разделы.
+
+Опубликованная документация: https://registry.terraform.io/providers/C2Devel/rockitcloud/latest/docs
+
 ### Запуск линтеров
 
 Для запуска линтеров требуется установка [Docker](https://golang.org/doc/install) и собственно линтеров
-(см. [установка линтеров](#установка-линтеров)).
+(см. [установка линтеров](#установка-и-запуск-линтеров)).
 
 `docs/`: проверяется форматирование markdown файлов и ошибки в тексте (English).
 
@@ -200,9 +218,13 @@ $ make docs-lint
 
 ```
 $ make website-lint
-...
 $ make docscheck
 ```
+
+### Директория website_unsupported
+
+В `website_unsupported/` перенесены гайды и документация для ресурсов, которые не поддерживаются Rockit Cloud API.
+Для публикации требуется перенести нужную страницу в соответствующую директорию в `website/`.
 
 ## Выпуск релиза
 
@@ -269,10 +291,21 @@ $ make docscheck
 **Важно!** Релизы провайдера выпускаются с ветки **develop** (установлена дефолтной).
 Ветка **main** используется для получения обновлений с upstream.
 
-1. **Опционально.** Если требуется обновить версию **aws-sdk-go**,
-   см. [изменение версии aws-sdk-go](#изменение-версии-aws-sdk-go)
-2. Обновление [CHANGELOG.md](../../CHANGELOG.md)
-3. Запуск тестов (см. [тесты](#тесты))
+1. Создание релизного PR'а в ветку **develop**
+(пример: [v24.1.0](https://github.com/C2Devel/terraform-provider-rockitcloud/pull/49))
+   - **Опционально.** Обновление версии **aws-sdk-go**, если требуется
+     (см. [изменение версии aws-sdk-go](#изменение-версии-aws-sdk-go))
+   - Обновление [CHANGELOG.md](../../CHANGELOG.md)
+2. Локальный запуск линтеров и unit тестов на ветке **develop** + релизный PR
+
+   ```
+   $ make lint
+   $ make docs-lint
+   $ make website-lint
+   $ make test
+   ```
+
+3. Мердж релизного PR'а
 4. **Опционально.** Включение автопубликации релиза в github (флаг `release.draft` в `.goreleaser.yml`)
 
    ```
@@ -309,6 +342,8 @@ $ make docscheck
     - `terraform-provider-rockitcloud_{VERSION}_manifest.json`
         - Файл создается вручную:
         - `cp terraform-registry-manifest.json terraform-provider-rockitcloud_{VERSION}_manifest.json`
+
+   В описание дублируется запись из CHANGELOG.md.
 
 ## Публикация провайдера в официальном terraform registry
 

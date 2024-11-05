@@ -96,6 +96,7 @@ func (s mongoDBManager) serviceParametersDataSourceSchema() map[string]*schema.S
 		"options": {
 			Type:     schema.TypeMap,
 			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 		"profile": {
 			Type:     schema.TypeString,

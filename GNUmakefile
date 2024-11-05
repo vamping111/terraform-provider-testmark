@@ -189,6 +189,6 @@ website-lint-fix:
 
 semgrep:
 	@echo "==> Running Semgrep static analysis..."
-	@docker run --rm --volume "${PWD}:/src" returntocorp/semgrep --config .semgrep.yml
+	@docker run --rm --volume "${PWD}:/src" returntocorp/semgrep semgrep --config .semgrep.yml
 
 .PHONY: providerlint build gen generate-changelog gh-workflows-lint golangci-lint sweep test testacc fmt fmtcheck lint tools test-compile website-link-check website-lint website-lint-fix depscheck docscheck semgrep

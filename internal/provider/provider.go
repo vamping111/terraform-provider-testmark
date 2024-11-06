@@ -205,7 +205,7 @@ func Provider() *schema.Provider {
 			"skip_credentials_validation": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 				Description: "Skip the credentials validation via STS API. " +
 					"Used for AWS API implementations that do not have STS available/implemented.",
 			},
@@ -226,14 +226,14 @@ func Provider() *schema.Provider {
 			"skip_region_validation": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 				Description: "Skip static validation of region name. " +
 					"Used by users of alternative AWS-like APIs or users w/ access to regions that are not public (yet).",
 			},
 			"skip_requesting_account_id": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 				Description: "Skip requesting the account ID. " +
 					"Used for AWS API implementations that do not have IAM/STS API and/or metadata API.",
 			},

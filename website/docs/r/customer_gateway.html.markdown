@@ -32,7 +32,7 @@ The following arguments are supported:
 
 * `bgp_asn` - (Required) The gateway's Border Gateway Protocol (BGP) Autonomous System Number (ASN).
 * `ip_address` - (Required) The IP address of the gateway's Internet-routable external interface.
-* `type` - (Required) The type of customer gateway. Possible values: `ipsec.1`, `ipsec.legacy`.
+* `type` - (Required) The type of customer gateway. Valid values are `ipsec.1`, `ipsec.legacy`.
 * `tags` - (Optional) Tags to apply to the gateway. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
 
 ## Attributes Reference

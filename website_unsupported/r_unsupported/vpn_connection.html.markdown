@@ -64,7 +64,7 @@ resource "aws_vpn_connection" "example" {
 The following arguments are required:
 
 * `customer_gateway_id` - (Required) The ID of the customer gateway.
-* `type` - (Required) The type of VPN connection. Valid values is `ipsec.1`.
+* `type` - (Required) The type of VPN connection. Valid values are `ipsec.1`, `ipsec.legacy`.
 * `vpn_gateway_id` - (Required) The ID of the VPN gateway.
 
 Other arguments:
@@ -134,7 +134,7 @@ In addition to all arguments above, the following attributes are exported:
 * `status_message` - If an error occurs, a description of the error.
 
 ->  **Unsupported attributes**
-These exported attributes are currently unsupported.:
+These exported attributes are currently unsupported:
 
 * `core_network_arn` - The ARN of the core network. Always `""`.
 * `core_network_attachment_arn` - The ARN of the core network attachment. Always `""`.

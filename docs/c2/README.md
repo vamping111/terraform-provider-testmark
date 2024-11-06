@@ -253,8 +253,13 @@ $ make docscheck
    ```
 
 2. Создание **GPG** ключа
-   ([инструкция от github](https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key))
-    - **Важно!** Ключ должен быть без пароля
+   ([инструкция от Hashicorp](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-release-publish#generate-gpg-signing-key))
+    - **Важно!** Требования к ключу:
+      - Ключ должен быть без пароля
+      - Тип ключа должен быть RSA
+      - Размер ключа 4096
+      - Ключ не должен иметь срока годности
+      - Название и почта, которые указываются в описании ключа, должны быть обсуждены с ответственными людьми
     - **Опционально.** Привязка ключа к github аккаунту
 3. Установка переменной `GPG_FINGERPRINT`
 

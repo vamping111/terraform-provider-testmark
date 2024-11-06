@@ -1,3 +1,47 @@
+## 24.2.0
+
+NOTES:
+
+* Bump go version to 1.21
+* readme: add information about GPG key creation process
+
+FEATURES:
+
+* **New Data Source:** `aws_iam_group`
+* **New Data Source:** `aws_iam_policy`
+* **New Data Source:** `aws_iam_project`
+* **New Data Source:** `aws_iam_user`
+* **New Data Source:** `aws_iam_users`
+* **New Data Source:** `aws_backup_plan`
+* **New Data Source:** `aws_backup_selection`
+* **New Data Source:** `aws_backup_vault`
+* **New Resource:** `aws_iam_group`
+* **New Resource:** `aws_iam_group_membership`
+* **New Resource:** `aws_iam_group_policy_attachment`
+* **New Resource:** `aws_iam_policy`
+* **New Resource:** `aws_iam_project`
+* **New Resource:** `aws_iam_user`
+* **New Resource:** `aws_iam_user_group_membership`
+* **New Resource:** `aws_iam_user_policy_attachment`
+* **New Resource:** `aws_cloudwatch_metric_alarm`
+* **New Resource:** `aws_backup_plan`
+* **New Resource:** `aws_backup_selection`
+* **New Resource:** `aws_backup_vault_default`
+
+BUG FIXES:
+
+* resource/aws_customer_gateway, resource/aws_vpn_connection: add `ipsec.legacy` to possible values for `type` argument
+
+ENHANCEMENTS:
+
+* resource/aws_subnet: add `map_public_ip_on_launch` argument support
+* data-source/aws_subnet: add `map_public_ip_on_launch` attribute support
+* provider: change default values for the provider parameters:
+    * `skip_credentials_validation`: set the default value to `true`
+    * `skip_region_validation`: set the default value to `true`
+    * `skip_requesting_account_id`: set the default value to `true`
+* provider: support `EC2_URL` and `PAAS_URL` environment variables
+
 ## 24.1.0
 
 NOTES:

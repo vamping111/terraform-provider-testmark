@@ -1,3 +1,13 @@
+## 24.2.1
+
+BUG FIXES:
+
+* resource/aws_paas_service, data-source/aws_paas_service: add name for service and instance endpoints
+
+ENHANCEMENTS:
+
+* provider: ignore `system:` tag key prefix
+
 ## 24.2.0
 
 NOTES:

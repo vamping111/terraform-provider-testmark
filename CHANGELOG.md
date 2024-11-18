@@ -1,3 +1,9 @@
+## 24.2.2
+
+BUG FIXES:
+
+* config: fix invalid `ARN` building that used `username` instead of `project name` in `accountID` section
+
 ## 24.2.1
 
 BUG FIXES:

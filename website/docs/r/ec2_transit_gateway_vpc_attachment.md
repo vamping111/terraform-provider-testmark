@@ -67,7 +67,7 @@ The following arguments are supported:
 * `transit_gateway_default_route_table_propagation` - (Optional) Indicates whether the transit gateway VPC attachment
   should propagate routes to the transit gateway default propagation route table. Defaults to `true`.
 
-~> `transit_gateway_default_route_table_association` and `transit_gateway_default_route_table_propagation`
+~> **Note** `transit_gateway_default_route_table_association` and `transit_gateway_default_route_table_propagation`
 cannot be configured for shared transit gateways.  
 
 ## Attribute Reference

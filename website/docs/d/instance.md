@@ -46,9 +46,9 @@ data "aws_instance" "selected" {
 
 For more information about filtering, see the [EC2 API documentation][describe-instances].
 
-~> **NOTE:** At least one of `filter`, `instance_tags`, or `instance_id` must be specified.
+~> **Note** At least one of `filter`, `instance_tags`, or `instance_id` must be specified.
 
-~> **NOTE:** If anything other than a single match is returned by the search,
+~> **Note** If anything other than a single match is returned by the search,
 Terraform will fail. Ensure that your search is specific enough to return
 a single instance ID only.
 
@@ -57,7 +57,7 @@ a single instance ID only.
 `id` is set to the ID of the found instance. In addition, the following attributes
 are exported:
 
-~> **NOTE:** Some values are not always set and may not be available for
+~> **Note** Some values are not always set and may not be available for
 interpolation.
 
 * `affinity` - The affinity setting for an instance on a dedicated host.

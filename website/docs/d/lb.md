@@ -8,7 +8,7 @@ description: |-
 
 # Data Source: aws_lb
 
-~> **Note:** `aws_alb` is known as `aws_lb`. The functionality is identical.
+~> **Note** `aws_alb` is known as `aws_lb`. The functionality is identical.
 
 Provides information about a Load Balancer.
 
@@ -43,7 +43,7 @@ The following arguments are supported:
 * `name` - (Optional) The unique name of the load balancer.
 * `tags` - (Optional) A mapping of tags, each pair of which must exactly match a pair on the desired load balancer.
 
-~> **NOTE**: When both `arn` and `name` are specified, `arn` takes precedence. `tags` has lowest precedence.
+~> **Note**: When both `arn` and `name` are specified, `arn` takes precedence. `tags` has lowest precedence.
 
 ## Attributes Reference
 

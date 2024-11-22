@@ -93,7 +93,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-~> Only transit gateway routes with `static` type can be imported.
+~> **Note** Only transit gateway routes with `static` type can be imported.
 
 The transit gateway route can be imported using `id`, e.g.,
 

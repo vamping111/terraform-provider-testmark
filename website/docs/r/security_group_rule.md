@@ -11,14 +11,14 @@ description: |-
 Provides a security group rule resource. Represents a single `ingress` or
 `egress` group rule, which can be added to external security groups.
 
-~> **NOTE on Security Groups and Security Group Rules:** Terraform currently
+~> **Note on Security Groups and Security Group Rules:** Terraform currently
 provides both a standalone security group rule resource (a single `ingress` or
 `egress` rule), and a [`aws_security_group`][tf-security-group] with `ingress` and `egress` rules
 defined in-line. At this time you cannot use a security group with in-line rules
 in conjunction with any security group rule resources. Doing so will cause
 a conflict of rule settings and will overwrite rules.
 
-~> **NOTE:** Setting `protocol = "all"` or `protocol = -1` with `from_port` and `to_port` will result in the EC2 API creating a security group rule with all ports open. This API behavior cannot be controlled by Terraform and may generate warnings in the future.
+~> **Note** Setting `protocol = "all"` or `protocol = -1` with `from_port` and `to_port` will result in the EC2 API creating a security group rule with all ports open. This API behavior cannot be controlled by Terraform and may generate warnings in the future.
 
 ## Example Usage
 

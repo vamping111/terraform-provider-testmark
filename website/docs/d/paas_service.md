@@ -119,7 +119,7 @@ The `root_volume` block has the following structure:
 
 ## Elasticsearch Attribute Reference
 
-~> The following attributes contain default parameter values or user-defined values used when the service is created.
+~> **Note** The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for an Elasticsearch service:
@@ -134,7 +134,7 @@ the following attributes are exported only for an Elasticsearch service:
 
 ## Memcached Attribute Reference
 
-~> The following attributes contain default parameter values or user-defined values used when the service is created.
+~> **Note** The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a Memcached service:
@@ -145,7 +145,7 @@ the following attributes are exported only for a Memcached service:
 
 ## MongoDB Attribute Reference
 
-~> The following attributes contain default parameter values or user-defined values used when the service is created.
+~> **Note** The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a Memcached service:
@@ -191,7 +191,7 @@ The `user` block has the following structure:
 
 ## MySQL Attribute Reference
 
-~> The following attributes contain default parameter values or user-defined values used when the service is created.
+~> **Note** The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a MySQL service:
@@ -269,7 +269,7 @@ The `user` block has the following structure:
 
 ## PostgreSQL Attribute Reference
 
-~> The following attributes contain default parameter values or user-defined values used when the service is created.
+~> **Note** The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a PostgreSQL service:
@@ -343,7 +343,7 @@ The `user` block has the following structure:
 
 ## RabbitMQ Attribute Reference
 
-~> The following attributes contain default parameter values or user-defined values used when the service is created.
+~> **Note** The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a RabbitMQ service:
@@ -357,7 +357,7 @@ the following attributes are exported only for a RabbitMQ service:
 
 ## Redis Attribute Reference
 
-~> The following attributes contain default parameter values or user-defined values used when the service is created.
+~> **Note** The following attributes contain default parameter values or user-defined values used when the service is created.
 
 In addition to the common attributes for all services [described above](#attribute-reference),
 the following attributes are exported only for a Redis service:

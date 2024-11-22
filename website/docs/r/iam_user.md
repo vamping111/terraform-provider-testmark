@@ -49,7 +49,7 @@ The following arguments are supported:
   can only contain Latin letters, numbers, underscores (_), periods (.) and hyphens (-) (`^[a-zA-Z][a-zA-Z0-9_.-]*$`).
   The value must be 1 to 40 characters long.
 
-~> User names are not case-sensitive. For example, you cannot create user names "TESTUSER" and "testuser" at the same time.
+~> **Note** User names are not case-sensitive. For example, you cannot create user names "TESTUSER" and "testuser" at the same time.
 
 * `otp_required` - (Optional) Indicates whether the user is required to use two-factor authentication to log in to the web interface.
   Defaults to `false`.
@@ -70,7 +70,7 @@ In addition to all arguments above, the following attributes are exported:
 * `update_date` - The time in [RFC3339 format] when the user was last updated.
 * `user_id` - The ID of the user.
 
-~> `password` and `secret_key` are exported only once when the user is created and will not be updated afterwards.
+~> **Note** `password` and `secret_key` are exported only once when the user is created and will not be updated afterwards.
 
 ->  **Unsupported attributes**
 These attributes are currently unsupported:

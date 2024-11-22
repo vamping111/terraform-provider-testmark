@@ -36,7 +36,7 @@ data "aws_iam_policy" "selected" {
   (e.g. `arn:c2:iam::<customer-name>:policy/<policy-name>`).
 * `name` - (Required if `arn` is not specified) The name of the policy.
 
-~> Filtering by `name` is performed locally and can affect performance when the list of policies is large.
+~> **Note** Filtering by `name` is performed locally and can affect performance when the list of policies is large.
 
 ## Attribute Reference
 

@@ -77,7 +77,7 @@ The following arguments are supported:
 * `name_prefix` - (Optional, Conflicts with `name`) Creates a unique name starting with the specified prefix.
   The value has the same character restrictions as `name`. The value must be 1 to 102 characters long.
 
-~> If `name` and `name_prefix` are omitted, Terraform will assign a random unique name with the `terraform-` prefix.
+~> **Note** If `name` and `name_prefix` are omitted, Terraform will assign a random unique name with the `terraform-` prefix.
 
 * `policy` - (Required, Editable) A string with policy-defined access rules in JSON format.
 * `type` - (Required) The type of the policy. Valid values are `global`, `project`.

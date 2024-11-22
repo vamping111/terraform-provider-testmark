@@ -13,10 +13,10 @@ description: |-
 
 Manages a PaaS service backup.
 
-~> Terraform does not create backups of the PaaS service, but tries to gain control over an already created backup.
+~> **Note** Terraform does not create backups of the PaaS service, but tries to gain control over an already created backup.
 Use `backup_settings` section in [`aws_paas_service`](paas_service.md) resource to control the creation of backups.
 
-~> Terraform does not delete the backup when running `terraform destroy`, it will only be removed from the Terraform state.
+~> **Note** Terraform does not delete the backup when running `terraform destroy`, it will only be removed from the Terraform state.
 
 ## Example Usage
 

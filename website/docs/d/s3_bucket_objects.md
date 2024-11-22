@@ -8,9 +8,9 @@ description: |-
 
 # Data Source: aws_s3_bucket_objects
 
-~> **NOTE:** The `aws_s3_bucket_objects` data source is DEPRECATED and will be removed in a future version! Use [`aws_s3_objects`](s3_objects.md) instead, where new features and fixes will be added.
+~> **Note** The `aws_s3_bucket_objects` data source is DEPRECATED and will be removed in a future version! Use [`aws_s3_objects`](s3_objects.md) instead, where new features and fixes will be added.
 
-~> **NOTE on `max_keys`:** Retrieving very large numbers of keys can adversely affect Terraform's performance.
+~> **Note on `max_keys`:** Retrieving very large numbers of keys can adversely affect Terraform's performance.
 
 The objects data source returns keys (i.e., file names) and other metadata about objects in an S3 bucket.
 

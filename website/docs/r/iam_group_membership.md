@@ -12,7 +12,7 @@ description: |-
 
 Adds IAM users to an IAM group.
 
-~> Use no more than one resource per group to avoid inconsistent behavior.
+~> **Note** Use no more than one resource per group to avoid inconsistent behavior.
 
 How to manage a specific user in multiple groups,
 see the [`aws_iam_user_group_membership` resource][tf-user-group-membership].

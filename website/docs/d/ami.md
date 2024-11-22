@@ -45,7 +45,7 @@ For more information about filtering, see the [EC2 API documentation][describe-i
   and could have a performance impact if the result is large.
   It is recommended to combine this with other options to narrow down the list the EC2 API returns.
 
-~> **NOTE:** If more or less than a single match is returned by the search,
+~> **Note** If more or less than a single match is returned by the search,
 Terraform will fail. Ensure that your search is specific enough to return
 a single image ID only, or use `most_recent` to choose the most recent one. If
 you want to match multiple images, use the [`aws_ami_ids`](ami_ids.md) data source instead.
@@ -56,7 +56,7 @@ you want to match multiple images, use the [`aws_ami_ids`](ami_ids.md) data sour
 
 In addition, the following attributes are exported:
 
-~> **NOTE:** Some values are not always set and may not be available for
+~> **Note** Some values are not always set and may not be available for
 interpolation.
 
 * `arn` - The ARN of the image.

@@ -36,7 +36,7 @@ data "aws_iam_group" "selected" {
   (e.g. `arn:c2:iam::<customer-name>:group/<group-name>`).
 * `name` - (Required if `arn` is not specified) The name of the group.
 
-~> Filtering by `name` is performed locally and can affect performance when the list of groups is large.
+~> **Note** Filtering by `name` is performed locally and can affect performance when the list of groups is large.
 
 ## Attribute Reference
 

@@ -10,7 +10,7 @@ description: |-
 
 Creates an entry (a rule) in a network ACL with the specified rule number.
 
-~> **NOTE on Network ACLs and Network ACL Rules:** Terraform currently
+~> **Note on Network ACLs and Network ACL Rules:** Terraform currently
 provides both a standalone network ACL rule resource and an [aws_network_acl][tf-network-acl] resource with rules
 defined in-line. At this time you cannot use a Network ACL with in-line rules
 in conjunction with any network ACL rule resources. Doing so will cause
@@ -39,7 +39,7 @@ resource "aws_network_acl_rule" "example" {
 }
 ```
 
-~> **Note:** One of either `cidr_block` or `ipv6_cidr_block` is required.
+~> **Note** One of either `cidr_block` or `ipv6_cidr_block` is required.
 
 ## Argument Reference
 
@@ -57,11 +57,11 @@ The following arguments are supported:
 * `icmp_type` - (Optional) ICMP protocol: The ICMP type. Required if specifying ICMP for the protocolE.g., -1
 * `icmp_code` - (Optional) ICMP protocol: The ICMP code. Required if specifying ICMP for the protocolE.g., -1
 
-~> **NOTE:** If the value of `protocol` is `-1` or `all`, the `from_port` and `to_port` values will be ignored and the rule will apply to all ports.
+~> **Note** If the value of `protocol` is `-1` or `all`, the `from_port` and `to_port` values will be ignored and the rule will apply to all ports.
 
-~> **NOTE:** If the value of `icmp_type` is `-1` (which results in a wildcard ICMP type), the `icmp_code` must also be set to `-1` (wildcard ICMP code).
+~> **Note** If the value of `icmp_type` is `-1` (which results in a wildcard ICMP type), the `icmp_code` must also be set to `-1` (wildcard ICMP code).
 
-~> Note: For more information on ICMP types and codes, see here: https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml
+~> **Note** For more information on ICMP types and codes, see here: https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml
 
 ## Attributes Reference
 

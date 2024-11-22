@@ -10,13 +10,13 @@ description: |-
 
 Provides a resource to create a VPC routing table.
 
-~> **NOTE on Route Tables and Routes:** Terraform currently
+~> **Note on Route Tables and Routes:** Terraform currently
 provides both a standalone [`aws_route` resource][tf-route] and a Route Table resource with routes
 defined in-line. At this time you cannot use a route table with in-line routes
 in conjunction with any route resources. Doing so will cause
 a conflict of rule settings and will overwrite rules.
 
-~> **NOTE on `propagating_vgws` and the `aws_vpn_gateway_route_propagation` resource:**
+~> **Note on `propagating_vgws` and the `aws_vpn_gateway_route_propagation` resource:**
 If the `propagating_vgws` argument is present, it's not supported to _also_
 define route propagations using [`aws_vpn_gateway_route_propagation`][tf-vpn-gateway-route-propagation], since
 this resource will delete any propagating gateways not explicitly listed in
@@ -99,7 +99,7 @@ One of the following target arguments must be supplied:
 
 In addition to all arguments above, the following attributes are exported:
 
-~> **NOTE:** Only the target that is entered is exported as a readable
+~> **Note** Only the target that is entered is exported as a readable
 attribute once the route resource is created.
 
 * `id` - ID of the route table.

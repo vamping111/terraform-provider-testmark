@@ -10,7 +10,7 @@ description: |-
 
 Provides an Auto Scaling Policy resource.
 
-~> **NOTE:** You may want to omit `desired_capacity` attribute from attached `aws_autoscaling_group`
+~> **Note** You may want to omit `desired_capacity` attribute from attached `aws_autoscaling_group`
 when using autoscaling policies. It's good practice to pick either manual or dynamic (policy-based) scaling.
 
 ## Example Usage

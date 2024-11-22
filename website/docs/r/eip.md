@@ -76,9 +76,9 @@ The following arguments are supported:
 * `tags` - (Optional) Map of tags to assign to the resource. Tags can only be applied to EIPs in a VPC. If configured with a provider [`default_tags` configuration block][default-tags] present, tags with matching keys will overwrite those defined at the provider-level.
 * `vpc` - (Optional) Boolean if the EIP is in a VPC or not.
 
-~> **NOTE:** You can specify either the `instance` ID or the `network_interface` ID, but not both.
+~> **Note** You can specify either the `instance` ID or the `network_interface` ID, but not both.
 
-~> **NOTE:** Specifying both `public_ipv4_pool` and `address` won't cause an error but `address` will be used in the
+~> **Note** Specifying both `public_ipv4_pool` and `address` won't cause an error but `address` will be used in the
 case both options are defined as the api only requires one or the other.
 
 ## Attributes Reference
@@ -103,7 +103,7 @@ These exported attributes are currently unsupported:
 * `private_dns` - The Private DNS associated with the Elastic IP address (if in VPC). Computed by provider.
 * `public_dns` - Public DNS associated with the Elastic IP address. Computed by provider.
 
-~> **Note:** The data source computes the `public_dns` and `private_dns` attributes according to the [AWS VPC DNS Guide](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-dns.html#vpc-dns-hostnames) as they are not available with the EC2 API.
+~> **Note** The data source computes the `public_dns` and `private_dns` attributes according to the [AWS VPC DNS Guide](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-dns.html#vpc-dns-hostnames) as they are not available with the EC2 API.
 
 ## Timeouts
 

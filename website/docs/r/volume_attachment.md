@@ -10,7 +10,7 @@ description: |-
 
 Provides an EBS volume attachment as a top level resource, to attach and detach volumes from instances.
 
-~> **NOTE on EBS block devices:** If you use `ebs_block_device` on an `aws_instance`, Terraform will assume management over the full set of non-root EBS block devices for the instance, and treats additional block devices as drift. For this reason, `ebs_block_device` cannot be mixed with external `aws_ebs_volume` + `aws_volume_attachment` resources for a given instance.
+~> **Note on EBS block devices:** If you use `ebs_block_device` on an `aws_instance`, Terraform will assume management over the full set of non-root EBS block devices for the instance, and treats additional block devices as drift. For this reason, `ebs_block_device` cannot be mixed with external `aws_ebs_volume` + `aws_volume_attachment` resources for a given instance.
 
 ## Example Usage
 
@@ -34,7 +34,7 @@ The following arguments are supported:
 
 * `device_name` - (Optional) The device name to expose to the instance.
 
-~> **NOTE:** The parameter `device_name` is deprecated. Its value is ignored.
+~> **Note** The parameter `device_name` is deprecated. Its value is ignored.
 The device name will be generated during attaching and can be changed.
 
 * `instance_id` - (Required) ID of the instance to attach to.

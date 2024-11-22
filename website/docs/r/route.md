@@ -10,7 +10,7 @@ description: |-
 
 Provides a resource to create a routing table entry (a route) in a VPC routing table.
 
-~> **NOTE on Route Tables and Routes:** Terraform currently provides both a standalone Route resource and a [`aws_route_table`][tf-route-table] resource with routes defined in-line. At this time you cannot use a Route Table with in-line routes in conjunction with any Route resources. Doing so will cause a conflict of rule settings and will overwrite rules.
+~> **Note on Route Tables and Routes:** Terraform currently provides both a standalone Route resource and a [`aws_route_table`][tf-route-table] resource with routes defined in-line. At this time you cannot use a Route Table with in-line routes in conjunction with any Route resources. Doing so will cause a conflict of rule settings and will overwrite rules.
 
 ## Example Usage
 
@@ -46,7 +46,7 @@ One of the following target arguments must be supplied:
 
 In addition to all arguments above, the following attributes are exported:
 
-~> **NOTE:** Only the arguments that are configured (one of the above) will be exported as an attribute once the resource is created.
+~> **Note** Only the arguments that are configured (one of the above) will be exported as an attribute once the resource is created.
 
 * `id` - Route identifier computed from the routing table identifier and route destination.
 * `instance_owner_id` - The project ID that owns the EC2 instance.

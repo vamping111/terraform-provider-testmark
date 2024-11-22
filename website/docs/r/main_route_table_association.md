@@ -10,7 +10,7 @@ description: |-
 
 Provides a resource for managing the main routing table of a VPC.
 
-~> **NOTE:** **Do not** use both `aws_default_route_table` to manage a default route table **and** `aws_main_route_table_association` with the same VPC due to possible route conflicts. See [aws_default_route_table][tf-default-route-table] documentation for more details.
+~> **Note** **Do not** use both `aws_default_route_table` to manage a default route table **and** `aws_main_route_table_association` with the same VPC due to possible route conflicts. See [aws_default_route_table][tf-default-route-table] documentation for more details.
 For more information, see the documentation on [Route Tables][route-tables]. For information about managing normal route tables in Terraform, see [`aws_route_table`][tf-route-table].
 
 ## Example Usage

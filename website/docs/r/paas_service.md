@@ -81,7 +81,7 @@ resource "aws_paas_service" "elasticsearch" {
 
 ### Memcached Service with Enabled Monitoring
 
-~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
+~> **Note** This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
 
 ```terraform
 resource "aws_paas_service" "memcached" {
@@ -118,7 +118,7 @@ resource "aws_paas_service" "memcached" {
 
 ### MongoDB Service
 
-~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
+~> **Note** This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
 
 ```terraform
 resource "aws_paas_service" "mongodb" {
@@ -171,7 +171,7 @@ resource "aws_paas_service" "mongodb" {
 
 ### MySQL Service
 
-~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
+~> **Note** This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
 
 ```terraform
 resource "aws_paas_service" "mysql" {
@@ -345,7 +345,7 @@ resource "aws_paas_service" "pgsql" {
 
 ### RabbitMQ Service
 
-~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
+~> **Note** This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
 
 ```terraform
 resource "aws_paas_service" "rabbitmq" {
@@ -377,7 +377,7 @@ resource "aws_paas_service" "rabbitmq" {
 
 ### Redis Service with Enabled Logging
 
-~> This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
+~> **Note** This example uses the VPC and subnet defined in the [Elasticsearch Service example](#elasticsearch-service).
 
 ```terraform
 resource "aws_paas_service" "redis" {
@@ -424,7 +424,7 @@ resource "aws_paas_service" "redis" {
 
 ## Argument Reference
 
-~> Arguments are not editable (changes lead to a new resource) except for the blocks with service parameters and `backup_settings`.
+~> **Note** Arguments are not editable (changes lead to a new resource) except for the blocks with service parameters and `backup_settings`.
 
 * `arbitrator_required` - (Optional) Indicates whether to create a cluster with an arbitrator. Defaults to `false`.
   The parameter can be set to `true` only if `high_availability` is `true`.
@@ -459,7 +459,7 @@ One of the following blocks with service parameters must be specified:
 
 ### backup_settings
 
-~> All the parameters in the `backup_settings` block are editable.
+~> **Note** All the parameters in the `backup_settings` block are editable.
 
 The `backup_settings` block has the following structure:
 
@@ -503,7 +503,7 @@ the `elasticsearch` block can contain the following arguments:
 * `options` - (Optional, Editable) Map containing other Elasticsearch parameters.
   Parameter names must be in camelCase. Values are strings.
 
-~> If a parameter name includes a dot, it cannot be passed in `options`.
+~> **Note** If a parameter name includes a dot, it cannot be passed in `options`.
 If you need to use such a parameter, contact [technical support].
 
 * `password` - (Optional) The Elasticsearch user password.
@@ -536,7 +536,7 @@ the `mongodb` block can contain the following arguments:
 * `options` - (Optional, Editable) Map containing other MongoDB parameters.
   Parameter names must be in camelCase. Values are strings.
 
-~> If a parameter name includes a dot, it cannot be passed in `options`.
+~> **Note** If a parameter name includes a dot, it cannot be passed in `options`.
 If you need to use such a parameter, contact [technical support].
 
 * `profile` - (Optional, Editable) Indicates which operations to profile. Valid values are `off`, `slowOp`, `all`.
@@ -552,7 +552,7 @@ If you need to use such a parameter, contact [technical support].
 
 ### MongoDB database
 
-~> All the parameters in the `database` block are editable.
+~> **Note** All the parameters in the `database` block are editable.
 
 The `database` block has the following structure:
 
@@ -561,14 +561,14 @@ The `database` block has the following structure:
 
 ### MongoDB database user
 
-~> All the parameters in the `user` block are editable.
+~> **Note** All the parameters in the `user` block are editable.
 
 * `name` - (Required) The MongoDB user name.
 * `roles` - (Optional) List of user roles. Valid values are `read`, `readWrite`, `dbAdmin`, `dbOwner`.
 
 ### MongoDB user
 
-~> All the parameters in the `user` block are editable.
+~> **Note** All the parameters in the `user` block are editable.
 
 * `name` - (Required) The MongoDB user name.
 * `password` - (Required) The MongoDB user password. The value must not contain `'`, `"`, `` ` `` and `\`.
@@ -587,7 +587,7 @@ the `mysql` block can contain the following arguments:
 * `galera_options` - (Optional) Map containing other Galera parameters.
   Parameter names must be in camelCase. Values are strings.
 
-~> If a parameter name includes a dot, it cannot be passed in `galera_options`.
+~> **Note** If a parameter name includes a dot, it cannot be passed in `galera_options`.
 If you need to use such a parameter, contact [technical support].
 
 * `gcache_size` - (Optional) A Galera parameter. The size of GCache circular buffer storage preallocated on startup in bytes.
@@ -601,13 +601,13 @@ If you need to use such a parameter, contact [technical support].
 * `gcs_fc_master_slave` - (Optional) A Galera parameter. Indicates whether the cluster has only one source node.
   The parameter can be set only if `high_availability` is `true`.
 
-~> `gcs_fc_master_slave` is deprecated. This parameter is relevant for Percona 5.7, MySQL 5.7, and MariaDB 10.2 and 10.3.
+~> **Note** `gcs_fc_master_slave` is deprecated. This parameter is relevant for Percona 5.7, MySQL 5.7, and MariaDB 10.2 and 10.3.
 Use `gcs_fc_single_primary` instead.
 
 * `gcs_fc_single_primary` - (Optional) A Galera parameter. Indicates whether there is more than one replication source.
   The parameter can be set only if `high_availability` is `true`.
 
-~> `gcs_fc_single_primary` replaces the deprecated `gcs_fc_master_slave` parameter.
+~> **Note** `gcs_fc_single_primary` replaces the deprecated `gcs_fc_master_slave` parameter.
 This parameter is relevant for Percona 8.0, MySQL 8.0, and MariaDB 10.4, 10.5, 10.6 and 10.7.
 
 * `innodb_buffer_pool_instances` - (Optional) The number of regions that `innodb_buffer_pool_size` is divided into
@@ -650,7 +650,7 @@ This parameter is relevant for Percona 8.0, MySQL 8.0, and MariaDB 10.4, 10.5, 1
 * `options` - (Optional) Map containing other MySQL parameters.
   Parameter names must be in camelCase. Values are strings.
 
-~> If a parameter name includes a dot, it cannot be passed in `options`.
+~> **Note** If a parameter name includes a dot, it cannot be passed in `options`.
 If you need to use such a parameter, contact [technical support].
 
 * `pxc_strict_mode` - (Optional) PXC mode. For more information about the parameter, see the [Percona documentation][doc-pxc_strict_mode].
@@ -676,7 +676,7 @@ If you need to use such a parameter, contact [technical support].
 
 ### MySQL database
 
-~> All the parameters in the `database` block are editable.
+~> **Note** All the parameters in the `database` block are editable.
 
 The `database` block has the following structure:
 
@@ -695,7 +695,7 @@ The `database` block has the following structure:
 
 ### MySQL database user
 
-~> All the parameters in the `user` block are editable.
+~> **Note** All the parameters in the `user` block are editable.
 
 The `user` block has the following structure:
 
@@ -707,7 +707,7 @@ The `user` block has the following structure:
 
 ### MySQL user
 
-~> All the parameters in the `user` block are editable.
+~> **Note** All the parameters in the `user` block are editable.
 
 The `user` block has the following structure:
 
@@ -760,7 +760,7 @@ the `pgsql` block can contain the following arguments:
 * `options` - (Optional) Map containing other PostgreSQL parameters.
   Parameter names must be in camelCase. Values are strings.
 
-~> If a parameter name includes a dot, it cannot be passed in `options`.
+~> **Note** If a parameter name includes a dot, it cannot be passed in `options`.
 If you need to use such a parameter, contact [technical support].
 
 * `replication_mode` - (Optional) The replication mode in the _Patroni_ cluster.
@@ -781,7 +781,7 @@ If you need to use such a parameter, contact [technical support].
 
 ### PostgreSQL database
 
-~> All the parameters in the `database` block are editable.
+~> **Note** All the parameters in the `database` block are editable.
 
 The `database` block has the following structure:
 
@@ -804,7 +804,7 @@ The `database` block has the following structure:
 
 ### PostgreSQL database user
 
-~> All the parameters in the `user` block are editable.
+~> **Note** All the parameters in the `user` block are editable.
 
 The `user` block has the following structure:
 
@@ -812,7 +812,7 @@ The `user` block has the following structure:
 
 ### PostgreSQL user
 
-~> All the parameters in the `user` block are editable.
+~> **Note** All the parameters in the `user` block are editable.
 
 The `user` block has the following structure:
 
@@ -831,7 +831,7 @@ the `rabbitmq` block can contain the following arguments:
 * `options` - (Optional, Editable) Map containing other RabbitMQ parameters.
   Parameter names must be in camelCase. Values are strings.
 
-~> If a parameter name includes a dot, it cannot be passed in the `options`.
+~> **Note** If a parameter name includes a dot, it cannot be passed in the `options`.
 If you need to use such a parameter, contact [technical support].
 
 * `password` - (Required, Editable) The RabbitMQ admin password.
@@ -854,7 +854,7 @@ the `redis` block can contain the following arguments:
 * `options` - (Optional, Editable) Map containing other Redis parameters.
   Parameter names must be in camelCase. Values are strings.
 
-~> If a parameter name includes a dot, it cannot be passed in `options`.
+~> **Note** If a parameter name includes a dot, it cannot be passed in `options`.
 If you need to use such a parameter, contact [technical support].
 
 * `password` - (Optional) The Redis user password.
@@ -872,7 +872,7 @@ If you need to use such a parameter, contact [technical support].
 
 ### logging
 
-~> All the parameters in the `logging` block are editable.
+~> **Note** All the parameters in the `logging` block are editable.
 
 The `logging` block has the following structure:
 
@@ -882,7 +882,7 @@ The `logging` block has the following structure:
 
 ### monitoring
 
-~> All the parameters in the `monitoring` block are editable.
+~> **Note** All the parameters in the `monitoring` block are editable.
 
 The `monitoring` block has the following structure:
 

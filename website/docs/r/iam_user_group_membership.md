@@ -12,7 +12,7 @@ description: |-
 
 Adds an IAM user to IAM groups.
 
-~> This resource can be used multiple times with the same user for non-overlapping groups.
+~> **Note** This resource can be used multiple times with the same user for non-overlapping groups.
 
 How to manage users in a specific group, see the [`aws_iam_group_membership` resource][tf-group-membership].
 
@@ -70,7 +70,7 @@ The following arguments are supported:
 * `group_arns` - (Required) List of Amazon Resource Names (ARNs) of the groups to which the user is added
   (e.g. `arn:c2:iam::<customer-name>:group/<group-name>`).
 
-~> All groups in `group_arns` must be of the same type: **global** or **project**.
+~> **Note** All groups in `group_arns` must be of the same type: **global** or **project**.
 If groups are of the **project** type, `project` must be specified.
 
 * `project` - (Optional) The name of the project. Specified when the user is added to project groups.
@@ -86,7 +86,7 @@ In addition to all arguments above, the following attributes are exported:
 
 IAM user group membership can be imported using `user`, `project` (optionally), and `group_arns` separated by a hash sign (`#`).
 
-~> If the user isn't a member of some of the specified groups, these groups will be ignored during import.
+~> **Note** If the user isn't a member of some of the specified groups, these groups will be ignored during import.
 
 Examples:
 

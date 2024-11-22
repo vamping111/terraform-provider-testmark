@@ -67,6 +67,6 @@ The following fields are also exported:
 * `description` - The description of the security group.
 * `arn` - The computed ARN of the security group.
 
-~> **Note:** The default security group for a VPC has the name `default`.
+~> **Note** The default security group for a VPC has the name `default`.
 
 [describe-security-groups]: https://docs.cloud.croc.ru/en/api/ec2/security_groups/DescribeSecurityGroups.html

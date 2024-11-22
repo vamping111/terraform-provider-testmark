@@ -8,7 +8,7 @@ description: |-
 
 # Data Source: aws_lb_target_group
 
-~> **Note:** `aws_alb_target_group` is known as `aws_lb_target_group`. The functionality is identical.
+~> **Note** `aws_alb_target_group` is known as `aws_lb_target_group`. The functionality is identical.
 
 Provides information about a Load Balancer Target Group.
 
@@ -42,7 +42,7 @@ The following arguments are supported:
 * `arn` - (Optional) The full ARN of the target group.
 * `name` - (Optional) The unique name of the target group.
 
-~> **NOTE**: When both `arn` and `name` are specified, `arn` takes precedence.
+~> **Note**: When both `arn` and `name` are specified, `arn` takes precedence.
 
 ## Attributes Reference
 

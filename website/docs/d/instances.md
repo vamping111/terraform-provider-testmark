@@ -18,7 +18,7 @@ Provides information about an EC2 instances. This data source can be used to get
 -> **Note:** It's a best practice to expose instance details via [outputs], and [remote state],
 and **use [`terraform_remote_state`][terraform_remote_state] data source instead** if you manage referenced instances via Terraform.
 
-~> **Note:** It's strongly discouraged to use this data source for querying ephemeral
+~> **Note** It's strongly discouraged to use this data source for querying ephemeral
 instances (e.g., managed via autoscaling group), as the output may change at any time
 and you'd need to re-run `apply` every time an instance comes up or dies.
 

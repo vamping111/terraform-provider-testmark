@@ -10,7 +10,7 @@ description: |-
 
 Provides a security group resource.
 
-~> **NOTE on Security Groups and Security Group Rules:** Terraform currently
+~> **Note on Security Groups and Security Group Rules:** Terraform currently
 provides both a standalone [`aws_security_group_rule`][tf-security-group-rule] (a single `ingress` or
 `egress` rule), and a security group resource with `ingress` and `egress` rules
 defined in-line. At this time you cannot use a security group with in-line rules
@@ -54,7 +54,7 @@ resource "aws_security_group" "allow_tls" {
 }
 ```
 
-~> **NOTE on Egress rules:** By default, the cloud creates an `ALLOW ALL` egress rule when creating a new security group inside a VPC. When creating a new Security Group inside a VPC, **Terraform will remove this default rule**, and require you specifically re-create it if you desire that rule. We feel this leads to fewer surprises in terms of controlling your egress rules. If you desire this rule to be in place, you can use this `egress` block:
+~> **Note on Egress rules:** By default, the cloud creates an `ALLOW ALL` egress rule when creating a new security group inside a VPC. When creating a new Security Group inside a VPC, **Terraform will remove this default rule**, and require you specifically re-create it if you desire that rule. We feel this leads to fewer surprises in terms of controlling your egress rules. If you desire this rule to be in place, you can use this `egress` block:
 
 ```terraform
 resource "aws_security_group" "example" {

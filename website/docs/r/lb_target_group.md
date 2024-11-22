@@ -10,7 +10,7 @@ description: |-
 
 Provides a Target Group resource for use with Load Balancer resources.
 
-~> **Note:** `aws_alb_target_group` is known as `aws_lb_target_group`. The functionality is identical.
+~> **Note** `aws_alb_target_group` is known as `aws_lb_target_group`. The functionality is identical.
 
 ## Example Usage
 
@@ -98,7 +98,7 @@ The following arguments are supported:
 
 ### health_check
 
-~> **Note:** The Health Check parameters you can set vary by the `protocol` of the Target Group. Many parameters cannot be set to custom values for `network` load balancers at this time. See http://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/API_CreateTargetGroup.html for a complete reference. Keep in mind, that health checks produce actual requests to the backend. The underlying function is invoked when `target_type` is set to `lambda`.
+~> **Note** The Health Check parameters you can set vary by the `protocol` of the Target Group. Many parameters cannot be set to custom values for `network` load balancers at this time. See http://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/API_CreateTargetGroup.html for a complete reference. Keep in mind, that health checks produce actual requests to the backend. The underlying function is invoked when `target_type` is set to `lambda`.
 
 * `enabled` - (Optional) Whether health checks are enabled. Defaults to `true`.
 * `healthy_threshold` - (Optional) Number of consecutive health checks successes required before considering an unhealthy target healthy. Defaults to 3.
@@ -112,7 +112,7 @@ The following arguments are supported:
 
 ### stickiness
 
-~> **NOTE:** Currently, an NLB (i.e., protocol of `HTTP` or `HTTPS`) can have an invalid `stickiness` block with `type` set to `lb_cookie` as long as `enabled` is set to `false`. However, please update your configurations to avoid errors in a future version of the provider: either remove the invalid `stickiness` block or set the `type` to `source_ip`.
+~> **Note** Currently, an NLB (i.e., protocol of `HTTP` or `HTTPS`) can have an invalid `stickiness` block with `type` set to `lb_cookie` as long as `enabled` is set to `false`. However, please update your configurations to avoid errors in a future version of the provider: either remove the invalid `stickiness` block or set the `type` to `source_ip`.
 
 * `cookie_duration` - (Optional) Only used when the type is `lb_cookie`. The time period, in seconds, during which requests from a client should be routed to the same target. After this time period expires, the load balancer-generated cookie is considered stale. The range is 1 second to 1 week (604800 seconds). The default value is 1 day (86400 seconds).
 * `cookie_name` - (Optional) Name of the application based cookie. AWSALB, AWSALBAPP, and AWSALBTG prefixes are reserved and cannot be used. Only needed when type is `app_cookie`.

@@ -10,7 +10,7 @@ description: |-
 
 Manages the default backup vault. If it does not exist, Terraform will create one.
 
-~> Terraform does not delete the default backup vault when running `terraform destroy`, it will only be removed from the Terraform state.
+~> **Note** Terraform does not delete the default backup vault when running `terraform destroy`, it will only be removed from the Terraform state.
 
 ## Example Usage
 

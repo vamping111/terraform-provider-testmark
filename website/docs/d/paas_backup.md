@@ -12,7 +12,7 @@ description: |-
 
 Provides information about a PaaS service backup.
 
-~> If more than one backup meets the specified criteria, the most recently created backup is returned.
+~> **Note** If more than one backup meets the specified criteria, the most recently created backup is returned.
 
 ## Example Usage
 
@@ -40,7 +40,7 @@ The following arguments are supported:
 * `service_type` - (Optional) The type of the PaaS service.
   Valid values are `elasticsearch`, `memcached`, `mongodb`, `mysql`, `pgsql`, `rabbitmq`, `redis`.
 
-~> `id` cannot be specified together with the other parameters.
+~> **Note** `id` cannot be specified together with the other parameters.
 
 ## Attribute Reference
 

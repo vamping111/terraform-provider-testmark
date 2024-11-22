@@ -10,7 +10,7 @@ description: |-
 
 Provides a Load Balancer resource.
 
-~> **Note:** `aws_alb` is known as `aws_lb`. The functionality is identical.
+~> **Note** `aws_alb` is known as `aws_lb`. The functionality is identical.
 
 ## Example Usage
 
@@ -95,9 +95,9 @@ resource "aws_lb" "example" {
 
 ## Argument Reference
 
-~> **NOTE:** Please note that internal LBs can only use `ipv4` as the ip_address_type. You can only change to `dualstack` ip_address_type if the selected subnets are IPv6 enabled.
+~> **Note** Please note that internal LBs can only use `ipv4` as the ip_address_type. You can only change to `dualstack` ip_address_type if the selected subnets are IPv6 enabled.
 
-~> **NOTE:** Please note that one of either `subnets` or `subnet_mapping` is required.
+~> **Note** Please note that one of either `subnets` or `subnet_mapping` is required.
 
 The following arguments are supported:
 

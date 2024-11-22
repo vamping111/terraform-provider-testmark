@@ -50,7 +50,7 @@ resource "aws_route53_record" "dev-ns" {
 
 ### Private Zone
 
-~> **NOTE:** Private zones require one VPC association at all times.
+~> **Note** Private zones require one VPC association at all times.
 
 ```terraform
 resource "aws_route53_zone" "private" {

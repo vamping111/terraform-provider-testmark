@@ -55,7 +55,7 @@ The following arguments are supported:
 
 ### Rule
 
-~> All the parameters in the `rule` block are editable.
+~> **Note** All the parameters in the `rule` block are editable.
 
 The `rule` block has the following structure:
 

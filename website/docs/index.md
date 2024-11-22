@@ -19,7 +19,7 @@ The provider needs to be configured with the proper credentials before you can u
 
 Use the navigation to the left to read about the available resources.
 
-~> **NOTE**
+~> **Note**
 Resource names in the navigation bar have an automatically generated prefix that matches the *rockitcloud* name.
 For compatibility with AWS provider configurations, we retained the ``aws`` prefix in resource description and usage examples.
 

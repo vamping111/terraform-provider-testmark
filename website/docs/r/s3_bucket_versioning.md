@@ -70,7 +70,7 @@ resource "aws_s3_bucket_versioning" "versioning_example" {
 
 When you create an object whose `version_id` you need and an `aws_s3_bucket_versioning` resource in the same configuration, you are more likely to have success by ensuring the `s3_object` depends either implicitly (see below) or explicitly (i.e., using `depends_on = [aws_s3_bucket_versioning.example]`) on the `aws_s3_bucket_versioning` resource.
 
-~> **NOTE:** For critical and/or production S3 objects, do not create a bucket, enable versioning, and create an object in the bucket within the same configuration.
+~> **Note** For critical and/or production S3 objects, do not create a bucket, enable versioning, and create an object in the bucket within the same configuration.
 
 This example shows the `aws_s3_object.example` depending implicitly on the versioning resource through the reference to `aws_s3_bucket_versioning.example.bucket` to define `bucket`:
 
@@ -107,7 +107,7 @@ The following arguments are supported:
 
 ### versioning_configuration
 
-~> **Note:** While the `versioning_configuration.status` parameter supports `Disabled`, this value is only intended for _creating_ or _importing_ resources that correspond to unversioned S3 buckets.
+~> **Note** While the `versioning_configuration.status` parameter supports `Disabled`, this value is only intended for _creating_ or _importing_ resources that correspond to unversioned S3 buckets.
 Updating the value from `Enabled` or `Suspended` to `Disabled` will result in errors as the S3 API does not support returning buckets to an unversioned state.
 
 The `versioning_configuration` configuration block supports the following arguments:

@@ -32,7 +32,7 @@ The following arguments are supported:
 
 * `name_regex` - (Optional) A regex string to apply to the list of users returned by IAM API.
 
-~> This filtering is performed locally and can affect performance when the list of users is large.
+~> **Note** This filtering is performed locally and can affect performance when the list of users is large.
 
 ## Attribute Reference
 

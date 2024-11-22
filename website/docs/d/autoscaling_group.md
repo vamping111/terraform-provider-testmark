@@ -24,7 +24,7 @@ data "aws_autoscaling_group" "example" {
 
 ## Attributes Reference
 
-~> **NOTE:** Some values are not always set and may not be available for interpolation.
+~> **Note** Some values are not always set and may not be available for interpolation.
 
 * `arn` - The Amazon Resource Name (ARN) of the Auto Scaling Group.
 * `availability_zones` - One or more Availability Zones for the group.

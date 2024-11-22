@@ -87,4 +87,4 @@ These exported attributes are currently unsupported:
 * `private_dns` - The Private DNS associated with the Elastic IP address (if in VPC). Computed by provider.
 * `public_dns` - Public DNS associated with the Elastic IP address. Computed by provider.
 
-~> **Note:** The data source computes the `public_dns` and `private_dns` attributes according to the [AWS VPC DNS Guide](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-dns.html#vpc-dns-hostnames) as they are not available with the EC2 API.
+~> **Note** The data source computes the `public_dns` and `private_dns` attributes according to the [AWS VPC DNS Guide](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-dns.html#vpc-dns-hostnames) as they are not available with the EC2 API.

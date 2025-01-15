@@ -1,0 +1,39 @@
+name: Run acceptance tests
+
+on:
+    pull_request:
+      types: [labeled]
+      branches: [develop]
+
+jobs:
+    acc-tests:
+        runs-on: ubuntu-22.04
+        if: contains(github.event.pull_request.labels.*.name, 'acc')
+        steps:
+        - name: Setup Go
+          uses: actions/setup-go@v2
+          with:
+            go-version: 1.21.x
+
+        - uses: actions/checkout@v3
+
+        - name: Run acceptance tests
+          env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.secret_access_key }}
+            EC2_URL: ${{ secrets.ec2_url }}
+            PAAS_URL: ${{ secrets.paas_url }}
+            DIRECT_CONNECT_URL: ${{ secrets.direct_connect_url }}
+            DX_CONNECTION_NAME: ${{ secrets.dx_connection_name }}
+            DX_LAG_NAME: ${{ secrets.dx_lag_name }}
+            DX_VLAN: ${{ secrets.dx_vlan }}
+          run: |
+            echo "Run acceptance tests for PAAS"
+            make testacc TESTS=TestAccPaaSServiceElasticSearch_basic PKG=paas
+            echo "Run acceptance tests for Direct Connect"
+            make testacc TESTS=TestAccDirectConnectConnectionDataSource_basic PKG=directconnect
+            make testacc TESTS=TestAccDirectConnectGatewayAssociation_basicTransitGatewaySingleAccount PKG=directconnect
+            make testacc TESTS=TestAccDirectConnectGateway_basic PKG=directconnect
+            make testacc TESTS=TestAccDirectConnectGateway_disappears PKG=directconnect
+            make testacc TESTS=TestAccDirectConnectLagDataSource_basic PKG=directconnect
+            make testacc TESTS=TestAccDirectConnectTransitVirtualInterface_serial PKG=directconnect

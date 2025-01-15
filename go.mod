@@ -5,7 +5,7 @@ go 1.21
 replace github.com/aws/aws-sdk-go => github.com/C2Devel/aws-sdk-go v1.44.10-ROCKIT12
 
 require (
-	github.com/ProtonMail/go-crypto v1.1.0-alpha.2
+	github.com/ProtonMail/go-crypto v1.1.4
 	github.com/aws/aws-sdk-go v1.44.10
 	github.com/aws/aws-sdk-go-v2 v1.16.3
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.4

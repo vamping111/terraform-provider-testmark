@@ -1756,7 +1756,8 @@ func TestAccEC2Instance_rootBlockDeviceMismatch(t *testing.T) {
 }
 
 // This test reproduces the bug here:
-//   https://github.com/hashicorp/terraform/issues/1752
+//
+//	https://github.com/hashicorp/terraform/issues/1752
 //
 // I wish there were a way to exercise resources built with helper.Schema in a
 // unit context, in which case this test could be moved there, but for now this
@@ -4537,28 +4538,27 @@ func testAccCheckDetachVolumes(instance *ec2.Instance) resource.TestCheckFunc {
 		client := acctest.Provider.Meta().(*conns.AWSClient)
 		conn := client.EC2Conn
 
-		for _, bd := range instance.BlockDeviceMappings {
-			if bd.Ebs != nil && bd.Ebs.VolumeId != nil {
-				name := aws.StringValue(bd.DeviceName)
-				volID := aws.StringValue(bd.Ebs.VolumeId)
+		for _, v := range instance.BlockDeviceMappings {
+			if v.Ebs != nil && v.Ebs.VolumeId != nil {
+				volumeID := aws.StringValue(v.Ebs.VolumeId)
 				instanceID := aws.StringValue(instance.InstanceId)
 
-				// Make sure in correct state before detaching
-				if err := tfec2.WaitVolumeAttachmentAttached(conn, name, volID, instanceID); err != nil {
+				// Make sure in correct state before detaching.
+				if _, err := tfec2.WaitVolumeAttachmentCreated(conn, volumeID, instanceID, 5*time.Minute); err != nil {
 					return err
 				}
 
 				r := tfec2.ResourceVolumeAttachment()
 				d := r.Data(nil)
-				d.Set("device_name", name)
-				d.Set("volume_id", volID)
 				d.Set("instance_id", instanceID)
+				d.Set("volume_id", volumeID)
 
 				if err := r.Delete(d, client); err != nil {
 					return err
 				}
 			}
 		}
+
 		return nil
 	}
 }
@@ -4757,8 +4757,9 @@ func testAccAvailableAZsWavelengthZonesDefaultExcludeConfig() string {
 }
 
 // testAccInstanceVPCConfig returns the configuration for tests that create
-//   1) a VPC without IPv6 support
-//   2) a subnet in the VPC that optionally assigns public IP addresses to ENIs
+//  1. a VPC without IPv6 support
+//  2. a subnet in the VPC that optionally assigns public IP addresses to ENIs
+//
 // The resources are named 'test'.
 func testAccInstanceVPCConfig(rName string, mapPublicIpOnLaunch bool, azIndex int) string {
 	return acctest.ConfigCompose(acctest.ConfigAvailableAZsNoOptInDefaultExclude(), fmt.Sprintf(`
@@ -4784,8 +4785,9 @@ resource "aws_subnet" "test" {
 }
 
 // testAccInstanceVPCSecurityGroupConfig returns the configuration for tests that create
-//   1) a VPC security group
-//   2) an internet gateway in the VPC
+//  1. a VPC security group
+//  2. an internet gateway in the VPC
+//
 // The resources are named 'test'.
 func testAccInstanceVPCSecurityGroupConfig(rName string) string {
 	return fmt.Sprintf(`
@@ -4817,8 +4819,9 @@ resource "aws_security_group" "test" {
 }
 
 // testAccInstanceVPCIPv6Config returns the configuration for tests that create
-//   1) a VPC with IPv6 support
-//   2) a subnet in the VPC with an assigned IPv6 CIDR block
+//  1. a VPC with IPv6 support
+//  2. a subnet in the VPC with an assigned IPv6 CIDR block
+//
 // The resources are named 'test'.
 func testAccInstanceVPCIPv6Config(rName string) string {
 	return acctest.ConfigCompose(acctest.ConfigAvailableAZsNoOptInDefaultExclude(), fmt.Sprintf(`

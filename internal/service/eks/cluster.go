@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2/tfawserr"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -16,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
 	"github.com/hashicorp/terraform-provider-aws/internal/flex"
+	tfec2 "github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
 	"github.com/hashicorp/terraform-provider-aws/internal/tfresource"
 	"github.com/hashicorp/terraform-provider-aws/internal/verify"
@@ -141,7 +143,7 @@ func ResourceCluster() *schema.Resource {
 							Optional:     true,
 							Computed:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice(eks.IpFamily_Values(), false),
+							ValidateFunc: validation.StringInSlice([]string{eks.IpFamilyIpv4}, false),
 						},
 						"service_ipv4_cidr": {
 							Type:     schema.TypeString,
@@ -152,6 +154,56 @@ func ResourceCluster() *schema.Resource {
 								validation.IsCIDRNetwork(12, 24),
 								validation.StringMatch(regexp.MustCompile(`^(10|172\.(1[6-9]|2[0-9]|3[0-1])|192\.168)\..*`), "must be within 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16"),
 							),
+						},
+					},
+				},
+			},
+			"legacy_cluster_params": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"master_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"high_availability": {
+										Type:     schema.TypeBool,
+										Required: true,
+										ForceNew: true,
+									},
+									"instance_type": {
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
+									},
+									"public_ip": {
+										Type:     schema.TypeString,
+										Optional: true,
+										ForceNew: true,
+									},
+									"volume_iops": {
+										Type:     schema.TypeInt,
+										Optional: true,
+										ForceNew: true,
+									},
+									"volume_size": {
+										Type:     schema.TypeInt,
+										Required: true,
+										ForceNew: true,
+									},
+									"volume_type": {
+										Type:         schema.TypeString,
+										Required:     true,
+										ForceNew:     true,
+										ValidateFunc: validation.StringInSlice(ec2.VolumeType_Values(), false),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -168,7 +220,7 @@ func ResourceCluster() *schema.Resource {
 			},
 			"role_arn": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: verify.ValidARN,
 			},
@@ -180,8 +232,8 @@ func ResourceCluster() *schema.Resource {
 			"tags_all": tftags.TagsSchemaComputed(),
 			"version": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
+				ForceNew: true, // FIXME: Remove after UpdateClusterVersion is supported in C2 EKS API.
 			},
 			"vpc_config": {
 				Type:     schema.TypeList,
@@ -197,12 +249,10 @@ func ResourceCluster() *schema.Resource {
 						"endpoint_private_access": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  false,
 						},
 						"endpoint_public_access": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  true,
 						},
 						"public_access_cidrs": {
 							Type:     schema.TypeSet,
@@ -245,14 +295,32 @@ func resourceClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 	input := &eks.CreateClusterInput{
 		EncryptionConfig:   testAccClusterConfig_expandEncryption(d.Get("encryption_config").([]interface{})),
-		Logging:            expandLoggingTypes(d.Get("enabled_cluster_log_types").(*schema.Set)),
 		Name:               aws.String(name),
 		ResourcesVpcConfig: testAccClusterConfig_expandVPCRequest(d.Get("vpc_config").([]interface{})),
 		RoleArn:            aws.String(d.Get("role_arn").(string)),
 	}
 
+	// endpoint_private_access and endpoint_public_access are removed from CreateCluster input
+	// if they aren't specified in the configuration.
+	//
+	// FIXME: Remove after these parameters are supported in C2 EKS API.
+	if _, exists := d.GetOkExists("vpc_config.0.endpoint_private_access"); !exists {
+		input.ResourcesVpcConfig.EndpointPrivateAccess = nil
+	}
+	if _, exists := d.GetOkExists("vpc_config.0.endpoint_public_access"); !exists {
+		input.ResourcesVpcConfig.EndpointPublicAccess = nil
+	}
+
+	if _, ok := d.GetOk("enabled_cluster_log_types"); ok {
+		input.Logging = expandLoggingTypes(d.Get("enabled_cluster_log_types").(*schema.Set))
+	}
+
 	if _, ok := d.GetOk("kubernetes_network_config"); ok {
 		input.KubernetesNetworkConfig = expandNetworkConfigRequest(d.Get("kubernetes_network_config").([]interface{}))
+	}
+
+	if v, ok := d.GetOk("legacy_cluster_params"); ok {
+		input.LegacyClusterParams = expandLegacyClusterParams(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk("version"); ok {
@@ -363,6 +431,10 @@ func resourceClusterRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error setting kubernetes_network_config: %w", err)
 	}
 
+	if err := d.Set("legacy_cluster_params", flattenLegacyClusterParams(cluster.LegacyClusterParams)); err != nil {
+		return fmt.Errorf("error setting legacy_cluster_params: %w", err)
+	}
+
 	d.Set("name", cluster.Name)
 	d.Set("platform_version", cluster.PlatformVersion)
 	d.Set("role_arn", cluster.RoleArn)
@@ -375,7 +447,7 @@ func resourceClusterRead(d *schema.ResourceData, meta interface{}) error {
 
 	tags := KeyValueTags(cluster.Tags).IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}
@@ -389,6 +461,7 @@ func resourceClusterRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).EKSConn
+	connEc2 := meta.(*conns.AWSClient).EC2Conn
 
 	// Do any version update first.
 	if d.HasChange("version") {
@@ -485,7 +558,9 @@ func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("tags_all") {
 		o, n := d.GetChange("tags_all")
-		if err := UpdateTags(conn, d.Get("arn").(string), o, n); err != nil {
+		// FIXME: Use eks.UpdateTags after TagResource and UntagResource are supported in C2 EKS API.
+		// To use EC2 API arn contains the cluster id.
+		if err := tfec2.UpdateTags(connEc2, d.Get("arn").(string), o, n); err != nil {
 			return fmt.Errorf("error updating tags: %w", err)
 		}
 	}
@@ -671,6 +746,64 @@ func expandLoggingTypes(vEnabledLogTypes *schema.Set) *eks.Logging {
 	}
 }
 
+func expandLegacyClusterParams(tfList []interface{}) *eks.LegacyClusterParams {
+	if len(tfList) == 0 {
+		return nil
+	}
+
+	tfMap, ok := tfList[0].(map[string]interface{})
+	if !ok || tfMap == nil {
+		return nil
+	}
+
+	legacyParams := &eks.LegacyClusterParams{}
+
+	if masterConfig, ok := tfMap["master_config"].([]interface{}); ok && len(masterConfig) > 0 {
+		legacyParams.MasterConfig = expandMasterConfig(masterConfig)
+	}
+
+	return legacyParams
+}
+
+func expandMasterConfig(tfList []interface{}) *eks.MasterConfig {
+	if len(tfList) == 0 {
+		return nil
+	}
+
+	tfMap, ok := tfList[0].(map[string]interface{})
+	if !ok || tfMap == nil {
+		return nil
+	}
+
+	masterConfig := &eks.MasterConfig{}
+
+	if v, ok := tfMap["high_availability"].(bool); ok {
+		masterConfig.HighAvailability = aws.Bool(v)
+	}
+
+	if v, ok := tfMap["instance_type"].(string); ok && v != "" {
+		masterConfig.MastersInstanceType = aws.String(v)
+	}
+
+	if v, ok := tfMap["public_ip"].(string); ok && v != "" {
+		masterConfig.MasterPublicIp = aws.String(v)
+	}
+
+	if v, ok := tfMap["volume_iops"].(int); ok && v != 0 {
+		masterConfig.MastersVolumeIops = aws.Int64(int64(v))
+	}
+
+	if v, ok := tfMap["volume_size"].(int); ok && v != 0 {
+		masterConfig.MastersVolumeSize = aws.Int64(int64(v))
+	}
+
+	if v, ok := tfMap["volume_type"].(string); ok && v != "" {
+		masterConfig.MastersVolumeType = aws.String(v)
+	}
+
+	return masterConfig
+}
+
 func flattenCertificate(certificate *eks.Certificate) []map[string]interface{} {
 	if certificate == nil {
 		return []map[string]interface{}{}
@@ -781,6 +914,35 @@ func flattenNetworkConfig(apiObject *eks.KubernetesNetworkConfigResponse) []inte
 	tfMap := map[string]interface{}{
 		"service_ipv4_cidr": aws.StringValue(apiObject.ServiceIpv4Cidr),
 		"ip_family":         aws.StringValue(apiObject.IpFamily),
+	}
+
+	return []interface{}{tfMap}
+}
+
+func flattenLegacyClusterParams(legacyParams *eks.LegacyClusterParams) []interface{} {
+	if legacyParams == nil {
+		return nil
+	}
+
+	tfMap := map[string]interface{}{
+		"master_config": flattenMasterConfig(legacyParams.MasterConfig),
+	}
+
+	return []interface{}{tfMap}
+}
+
+func flattenMasterConfig(masterConfig *eks.MasterConfig) []interface{} {
+	if masterConfig == nil {
+		return nil
+	}
+
+	tfMap := map[string]interface{}{
+		"high_availability": aws.BoolValue(masterConfig.HighAvailability),
+		"instance_type":     aws.StringValue(masterConfig.MastersInstanceType),
+		"public_ip":         aws.StringValue(masterConfig.MasterPublicIp),
+		"volume_iops":       aws.Int64Value(masterConfig.MastersVolumeIops),
+		"volume_size":       aws.Int64Value(masterConfig.MastersVolumeSize),
+		"volume_type":       aws.StringValue(masterConfig.MastersVolumeType),
 	}
 
 	return []interface{}{tfMap}

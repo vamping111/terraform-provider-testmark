@@ -134,9 +134,9 @@ func resourceZoneCreate(d *schema.ResourceData, meta interface{}) error {
 		},
 	}
 
-	if v, ok := d.GetOk("delegation_set_id"); ok {
-		input.DelegationSetId = aws.String(v.(string))
-	}
+	// if v, ok := d.GetOk("delegation_set_id"); ok {
+	// 	input.DelegationSetId = aws.String(v.(string))
+	// }
 
 	// Private Route53 Hosted Zones can only be created with their first VPC association,
 	// however we need to associate the remaining after creation.
@@ -209,7 +209,7 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.Set("comment", "")
-	d.Set("delegation_set_id", "")
+	// d.Set("delegation_set_id", "")
 	// To be consistent with other AWS services (e.g. ACM) that do not accept a trailing period,
 	// we remove the suffix from the Hosted Zone Name returned from the API
 	d.Set("name", TrimTrailingPeriod(aws.StringValue(output.HostedZone.Name)))
@@ -218,7 +218,7 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 	var nameServers []string
 
 	if output.DelegationSet != nil {
-		d.Set("delegation_set_id", CleanDelegationSetID(aws.StringValue(output.DelegationSet.Id)))
+		// d.Set("delegation_set_id", CleanDelegationSetID(aws.StringValue(output.DelegationSet.Id)))
 
 		nameServers = aws.StringValueSlice(output.DelegationSet.NameServers)
 	}
@@ -226,14 +226,15 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 	if output.HostedZone.Config != nil {
 		d.Set("comment", output.HostedZone.Config.Comment)
 
-		if aws.BoolValue(output.HostedZone.Config.PrivateZone) {
-			var err error
-			nameServers, err = getNameServers(d.Id(), d.Get("name").(string), conn)
+		// Private Zones in C2 don't have NS records, nameServers = []
+		// if aws.BoolValue(output.HostedZone.Config.PrivateZone) {
+		// 	var err error
+		// 	nameServers, err = getNameServers(d.Id(), d.Get("name").(string), conn)
 
-			if err != nil {
-				return fmt.Errorf("error getting Route53 Hosted Zone (%s) name servers: %s", d.Id(), err)
-			}
-		}
+		// 	if err != nil {
+		// 		return fmt.Errorf("error getting Route53 Hosted Zone (%s) name servers: %s", d.Id(), err)
+		// 	}
+		// }
 	}
 
 	sort.Strings(nameServers)
@@ -253,7 +254,7 @@ func resourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 
 	tags = tags.IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}
@@ -426,16 +427,22 @@ func deleteAllRecordsInHostedZoneId(hostedZoneId, hostedZoneName string, conn *r
 	return nil
 }
 
+//nolint:unparam // Unsupported r53 api methods are commented out.
 func dnsSECStatus(conn *route53.Route53, hostedZoneID string) (string, error) {
-	input := &route53.GetDNSSECInput{
-		HostedZoneId: aws.String(hostedZoneID),
+	// input := &route53.GetDNSSECInput{
+	// 	HostedZoneId: aws.String(hostedZoneID),
+	// }
+
+	output := &route53.GetDNSSECOutput{
+		// FIXME: 1 = NOT_SIGNING. Remove after DNSSEC implementation.
+		Status: &route53.DNSSECStatus{ServeSignature: aws.String("1")},
 	}
 
-	var output *route53.GetDNSSECOutput
 	err := tfresource.RetryConfigContext(context.Background(), 0*time.Millisecond, 1*time.Minute, 0*time.Millisecond, 30*time.Second, 3*time.Minute, func() *resource.RetryError {
 		var err error
 
-		output, err = conn.GetDNSSEC(input)
+		log.Printf("[WARN] GetDNSSEC Request is not supported by C2")
+		// output, err = conn.GetDNSSEC(input)
 
 		if err != nil {
 			if strings.Contains(err.Error(), "Throttling") {
@@ -449,9 +456,9 @@ func dnsSECStatus(conn *route53.Route53, hostedZoneID string) (string, error) {
 		return nil
 	})
 
-	if tfresource.TimedOut(err) {
-		output, err = conn.GetDNSSEC(input)
-	}
+	// if tfresource.TimedOut(err) {
+	// 	output, err = conn.GetDNSSEC(input)
+	// }
 
 	if tfawserr.ErrMessageContains(err, route53.ErrCodeInvalidArgument, "Operation is unsupported for private") {
 		return "NOT_SIGNING", nil
@@ -491,7 +498,8 @@ func disableDNSSECForZone(conn *route53.Route53, hostedZoneId string) error {
 	err = tfresource.RetryConfigContext(context.Background(), 0*time.Millisecond, 1*time.Minute, 0*time.Millisecond, 20*time.Second, 5*time.Minute, func() *resource.RetryError {
 		var err error
 
-		output, err = conn.DisableHostedZoneDNSSEC(input)
+		log.Printf("[WARN] DisableDNSSECForHostedZone Request is not supported by C2")
+		// output, err = conn.DisableHostedZoneDNSSEC(input)
 
 		if err != nil {
 			if tfawserr.ErrCodeEquals(err, route53.ErrCodeKeySigningKeyInParentDSRecord) {
@@ -641,6 +649,7 @@ func flattenVPCs(vpcs []*route53.VPC) []interface{} {
 	return l
 }
 
+//nolint:unparam // Unsupported r53 api methods are commented out.
 func hostedZoneVPCAssociate(conn *route53.Route53, zoneID string, vpc *route53.VPC) error {
 	input := &route53.AssociateVPCWithHostedZoneInput{
 		HostedZoneId: aws.String(zoneID),
@@ -648,19 +657,22 @@ func hostedZoneVPCAssociate(conn *route53.Route53, zoneID string, vpc *route53.V
 	}
 
 	log.Printf("[DEBUG] Associating Route53 Hosted Zone with VPC: %s", input)
-	output, err := conn.AssociateVPCWithHostedZone(input)
+	log.Printf("[WARN] AssociateVPCWithHostedZone Request is not supported by C2")
+	// output, err := conn.AssociateVPCWithHostedZone(input)
+	var err error
 
 	if err != nil {
 		return fmt.Errorf("error associating Route53 Hosted Zone (%s) to VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
 	}
 
-	if err := waitForChangeSynchronization(conn, CleanChangeID(aws.StringValue(output.ChangeInfo.Id))); err != nil {
-		return fmt.Errorf("error waiting for Route53 Hosted Zone (%s) association to VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
-	}
+	// if err := waitForChangeSynchronization(conn, CleanChangeID(aws.StringValue(output.ChangeInfo.Id))); err != nil {
+	// 	return fmt.Errorf("error waiting for Route53 Hosted Zone (%s) association to VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
+	// }
 
 	return nil
 }
 
+//nolint:unparam // Unsupported r53 api methods are commented out.
 func hostedZoneVPCDisassociate(conn *route53.Route53, zoneID string, vpc *route53.VPC) error {
 	input := &route53.DisassociateVPCFromHostedZoneInput{
 		HostedZoneId: aws.String(zoneID),
@@ -668,15 +680,17 @@ func hostedZoneVPCDisassociate(conn *route53.Route53, zoneID string, vpc *route5
 	}
 
 	log.Printf("[DEBUG] Disassociating Route53 Hosted Zone with VPC: %s", input)
-	output, err := conn.DisassociateVPCFromHostedZone(input)
+	log.Printf("[WARN] DisassociateVPCFromHostedZone Request is not supported by C2")
+	// output, err := conn.DisassociateVPCFromHostedZone(input)
+	var err error
 
 	if err != nil {
 		return fmt.Errorf("error disassociating Route53 Hosted Zone (%s) from VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
 	}
 
-	if err := waitForChangeSynchronization(conn, CleanChangeID(aws.StringValue(output.ChangeInfo.Id))); err != nil {
-		return fmt.Errorf("error waiting for Route53 Hosted Zone (%s) disassociation from VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
-	}
+	// if err := waitForChangeSynchronization(conn, CleanChangeID(aws.StringValue(output.ChangeInfo.Id))); err != nil {
+	// 	return fmt.Errorf("error waiting for Route53 Hosted Zone (%s) disassociation from VPC (%s): %s", zoneID, aws.StringValue(vpc.VPCId), err)
+	// }
 
 	return nil
 }

@@ -142,9 +142,44 @@ func (c *Config) Client(ctx context.Context) (interface{}, diag.Diagnostics) {
 		return nil, diag.Errorf("error creating AWS SDK v1 session: %s", err)
 	}
 
-	accountID, partition, err := awsbase.GetAwsAccountIDAndPartition(ctx, cfg, &awsbaseConfig)
-	if err != nil {
-		return nil, diag.Errorf("error retrieving account details: %s", err)
+	var accountID, partition string
+
+	// FIXME: A temporary solution for building correct ARNs while yet resolving via IAM not implemented
+	if c.SkipCredsValidation && c.SkipRequestingAccountId {
+		if c.AccessKey == "" {
+			accountID = ""
+		} else {
+			errMsg := "The provided access key is in an invalid form: %s. Expected format: project:user@customer."
+			accessKeyParts := strings.Split(c.AccessKey, ":")
+			if len(accessKeyParts) != 2 {
+				return nil, diag.Errorf(errMsg, c.AccessKey)
+			}
+			projectName := accessKeyParts[0]
+			userLogin := accessKeyParts[1]
+
+			if projectName == "" || userLogin == "" {
+				return nil, diag.Errorf(errMsg, c.AccessKey)
+			}
+
+			userLoginParts := strings.Split(userLogin, "@")
+			if len(userLoginParts) != 2 {
+				return nil, diag.Errorf(errMsg, c.AccessKey)
+			}
+
+			username := userLoginParts[0]
+			customerName := userLoginParts[1]
+			if username == "" || customerName == "" {
+				return nil, diag.Errorf(errMsg, c.AccessKey)
+			}
+
+			accountID = strings.Join([]string{projectName, customerName}, "@")
+		}
+		partition = "c2"
+	} else {
+		accountID, partition, err = awsbase.GetAwsAccountIDAndPartition(ctx, cfg, &awsbaseConfig)
+		if err != nil {
+			return nil, diag.Errorf("error retrieving account details: %s", err)
+		}
 	}
 
 	if accountID == "" {

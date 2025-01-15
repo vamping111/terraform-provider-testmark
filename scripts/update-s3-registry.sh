@@ -8,7 +8,7 @@ set -euo pipefail
 TF_REGISTRY_URL=${TF_REGISTRY_URL:-"https://registry.terraform.io/"}
 S3_REGISTRY_URL=${S3_REGISTRY_URL:-}
 S3_BUCKET_NAME=${S3_BUCKET_NAME:-}
-PROVIDER_NAME=${PROVIDER_NAME:-"c2devel/croccloud"}
+PROVIDER_NAME=${PROVIDER_NAME:-"hashicorp/local"}
 
 S3_BACKUP_DIR=${S3_BACKUP_DIR:-}
 TMP_DIR="/tmp/"
@@ -120,7 +120,7 @@ if [[ -n "${S3_BACKUP_DIR}" ]]; then
 
   mkdir -p "${S3_BACKUP_DIR}"
 
-  s3cmd sync --quiet "s3://${S3_BUCKET_NAME}/" "${S3_BACKUP_DIR}/${S3_BUCKET_NAME}-${timestamp}/"
+  s3cmd sync --quiet --no-preserve "s3://${S3_BUCKET_NAME}/" "${S3_BACKUP_DIR}/${S3_BUCKET_NAME}-${timestamp}/"
 
   echo "Finish backup"
 fi

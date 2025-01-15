@@ -83,8 +83,8 @@ func waitAddonUpdateSuccessful(ctx context.Context, conn *eks.EKS, clusterName, 
 
 func waitClusterCreated(conn *eks.EKS, name string, timeout time.Duration) (*eks.Cluster, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.ClusterStatusCreating},
-		Target:  []string{eks.ClusterStatusActive},
+		Pending: []string{eks.ClusterStatusCreating, eks.ClusterStatusPending, eks.ClusterStatusClaimed, eks.ClusterStatusProvisioning},
+		Target:  []string{eks.ClusterStatusReady},
 		Refresh: statusCluster(conn, name),
 		Timeout: timeout,
 	}
@@ -100,8 +100,8 @@ func waitClusterCreated(conn *eks.EKS, name string, timeout time.Duration) (*eks
 
 func waitClusterDeleted(conn *eks.EKS, name string, timeout time.Duration) (*eks.Cluster, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.ClusterStatusActive, eks.ClusterStatusDeleting},
-		Target:  []string{},
+		Pending: []string{eks.ClusterStatusPending, eks.ClusterStatusClaimed, eks.ClusterStatusDeleting},
+		Target:  []string{eks.ClusterStatusDeleted},
 		Refresh: statusCluster(conn, name),
 		Timeout: timeout,
 	}
@@ -172,7 +172,7 @@ func waitFargateProfileDeleted(conn *eks.EKS, clusterName, fargateProfileName st
 
 func waitNodegroupCreated(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName string, timeout time.Duration) (*eks.Nodegroup, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.NodegroupStatusCreating},
+		Pending: []string{eks.NodegroupStatusPending, eks.NodegroupStatusCreating},
 		Target:  []string{eks.NodegroupStatusActive},
 		Refresh: statusNodegroup(conn, clusterName, nodeGroupName),
 		Timeout: timeout,
@@ -193,8 +193,8 @@ func waitNodegroupCreated(ctx context.Context, conn *eks.EKS, clusterName, nodeG
 
 func waitNodegroupDeleted(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName string, timeout time.Duration) (*eks.Nodegroup, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.NodegroupStatusActive, eks.NodegroupStatusDeleting},
-		Target:  []string{},
+		Pending: []string{eks.NodegroupStatusPending, eks.NodegroupStatusDeleting},
+		Target:  []string{eks.NodegroupStatusDeleted},
 		Refresh: statusNodegroup(conn, clusterName, nodeGroupName),
 		Timeout: timeout,
 	}
@@ -212,7 +212,28 @@ func waitNodegroupDeleted(ctx context.Context, conn *eks.EKS, clusterName, nodeG
 	return nil, err
 }
 
-func waitNodegroupUpdateSuccessful(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName, id string, timeout time.Duration) (*eks.Update, error) { //nolint:unparam
+// This is a temporary solution for C2 Nodegroups until DescribeUpdate is implemented.
+//
+//nolint:unparam // A waiter return value should include an object (*eks.Nodegroup) even if it is never used.
+func waitC2NodegroupUpdated(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName string, timeout time.Duration) (*eks.Nodegroup, error) {
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{eks.NodegroupStatusPending, eks.NodegroupStatusUpdating},
+		Target:  []string{eks.NodegroupStatusActive},
+		Refresh: statusNodegroup(conn, clusterName, nodeGroupName),
+		Timeout: timeout,
+	}
+
+	outputRaw, err := stateConf.WaitForStateContext(ctx)
+
+	if output, ok := outputRaw.(*eks.Nodegroup); ok {
+		return output, err
+	}
+
+	return nil, err
+}
+
+//lint:ignore U1000 Ignore unused function temporarily
+func waitNodegroupUpdateSuccessful(ctx context.Context, conn *eks.EKS, clusterName, nodeGroupName, id string, timeout time.Duration) (*eks.Update, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{eks.UpdateStatusInProgress},
 		Target:  []string{eks.UpdateStatusSuccessful},

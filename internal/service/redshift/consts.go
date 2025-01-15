@@ -2,7 +2,6 @@ package redshift
 
 import "time"
 
-//nolint:deadcode,varcheck // These constants are missing from the AWS SDK
 const (
 	clusterAvailabilityStatusAvailable   = "Available"
 	clusterAvailabilityStatusFailed      = "Failed"
@@ -12,7 +11,8 @@ const (
 )
 
 // https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html#rs-mgmt-cluster-status.
-//nolint:deadcode,varcheck // These constants are missing from the AWS SDK
+//
+//nolint:unused // These constants are missing from the AWS SDK
 const (
 	clusterStatusAvailable              = "available"
 	clusterStatusAvailablePrepForResize = "available, prep-for-resize"
@@ -44,7 +44,7 @@ const (
 	clusterTypeSingleNode = "single-node"
 )
 
-//nolint:deadcode // These constants are missing from the AWS SDK
+//nolint:unused // These constants are missing from the AWS SDK
 func clusterType_Values() []string {
 	return []string{
 		clusterTypeMultiNode,

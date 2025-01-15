@@ -761,6 +761,35 @@ func StatusTransitGatewayRouteTablePropagationState(conn *ec2.EC2, transitGatewa
 	}
 }
 
+// StatusUpdatedC2VolumeState is a StateRefreshFunc that checks if the C2 Volume
+// has been updated by matching against one or more target volume parameters.
+//
+// This is a temporary solution for C2 Volumes until VolumeModification is implemented.
+func StatusUpdatedC2VolumeState(conn *ec2.EC2, id string, target *targetVolumeParameters) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		output, err := FindEBSVolumeByID(conn, id)
+
+		if tfresource.NotFound(err) {
+			return nil, "", nil
+		}
+
+		if err != nil {
+			return nil, "", err
+		}
+
+		isSizeMatch := target.size == nil || aws.Int64Value(target.size) == aws.Int64Value(output.Size)
+		isIopsNumMatch := target.iops == nil || aws.Int64Value(target.iops) == aws.Int64Value(output.Iops)
+		isTypeMatch := target.volumeType == nil || aws.StringValue(target.volumeType) == aws.StringValue(output.VolumeType)
+
+		if isSizeMatch && isIopsNumMatch && isTypeMatch {
+			return output, aws.StringValue(output.State), nil
+		}
+
+		// During the update of C2 volume, synthetic modifying state is used as its current state.
+		return output, ec2.VolumeModificationStateModifying, nil
+	}
+}
+
 func StatusVolumeState(conn *ec2.EC2, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		output, err := FindEBSVolumeByID(conn, id)
@@ -777,9 +806,9 @@ func StatusVolumeState(conn *ec2.EC2, id string) resource.StateRefreshFunc {
 	}
 }
 
-func StatusVolumeAttachmentState(conn *ec2.EC2, volumeID, instanceID, deviceName string) resource.StateRefreshFunc {
+func StatusVolumeAttachmentState(conn *ec2.EC2, volumeID, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		output, err := FindEBSVolumeAttachment(conn, volumeID, instanceID, deviceName)
+		output, err := FindEBSVolumeAttachment(conn, volumeID, instanceID)
 
 		if tfresource.NotFound(err) {
 			return nil, "", nil

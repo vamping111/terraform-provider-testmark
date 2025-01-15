@@ -137,7 +137,7 @@ func ResourceAMI() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							Default:      ec2.VolumeTypeStandard,
+							Default:      ec2.VolumeTypeSt2,
 							ValidateFunc: validation.StringInSlice(ec2.VolumeType_Values(), false),
 						},
 					},
@@ -249,7 +249,9 @@ func ResourceAMI() *schema.Resource {
 			"sriov_net_support": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				// FIXME: Enable forced replacement on new value
+				// when C2 API supports the `SriovNetSupport` parameter
+				ForceNew: false,
 				Default:  "simple",
 			},
 			"tags":     tftags.TagsSchema(),
@@ -262,7 +264,7 @@ func ResourceAMI() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      ec2.VirtualizationTypeParavirtual,
+				Default:      ec2.VirtualizationTypeHvm,
 				ValidateFunc: validation.StringInSlice(ec2.VirtualizationType_Values(), false),
 			},
 		},
@@ -432,7 +434,7 @@ func resourceAMIRead(d *schema.ResourceData, meta interface{}) error {
 
 	tags := KeyValueTags(image.Tags).IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}

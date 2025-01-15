@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 )
 
 func dxVirtualInterfaceRead(id string, conn *directconnect.DirectConnect) (*directconnect.VirtualInterface, error) {
@@ -27,6 +28,7 @@ func dxVirtualInterfaceRead(id string, conn *directconnect.DirectConnect) (*dire
 
 func dxVirtualInterfaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).DirectConnectConn
+	connEC2 := meta.(*conns.AWSClient).EC2Conn
 
 	if d.HasChange("mtu") {
 		req := &directconnect.UpdateVirtualInterfaceAttributesInput{
@@ -55,7 +57,8 @@ func dxVirtualInterfaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("tags_all") {
 		o, n := d.GetChange("tags_all")
 
-		if err := UpdateTags(conn, arn, o, n); err != nil {
+		// FIXME: Use directconnect.UpdateTags after TagResource and UntagResource are supported in Direct Connect API.
+		if err := ec2.UpdateTags(connEC2, d.Id(), o, n); err != nil {
 			return fmt.Errorf("error updating Direct Connect virtual interface (%s) tags: %s", arn, err)
 		}
 	}

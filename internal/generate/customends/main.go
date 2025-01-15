@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"text/template"
@@ -94,6 +95,11 @@ func main() {
 }
 
 func writeTemplate(body string, templateName string, td TemplateData) {
+	if _, err := os.Open(filepath.Dir(filename)); os.IsNotExist(err) {
+		log.Printf("warning: directory %s does not exist", filepath.Dir(filename))
+		return
+	}
+
 	// If the file doesn't exist, create it, or append to the file
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {

@@ -32,7 +32,7 @@ var (
 )
 
 func ResourceRecord() *schema.Resource {
-	//lintignore:R011
+	// lintignore:R011
 	return &schema.Resource{
 		Create: resourceRecordCreate,
 		Read:   resourceRecordRead,
@@ -280,15 +280,15 @@ func resourceRecordUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	// If the old record had a weighted_routing_policy we need to pass that in
 	// here because otherwise the API will give us an error.
-	if v, _ := d.GetChange("weighted_routing_policy"); v != nil {
-		if o, ok := v.([]interface{}); ok {
-			if len(o) == 1 {
-				if v, ok := o[0].(map[string]interface{}); ok {
-					oldRec.Weight = aws.Int64(int64(v["weight"].(int)))
-				}
-			}
-		}
-	}
+	// if v, _ := d.GetChange("weighted_routing_policy"); v != nil {
+	// 	if o, ok := v.([]interface{}); ok {
+	// 		if len(o) == 1 {
+	// 			if v, ok := o[0].(map[string]interface{}); ok {
+	// 				oldRec.Weight = aws.Int64(int64(v["weight"].(int)))
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	if v, _ := d.GetChange("ttl"); v.(int) != 0 {
 		oldRec.TTL = aws.Int64(int64(v.(int)))
@@ -303,26 +303,26 @@ func resourceRecordUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Alias record
-	if v, _ := d.GetChange("alias"); v != nil {
-		aliases := v.(*schema.Set).List()
-		if len(aliases) == 1 {
-			alias := aliases[0].(map[string]interface{})
-			oldRec.AliasTarget = &route53.AliasTarget{
-				DNSName:              aws.String(alias["name"].(string)),
-				EvaluateTargetHealth: aws.Bool(alias["evaluate_target_health"].(bool)),
-				HostedZoneId:         aws.String(alias["zone_id"].(string)),
-			}
-		}
-	}
+	// if v, _ := d.GetChange("alias"); v != nil {
+	// 	aliases := v.(*schema.Set).List()
+	// 	if len(aliases) == 1 {
+	// 		alias := aliases[0].(map[string]interface{})
+	// 		oldRec.AliasTarget = &route53.AliasTarget{
+	// 			DNSName:              aws.String(alias["name"].(string)),
+	// 			EvaluateTargetHealth: aws.Bool(alias["evaluate_target_health"].(bool)),
+	// 			HostedZoneId:         aws.String(alias["zone_id"].(string)),
+	// 		}
+	// 	}
+	// }
 
 	// If health check id is present send that to AWS
-	if v, _ := d.GetChange("health_check_id"); v.(string) != "" {
-		oldRec.HealthCheckId = aws.String(v.(string))
-	}
+	// if v, _ := d.GetChange("health_check_id"); v.(string) != "" {
+	// 	oldRec.HealthCheckId = aws.String(v.(string))
+	// }
 
-	if v, _ := d.GetChange("set_identifier"); v.(string) != "" {
-		oldRec.SetIdentifier = aws.String(v.(string))
-	}
+	// if v, _ := d.GetChange("set_identifier"); v.(string) != "" {
+	// 	oldRec.SetIdentifier = aws.String(v.(string))
+	// }
 
 	// Build the to be created record
 	rec, err := resourceRecordBuildSet(d, aws.StringValue(zoneRecord.HostedZone.Name))
@@ -368,9 +368,9 @@ func resourceRecordUpdate(d *schema.ResourceData, meta interface{}) error {
 		strings.ToLower(d.Get("name").(string)),
 		d.Get("type").(string),
 	}
-	if v, ok := d.GetOk("set_identifier"); ok {
-		vars = append(vars, v.(string))
-	}
+	// if v, ok := d.GetOk("set_identifier"); ok {
+	// 	vars = append(vars, v.(string))
+	// }
 
 	d.SetId(strings.Join(vars, "_"))
 
@@ -446,9 +446,9 @@ func resourceRecordCreate(d *schema.ResourceData, meta interface{}) error {
 		strings.ToLower(d.Get("name").(string)),
 		d.Get("type").(string),
 	}
-	if v, ok := d.GetOk("set_identifier"); ok {
-		vars = append(vars, v.(string))
-	}
+	// if v, ok := d.GetOk("set_identifier"); ok {
+	// 	vars = append(vars, v.(string))
+	// }
 
 	d.SetId(strings.Join(vars, "_"))
 
@@ -516,9 +516,9 @@ func resourceRecordRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("zone_id", parts[0])
 		d.Set("name", parts[1])
 		d.Set("type", parts[2])
-		if parts[3] != "" {
-			d.Set("set_identifier", parts[3])
-		}
+		// if parts[3] != "" {
+		// 	d.Set("set_identifier", parts[3])
+		// }
 	}
 
 	record, err := findRecord(d, meta)
@@ -538,65 +538,65 @@ func resourceRecordRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting records for: %s, error: %w", d.Id(), err)
 	}
 
-	if alias := record.AliasTarget; alias != nil {
-		name := NormalizeAliasName(aws.StringValue(alias.DNSName))
-		d.Set("alias", []interface{}{
-			map[string]interface{}{
-				"zone_id":                aws.StringValue(alias.HostedZoneId),
-				"name":                   name,
-				"evaluate_target_health": aws.BoolValue(alias.EvaluateTargetHealth),
-			},
-		})
-	}
+	// if alias := record.AliasTarget; alias != nil {
+	// 	name := NormalizeAliasName(aws.StringValue(alias.DNSName))
+	// 	d.Set("alias", []interface{}{
+	// 		map[string]interface{}{
+	// 			"zone_id":                aws.StringValue(alias.HostedZoneId),
+	// 			"name":                   name,
+	// 			"evaluate_target_health": aws.BoolValue(alias.EvaluateTargetHealth),
+	// 		},
+	// 	})
+	// }
 
 	d.Set("ttl", record.TTL)
 
-	if record.Failover != nil {
-		v := []map[string]interface{}{{
-			"type": aws.StringValue(record.Failover),
-		}}
-		if err := d.Set("failover_routing_policy", v); err != nil {
-			return fmt.Errorf("Error setting failover records for: %s, error: %w", d.Id(), err)
-		}
-	}
+	// if record.Failover != nil {
+	// 	v := []map[string]interface{}{{
+	// 		"type": aws.StringValue(record.Failover),
+	// 	}}
+	// 	if err := d.Set("failover_routing_policy", v); err != nil {
+	// 		return fmt.Errorf("Error setting failover records for: %s, error: %w", d.Id(), err)
+	// 	}
+	// }
 
-	if record.GeoLocation != nil {
-		v := []map[string]interface{}{{
-			"continent":   aws.StringValue(record.GeoLocation.ContinentCode),
-			"country":     aws.StringValue(record.GeoLocation.CountryCode),
-			"subdivision": aws.StringValue(record.GeoLocation.SubdivisionCode),
-		}}
-		if err := d.Set("geolocation_routing_policy", v); err != nil {
-			return fmt.Errorf("Error setting gelocation records for: %s, error: %w", d.Id(), err)
-		}
-	}
+	// if record.GeoLocation != nil {
+	// 	v := []map[string]interface{}{{
+	// 		"continent":   aws.StringValue(record.GeoLocation.ContinentCode),
+	// 		"country":     aws.StringValue(record.GeoLocation.CountryCode),
+	// 		"subdivision": aws.StringValue(record.GeoLocation.SubdivisionCode),
+	// 	}}
+	// 	if err := d.Set("geolocation_routing_policy", v); err != nil {
+	// 		return fmt.Errorf("Error setting gelocation records for: %s, error: %w", d.Id(), err)
+	// 	}
+	// }
 
-	if record.Region != nil {
-		v := []map[string]interface{}{{
-			"region": aws.StringValue(record.Region),
-		}}
-		if err := d.Set("latency_routing_policy", v); err != nil {
-			return fmt.Errorf("Error setting latency records for: %s, error: %w", d.Id(), err)
-		}
-	}
+	// if record.Region != nil {
+	// 	v := []map[string]interface{}{{
+	// 		"region": aws.StringValue(record.Region),
+	// 	}}
+	// 	if err := d.Set("latency_routing_policy", v); err != nil {
+	// 		return fmt.Errorf("Error setting latency records for: %s, error: %w", d.Id(), err)
+	// 	}
+	// }
 
-	if record.Weight != nil {
-		v := []map[string]interface{}{{
-			"weight": aws.Int64Value((record.Weight)),
-		}}
-		if err := d.Set("weighted_routing_policy", v); err != nil {
-			return fmt.Errorf("Error setting weighted records for: %s, error: %w", d.Id(), err)
-		}
-	}
+	// if record.Weight != nil {
+	// 	v := []map[string]interface{}{{
+	// 		"weight": aws.Int64Value((record.Weight)),
+	// 	}}
+	// 	if err := d.Set("weighted_routing_policy", v); err != nil {
+	// 		return fmt.Errorf("Error setting weighted records for: %s, error: %w", d.Id(), err)
+	// 	}
+	// }
 
-	if record.MultiValueAnswer != nil {
-		if err := d.Set("multivalue_answer_routing_policy", record.MultiValueAnswer); err != nil {
-			return fmt.Errorf("Error setting multivalue answer records for: %s, error: %w", d.Id(), err)
-		}
-	}
+	// if record.MultiValueAnswer != nil {
+	// 	if err := d.Set("multivalue_answer_routing_policy", record.MultiValueAnswer); err != nil {
+	// 		return fmt.Errorf("Error setting multivalue answer records for: %s, error: %w", d.Id(), err)
+	// 	}
+	// }
 
-	d.Set("set_identifier", record.SetIdentifier)
-	d.Set("health_check_id", record.HealthCheckId)
+	// d.Set("set_identifier", record.SetIdentifier)
+	// d.Set("health_check_id", record.HealthCheckId)
 
 	return nil
 }
@@ -647,21 +647,18 @@ func findRecord(d *schema.ResourceData, meta interface{}) (*route53.ResourceReco
 
 	recordName := FQDN(strings.ToLower(en))
 	recordType := d.Get("type").(string)
-	recordSetIdentifier := d.Get("set_identifier").(string)
+	// recordSetIdentifier := d.Get("set_identifier").(string)
 
 	// If this isn't a Weighted, Latency, Geo, or Failover resource with
 	// a SetIdentifier we only need to look at the first record in the response since there can be
 	// only one
-	maxItems := "1"
-	if recordSetIdentifier != "" {
-		maxItems = "100"
-	}
+	// maxItems := "1"
+	// if recordSetIdentifier != "" {
+	// 	maxItems = "100"
+	// }
 
 	lopts := &route53.ListResourceRecordSetsInput{
-		HostedZoneId:    aws.String(CleanZoneID(zone)),
-		StartRecordName: aws.String(recordName),
-		StartRecordType: aws.String(recordType),
-		MaxItems:        aws.String(maxItems),
+		HostedZoneId: aws.String(CleanZoneID(zone)),
 	}
 
 	log.Printf("[DEBUG] List resource records sets for zone: %s, opts: %s",
@@ -687,9 +684,9 @@ func findRecord(d *schema.ResourceData, meta interface{}) (*route53.ResourceReco
 			if recordType != responseType {
 				continue
 			}
-			if aws.StringValue(recordSet.SetIdentifier) != recordSetIdentifier {
-				continue
-			}
+			// if aws.StringValue(recordSet.SetIdentifier) != recordSetIdentifier {
+			// 	continue
+			// }
 
 			record = recordSet
 			return false
@@ -773,6 +770,7 @@ func DeleteRecordSet(conn *route53.Route53, input *route53.ChangeResourceRecordS
 	return out, err
 }
 
+//nolint:unparam // Unsupported r53 api parameters are commented out.
 func resourceRecordBuildSet(d *schema.ResourceData, zoneName string) (*route53.ResourceRecordSet, error) {
 	// get expanded name
 	en := ExpandRecordName(d.Get("name").(string), zoneName)
@@ -797,99 +795,99 @@ func resourceRecordBuildSet(d *schema.ResourceData, zoneName string) (*route53.R
 	}
 
 	// Alias record
-	if v, ok := d.GetOk("alias"); ok {
-		aliases := v.(*schema.Set).List()
-		if len(aliases) > 1 {
-			return nil, fmt.Errorf("You can only define a single alias target per record")
-		}
-		alias := aliases[0].(map[string]interface{})
-		rec.AliasTarget = &route53.AliasTarget{
-			DNSName:              aws.String(alias["name"].(string)),
-			EvaluateTargetHealth: aws.Bool(alias["evaluate_target_health"].(bool)),
-			HostedZoneId:         aws.String(alias["zone_id"].(string)),
-		}
-		log.Printf("[DEBUG] Creating alias: %#v", alias)
-	} else {
-		if _, ok := d.GetOk("ttl"); !ok {
-			return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "ttl": required field is not set`, d.Get("name").(string))
-		}
+	// if v, ok := d.GetOk("alias"); ok {
+	// 	aliases := v.(*schema.Set).List()
+	// 	if len(aliases) > 1 {
+	// 		return nil, fmt.Errorf("You can only define a single alias target per record")
+	// 	}
+	// 	alias := aliases[0].(map[string]interface{})
+	// 	rec.AliasTarget = &route53.AliasTarget{
+	// 		DNSName:              aws.String(alias["name"].(string)),
+	// 		EvaluateTargetHealth: aws.Bool(alias["evaluate_target_health"].(bool)),
+	// 		HostedZoneId:         aws.String(alias["zone_id"].(string)),
+	// 	}
+	// 	log.Printf("[DEBUG] Creating alias: %#v", alias)
+	// } else {
+	// 	if _, ok := d.GetOk("ttl"); !ok {
+	// 		return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "ttl": required field is not set`, d.Get("name").(string))
+	// 	}
 
-		if _, ok := d.GetOk("records"); !ok {
-			return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "records": required field is not set`, d.Get("name").(string))
-		}
-	}
+	// 	if _, ok := d.GetOk("records"); !ok {
+	// 		return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "records": required field is not set`, d.Get("name").(string))
+	// 	}
+	// }
 
-	if v, ok := d.GetOk("failover_routing_policy"); ok {
-		if _, ok := d.GetOk("set_identifier"); !ok {
-			return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "failover_routing_policy" is set`, d.Get("name").(string))
-		}
-		records := v.([]interface{})
-		if len(records) > 1 {
-			return nil, fmt.Errorf("You can only define a single failover_routing_policy per record")
-		}
-		failover := records[0].(map[string]interface{})
+	// if v, ok := d.GetOk("failover_routing_policy"); ok {
+	// 	if _, ok := d.GetOk("set_identifier"); !ok {
+	// 		return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "failover_routing_policy" is set`, d.Get("name").(string))
+	// 	}
+	// 	records := v.([]interface{})
+	// 	if len(records) > 1 {
+	// 		return nil, fmt.Errorf("You can only define a single failover_routing_policy per record")
+	// 	}
+	// 	failover := records[0].(map[string]interface{})
 
-		rec.Failover = aws.String(failover["type"].(string))
-	}
+	// 	rec.Failover = aws.String(failover["type"].(string))
+	// }
 
-	if v, ok := d.GetOk("health_check_id"); ok {
-		rec.HealthCheckId = aws.String(v.(string))
-	}
+	// if v, ok := d.GetOk("health_check_id"); ok {
+	// 	rec.HealthCheckId = aws.String(v.(string))
+	// }
 
-	if v, ok := d.GetOk("weighted_routing_policy"); ok {
-		if _, ok := d.GetOk("set_identifier"); !ok {
-			return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "weighted_routing_policy" is set`, d.Get("name").(string))
-		}
-		records := v.([]interface{})
-		if len(records) > 1 {
-			return nil, fmt.Errorf("You can only define a single weighted_routing_policy per record")
-		}
-		weight := records[0].(map[string]interface{})
+	// if v, ok := d.GetOk("weighted_routing_policy"); ok {
+	// 	if _, ok := d.GetOk("set_identifier"); !ok {
+	// 		return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "weighted_routing_policy" is set`, d.Get("name").(string))
+	// 	}
+	// 	records := v.([]interface{})
+	// 	if len(records) > 1 {
+	// 		return nil, fmt.Errorf("You can only define a single weighted_routing_policy per record")
+	// 	}
+	// 	weight := records[0].(map[string]interface{})
 
-		rec.Weight = aws.Int64(int64(weight["weight"].(int)))
-	}
+	// 	rec.Weight = aws.Int64(int64(weight["weight"].(int)))
+	// }
 
-	if v, ok := d.GetOk("set_identifier"); ok {
-		rec.SetIdentifier = aws.String(v.(string))
-	}
+	// if v, ok := d.GetOk("set_identifier"); ok {
+	// 	rec.SetIdentifier = aws.String(v.(string))
+	// }
 
-	if v, ok := d.GetOk("latency_routing_policy"); ok {
-		if _, ok := d.GetOk("set_identifier"); !ok {
-			return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "latency_routing_policy" is set`, d.Get("name").(string))
-		}
-		records := v.([]interface{})
-		if len(records) > 1 {
-			return nil, fmt.Errorf("You can only define a single latency_routing_policy per record")
-		}
-		latency := records[0].(map[string]interface{})
+	// if v, ok := d.GetOk("latency_routing_policy"); ok {
+	// 	if _, ok := d.GetOk("set_identifier"); !ok {
+	// 		return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "latency_routing_policy" is set`, d.Get("name").(string))
+	// 	}
+	// 	records := v.([]interface{})
+	// 	if len(records) > 1 {
+	// 		return nil, fmt.Errorf("You can only define a single latency_routing_policy per record")
+	// 	}
+	// 	latency := records[0].(map[string]interface{})
 
-		rec.Region = aws.String(latency["region"].(string))
-	}
+	// 	rec.Region = aws.String(latency["region"].(string))
+	// }
 
-	if v, ok := d.GetOk("geolocation_routing_policy"); ok {
-		if _, ok := d.GetOk("set_identifier"); !ok {
-			return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "geolocation_routing_policy" is set`, d.Get("name").(string))
-		}
-		geolocations := v.([]interface{})
-		if len(geolocations) > 1 {
-			return nil, fmt.Errorf("You can only define a single geolocation_routing_policy per record")
-		}
-		geolocation := geolocations[0].(map[string]interface{})
+	// if v, ok := d.GetOk("geolocation_routing_policy"); ok {
+	// 	if _, ok := d.GetOk("set_identifier"); !ok {
+	// 		return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "geolocation_routing_policy" is set`, d.Get("name").(string))
+	// 	}
+	// 	geolocations := v.([]interface{})
+	// 	if len(geolocations) > 1 {
+	// 		return nil, fmt.Errorf("You can only define a single geolocation_routing_policy per record")
+	// 	}
+	// 	geolocation := geolocations[0].(map[string]interface{})
 
-		rec.GeoLocation = &route53.GeoLocation{
-			ContinentCode:   nilString(geolocation["continent"].(string)),
-			CountryCode:     nilString(geolocation["country"].(string)),
-			SubdivisionCode: nilString(geolocation["subdivision"].(string)),
-		}
-		log.Printf("[DEBUG] Creating geolocation: %#v", geolocation)
-	}
+	// 	rec.GeoLocation = &route53.GeoLocation{
+	// 		ContinentCode:   nilString(geolocation["continent"].(string)),
+	// 		CountryCode:     nilString(geolocation["country"].(string)),
+	// 		SubdivisionCode: nilString(geolocation["subdivision"].(string)),
+	// 	}
+	// 	log.Printf("[DEBUG] Creating geolocation: %#v", geolocation)
+	// }
 
-	if v, ok := d.GetOk("multivalue_answer_routing_policy"); ok {
-		if _, ok := d.GetOk("set_identifier"); !ok {
-			return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "multivalue_answer_routing_policy" is set`, d.Get("name").(string))
-		}
-		rec.MultiValueAnswer = aws.Bool(v.(bool))
-	}
+	// if v, ok := d.GetOk("multivalue_answer_routing_policy"); ok {
+	// 	if _, ok := d.GetOk("set_identifier"); !ok {
+	// 		return nil, fmt.Errorf(`provider.aws: aws_route53_record: %s: "set_identifier": required field is not set when "multivalue_answer_routing_policy" is set`, d.Get("name").(string))
+	// 	}
+	// 	rec.MultiValueAnswer = aws.Bool(v.(bool))
+	// }
 
 	return rec, nil
 }
@@ -944,6 +942,8 @@ func resourceAliasRecordHash(v interface{}) int {
 // nilString takes a string as an argument and returns a string
 // pointer. The returned pointer is nil if the string argument is
 // empty. Otherwise, it is a pointer to a copy of the string.
+//
+//nolint:unused // Unsupported r53 api parameters that use this method are commented out.
 func nilString(s string) *string {
 	if s == "" {
 		return nil

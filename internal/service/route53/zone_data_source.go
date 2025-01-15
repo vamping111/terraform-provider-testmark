@@ -151,7 +151,7 @@ func dataSourceZoneRead(d *schema.ResourceData, meta interface{}) error {
 				}
 			}
 		}
-		if *resp.IsTruncated {
+		if resp.IsTruncated != nil && *resp.IsTruncated {
 			nextMarker = resp.NextMarker
 		} else {
 			allHostedZoneListed = true

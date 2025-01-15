@@ -65,7 +65,6 @@ func ResourceSecurityGroup() *schema.Resource {
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				Default:      "Managed by Terraform",
 				ValidateFunc: validation.StringLenBetween(0, 255),
 			},
@@ -406,6 +405,19 @@ func resourceSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) error
 	group, err := FindSecurityGroupByID(conn, d.Id())
 	if err != nil {
 		return fmt.Errorf("error updating Security Group (%s): %w", d.Id(), err)
+	}
+
+	if d.HasChange("description") && !d.IsNewResource() {
+		_, err := conn.ModifySecurityGroupAttribute(&ec2.ModifySecurityGroupAttributeInput{
+			Description: &ec2.AttributeValue{
+				Value: aws.String(d.Get("description").(string)),
+			},
+			GroupId: aws.String(d.Id()),
+		})
+
+		if err != nil {
+			return fmt.Errorf("error updating Security Group (%s) description: %w", d.Id(), err)
+		}
 	}
 
 	err = resourceSecurityGroupUpdateRules(d, "ingress", meta, group)
@@ -778,7 +790,6 @@ func resourceSecurityGroupUpdateRules(
 // of rules. We iterate through the local set of rules trying to find a matching
 // remote rule, which may be structured differently because of how AWS
 // aggregates the rules under the to, from, and type.
-//
 //
 // Matching rules are written to state, with their elements removed from the
 // remote set
@@ -1179,31 +1190,31 @@ func SecurityGroupCollapseRules(ruleset string, rules []interface{}) []interface
 //
 // For example, in terraform syntax, the following block:
 //
-// ingress {
-//   from_port = 80
-//   to_port = 80
-//   protocol = "tcp"
-//   cidr_blocks = [
-//     "192.168.0.1/32",
-//     "192.168.0.2/32",
-//   ]
-// }
+//	ingress {
+//	  from_port = 80
+//	  to_port = 80
+//	  protocol = "tcp"
+//	  cidr_blocks = [
+//	    "192.168.0.1/32",
+//	    "192.168.0.2/32",
+//	  ]
+//	}
 //
 // will be converted to the two blocks below:
 //
-// ingress {
-//   from_port = 80
-//   to_port = 80
-//   protocol = "tcp"
-//   cidr_blocks = [ "192.168.0.1/32" ]
-// }
+//	ingress {
+//	  from_port = 80
+//	  to_port = 80
+//	  protocol = "tcp"
+//	  cidr_blocks = [ "192.168.0.1/32" ]
+//	}
 //
-// ingress {
-//   from_port = 80
-//   to_port = 80
-//   protocol = "tcp"
-//   cidr_blocks = [ "192.168.0.2/32" ]
-// }
+//	ingress {
+//	  from_port = 80
+//	  to_port = 80
+//	  protocol = "tcp"
+//	  cidr_blocks = [ "192.168.0.2/32" ]
+//	}
 //
 // Then the Difference operation is executed on the new set
 // to find which rules got modified, and the resulting set
@@ -1211,7 +1222,6 @@ func SecurityGroupCollapseRules(ruleset string, rules []interface{}) []interface
 // to convert the "diff" back to a more compact form for
 // execution. Such compact form helps reduce the number of
 // API calls.
-//
 func SecurityGroupExpandRules(rules *schema.Set) *schema.Set {
 	var keys_to_expand = []string{"cidr_blocks", "ipv6_cidr_blocks", "prefix_list_ids", "security_groups"}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/directconnect"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
 )
 
@@ -51,6 +52,8 @@ func DataSourceConnection() *schema.Resource {
 
 func dataSourceConnectionRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).DirectConnectConn
+	connEC2 := meta.(*conns.AWSClient).EC2Conn
+
 	ignoreTagsConfig := meta.(*conns.AWSClient).IgnoreTagsConfig
 
 	var connections []*directconnect.Connection
@@ -87,7 +90,7 @@ func dataSourceConnectionRead(d *schema.ResourceData, meta interface{}) error {
 		Region:    aws.StringValue(connection.Region),
 		Service:   "directconnect",
 		AccountID: aws.StringValue(connection.OwnerAccount),
-		Resource:  fmt.Sprintf("dxcon/%s", d.Id()),
+		Resource:  fmt.Sprintf("dxconn/%s", d.Id()),
 	}.String()
 	d.Set("arn", arn)
 	d.Set("aws_device", connection.AwsDeviceV2)
@@ -97,7 +100,8 @@ func dataSourceConnectionRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("owner_account_id", connection.OwnerAccount)
 	d.Set("provider_name", connection.ProviderName)
 
-	tags, err := ListTags(conn, arn)
+	// FIXME: Use directconnect.ListTags after DescribeTags is supported in Direct Connect API.
+	tags, err := ec2.ListTags(connEC2, d.Id())
 
 	if err != nil {
 		return fmt.Errorf("error listing tags for Direct Connect Connection (%s): %w", arn, err)

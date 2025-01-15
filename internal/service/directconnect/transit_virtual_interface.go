@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-aws/internal/conns"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	tftags "github.com/hashicorp/terraform-provider-aws/internal/tags"
 	"github.com/hashicorp/terraform-provider-aws/internal/verify"
 )
@@ -29,11 +30,11 @@ func ResourceTransitVirtualInterface() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"address_family": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
+				Default:  directconnect.AddressFamilyIpv4,
 				ValidateFunc: validation.StringInSlice([]string{
 					directconnect.AddressFamilyIpv4,
-					directconnect.AddressFamilyIpv6,
 				}, false),
 			},
 			"amazon_address": {
@@ -60,10 +61,11 @@ func ResourceTransitVirtualInterface() *schema.Resource {
 				ForceNew: true,
 			},
 			"bgp_auth_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Computed:  true,
+				ForceNew:  true,
+				Sensitive: true,
 			},
 			"connection_id": {
 				Type:     schema.TypeString,
@@ -87,7 +89,6 @@ func ResourceTransitVirtualInterface() *schema.Resource {
 			},
 			"mtu": {
 				Type:         schema.TypeInt,
-				Default:      1500,
 				Optional:     true,
 				ValidateFunc: validation.IntInSlice([]int{1500, 8500}),
 			},
@@ -122,6 +123,8 @@ func ResourceTransitVirtualInterface() *schema.Resource {
 
 func resourceTransitVirtualInterfaceCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).DirectConnectConn
+	connEC2 := meta.(*conns.AWSClient).EC2Conn
+
 	defaultTagsConfig := meta.(*conns.AWSClient).DefaultTagsConfig
 	tags := defaultTagsConfig.MergeTags(tftags.New(d.Get("tags").(map[string]interface{})))
 
@@ -146,9 +149,6 @@ func resourceTransitVirtualInterfaceCreate(d *schema.ResourceData, meta interfac
 	if v, ok := d.GetOk("customer_address"); ok {
 		req.NewTransitVirtualInterface.CustomerAddress = aws.String(v.(string))
 	}
-	if len(tags) > 0 {
-		req.NewTransitVirtualInterface.Tags = Tags(tags.IgnoreAWS())
-	}
 
 	log.Printf("[DEBUG] Creating Direct Connect transit virtual interface: %s", req)
 	resp, err := conn.CreateTransitVirtualInterface(req)
@@ -157,6 +157,13 @@ func resourceTransitVirtualInterfaceCreate(d *schema.ResourceData, meta interfac
 	}
 
 	d.SetId(aws.StringValue(resp.VirtualInterface.VirtualInterfaceId))
+
+	// FIXME: Provide tags in CreateTransitVirtualInterface request after Direct Connect API support.
+	if len(tags) > 0 {
+		if err := ec2.CreateTags(connEC2, d.Id(), tags.IgnoreAWS()); err != nil {
+			return fmt.Errorf("error creating tags for Direct Connect transit virtual interface: %s", err)
+		}
+	}
 
 	if err := dxTransitVirtualInterfaceWaitUntilAvailable(conn, d.Id(), d.Timeout(schema.TimeoutCreate)); err != nil {
 		return err
@@ -167,6 +174,8 @@ func resourceTransitVirtualInterfaceCreate(d *schema.ResourceData, meta interfac
 
 func resourceTransitVirtualInterfaceRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).DirectConnectConn
+	connEC2 := meta.(*conns.AWSClient).EC2Conn
+
 	defaultTagsConfig := meta.(*conns.AWSClient).DefaultTagsConfig
 	ignoreTagsConfig := meta.(*conns.AWSClient).IgnoreTagsConfig
 
@@ -203,7 +212,8 @@ func resourceTransitVirtualInterfaceRead(d *schema.ResourceData, meta interface{
 	d.Set("sitelink_enabled", vif.SiteLinkEnabled)
 	d.Set("vlan", vif.Vlan)
 
-	tags, err := ListTags(conn, arn)
+	// FIXME: Use directconnect.ListTags after DescribeTags is supported in Direct Connect API.
+	tags, err := ec2.ListTags(connEC2, d.Id())
 
 	if err != nil {
 		return fmt.Errorf("error listing tags for Direct Connect transit virtual interface (%s): %s", arn, err)

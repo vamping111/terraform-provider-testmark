@@ -217,6 +217,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/opsworkscm"
 	"github.com/aws/aws-sdk-go/service/organizations"
 	"github.com/aws/aws-sdk-go/service/outposts"
+	"github.com/aws/aws-sdk-go/service/paas"
 	"github.com/aws/aws-sdk-go/service/panorama"
 	"github.com/aws/aws-sdk-go/service/personalize"
 	"github.com/aws/aws-sdk-go/service/personalizeevents"
@@ -530,6 +531,7 @@ type AWSClient struct {
 	OrganizationsConn                *organizations.Organizations
 	OutpostsConn                     *outposts.Outposts
 	PIConn                           *pi.PI
+	PaaSConn                         *paas.PaaS
 	PanoramaConn                     *panorama.Panorama
 	PersonalizeConn                  *personalize.Personalize
 	PersonalizeEventsConn            *personalizeevents.PersonalizeEvents

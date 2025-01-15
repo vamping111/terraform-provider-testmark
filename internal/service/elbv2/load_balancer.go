@@ -531,29 +531,31 @@ func resourceLoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 			Attributes:      attributes,
 		}
 
-		log.Printf("[DEBUG] ALB Modify Load Balancer Attributes Request: %#v", input)
+		log.Printf("[DEBUG] ModifyLoadBalancerAttributes Request: %#v", input)
+
+		log.Printf("[WARN] ModifyLoadBalancerAttributes Request is not supported by C2")
 
 		// Not all attributes are supported in all partitions (e.g., ISO)
-		var err error
-		for {
-			_, err = conn.ModifyLoadBalancerAttributes(input)
-			if err == nil {
-				break
-			}
+		// var err error
+		// for {
+		// 	_, err = conn.ModifyLoadBalancerAttributes(input)
+		// 	if err == nil {
+		// 		break
+		// 	}
 
-			re := regexp.MustCompile(`attribute key ('|")?([^'" ]+)('|")? is not recognized`)
-			if sm := re.FindStringSubmatch(err.Error()); len(sm) > 1 {
-				log.Printf("[WARN] failed to modify Load Balancer (%s), unsupported attribute (%s): %s", d.Id(), sm[2], err)
-				input.Attributes = removeAttribute(input.Attributes, sm[2])
-				continue
-			}
+		// 	re := regexp.MustCompile(`attribute key ('|")?([^'" ]+)('|")? is not recognized`)
+		// 	if sm := re.FindStringSubmatch(err.Error()); len(sm) > 1 {
+		// 		log.Printf("[WARN] failed to modify Load Balancer (%s), unsupported attribute (%s): %s", d.Id(), sm[2], err)
+		// 		input.Attributes = removeAttribute(input.Attributes, sm[2])
+		// 		continue
+		// 	}
 
-			break
-		}
-
-		if err != nil {
-			return fmt.Errorf("failure configuring LB attributes: %w", err)
-		}
+		// 	break
+		// }
+		//
+		// if err != nil {
+		// 	return fmt.Errorf("failure configuring LB attributes: %w", err)
+		// }
 	}
 
 	if d.HasChange("security_groups") {
@@ -676,6 +678,7 @@ func resourceLoadBalancerDelete(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
+//nolint:unused // Unsupported elb api parameters that use this method are commented out.
 func removeAttribute(attributes []*elbv2.LoadBalancerAttribute, key string) []*elbv2.LoadBalancerAttribute {
 	for i, a := range attributes {
 		if aws.StringValue(a.Key) == key {
@@ -853,12 +856,15 @@ func flattenResource(d *schema.ResourceData, meta interface{}, lb *elbv2.LoadBal
 		return fmt.Errorf("error setting subnet_mapping: %w", err)
 	}
 
-	attributesResp, err := conn.DescribeLoadBalancerAttributes(&elbv2.DescribeLoadBalancerAttributesInput{
-		LoadBalancerArn: aws.String(d.Id()),
-	})
-	if err != nil {
-		return fmt.Errorf("error retrieving LB Attributes: %w", err)
-	}
+	log.Printf("[WARN] DescribeLoadBalancerAttributes Request is not supported by C2")
+
+	// attributesResp, err := conn.DescribeLoadBalancerAttributes(&elbv2.DescribeLoadBalancerAttributesInput{
+	// 	LoadBalancerArn: aws.String(d.Id()),
+	// })
+	// if err != nil {
+	// 	return fmt.Errorf("error retrieving LB Attributes: %w", err)
+	// }
+	attributesResp := &elbv2.DescribeLoadBalancerAttributesOutput{}
 
 	accessLogMap := map[string]interface{}{
 		"bucket":  "",
@@ -925,7 +931,7 @@ func flattenResource(d *schema.ResourceData, meta interface{}, lb *elbv2.LoadBal
 
 	tags = tags.IgnoreAWS().IgnoreConfig(ignoreTagsConfig)
 
-	//lintignore:AWSR002
+	// lintignore:AWSR002
 	if err := d.Set("tags", tags.RemoveDefaultConfig(defaultTagsConfig).Map()); err != nil {
 		return fmt.Errorf("error setting tags: %w", err)
 	}

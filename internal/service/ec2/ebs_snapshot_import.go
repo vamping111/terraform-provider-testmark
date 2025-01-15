@@ -22,7 +22,7 @@ func ResourceEBSSnapshotImport() *schema.Resource {
 	return &schema.Resource{
 		Create:        resourceEBSSnapshotImportCreate,
 		Read:          resourceEBSSnapshotImportRead,
-		Update:        resourceEBSSnapshotUpdate,
+		Update:        resourceEBSSnapshotImportUpdate,
 		Delete:        resourceEBSSnapshotDelete,
 		CustomizeDiff: verify.SetTagsDiff,
 
@@ -86,7 +86,6 @@ func ResourceEBSSnapshotImport() *schema.Resource {
 						"description": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 						"format": {
 							Type:         schema.TypeString,
@@ -337,6 +336,32 @@ func resourceEBSSnapshotImportRead(d *schema.ResourceData, meta interface{}) err
 	d.Set("arn", snapshotArn)
 
 	return nil
+}
+
+func resourceEBSSnapshotImportUpdate(d *schema.ResourceData, meta interface{}) error {
+	conn := meta.(*conns.AWSClient).EC2Conn
+
+	if d.HasChange("disk_container.0.description") {
+		_, err := conn.ModifySnapshotAttribute(&ec2.ModifySnapshotAttributeInput{
+			Description: &ec2.AttributeValue{
+				Value: aws.String(d.Get("disk_container.0.description").(string)),
+			},
+			SnapshotId: aws.String(d.Id()),
+		})
+
+		if err != nil {
+			return fmt.Errorf("error updating EBS Snapshot (%s) description: %w", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("tags_all") {
+		o, n := d.GetChange("tags_all")
+		if err := UpdateTags(conn, d.Id(), o, n); err != nil {
+			return fmt.Errorf("error updating tags: %w", err)
+		}
+	}
+
+	return resourceEBSSnapshotImportRead(d, meta)
 }
 
 func expandEBSSnapshotClientData(tfMap map[string]interface{}) (*ec2.ClientData, error) {

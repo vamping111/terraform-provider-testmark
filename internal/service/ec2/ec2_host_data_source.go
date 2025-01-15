@@ -44,8 +44,9 @@ func DataSourceHost() *schema.Resource {
 				Computed: true,
 			},
 			"instance_family": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeList,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"instance_type": {
 				Type:     schema.TypeString,

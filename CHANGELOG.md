@@ -1,3 +1,201 @@
+## 24.3.0
+
+NOTES:
+
+* Release internal user documentation on MkDocs
+
+FEATURES:
+
+* **New Data Source:** `aws_dx_connection`
+* **New Data Source:** `aws_dx_gateway`
+* **New Data Source:** `aws_dx_lag`
+* **New Data Source:** `aws_ec2_transit_gateway_dx_gateway_attachment`
+* **New Resource:** `aws_dx_gateway`
+* **New Resource:** `aws_dx_gateway_association`
+* **New Resource:** `aws_dx_transit_virtual_interface`
+
+BUG FIXES:
+
+* resource/aws_launch_template: suppress diff if no `placement` block is specified
+* internal/conns: do not validate access key if it is not provided or empty because `AWS_ACCESS_KEY_ID` environment variable can be used
+
+ENHANCEMENTS:
+
+* resource/aws_eks_cluster, data-source/aws_eks_cluster: add `legacy_cluster_params.master_config` block
+
+## 24.2.2
+
+BUG FIXES:
+
+* config: fix invalid `ARN` building that used `username` instead of `project name` in `accountID` section
+
+## 24.2.1
+
+BUG FIXES:
+
+* resource/aws_paas_service, data-source/aws_paas_service: add name for service and instance endpoints
+
+ENHANCEMENTS:
+
+* provider: ignore `system:` tag key prefix
+
+## 24.2.0
+
+NOTES:
+
+* Bump go version to 1.21
+* readme: add information about GPG key creation process
+
+FEATURES:
+
+* **New Data Source:** `aws_iam_group`
+* **New Data Source:** `aws_iam_policy`
+* **New Data Source:** `aws_iam_project`
+* **New Data Source:** `aws_iam_user`
+* **New Data Source:** `aws_iam_users`
+* **New Data Source:** `aws_backup_plan`
+* **New Data Source:** `aws_backup_selection`
+* **New Data Source:** `aws_backup_vault`
+* **New Resource:** `aws_iam_group`
+* **New Resource:** `aws_iam_group_membership`
+* **New Resource:** `aws_iam_group_policy_attachment`
+* **New Resource:** `aws_iam_policy`
+* **New Resource:** `aws_iam_project`
+* **New Resource:** `aws_iam_user`
+* **New Resource:** `aws_iam_user_group_membership`
+* **New Resource:** `aws_iam_user_policy_attachment`
+* **New Resource:** `aws_cloudwatch_metric_alarm`
+* **New Resource:** `aws_backup_plan`
+* **New Resource:** `aws_backup_selection`
+* **New Resource:** `aws_backup_vault_default`
+
+BUG FIXES:
+
+* resource/aws_customer_gateway, resource/aws_vpn_connection: add `ipsec.legacy` to possible values for `type` argument
+
+ENHANCEMENTS:
+
+* resource/aws_subnet: add `map_public_ip_on_launch` argument support
+* data-source/aws_subnet: add `map_public_ip_on_launch` attribute support
+* provider: change default values for the provider parameters:
+    * `skip_credentials_validation`: set the default value to `true`
+    * `skip_region_validation`: set the default value to `true`
+    * `skip_requesting_account_id`: set the default value to `true`
+* provider: support `EC2_URL` and `PAAS_URL` environment variables
+
+## 24.1.0
+
+NOTES:
+
+* Rockit Cloud rebranding
+
+FEATURES:
+
+* **New Data Source:** `aws_ec2_host`
+
+ENHANCEMENTS:
+
+
+* datasource/aws_route53_zone: make the `IsTruncated` parameter optional as it is not supported
+* datasource/aws_instance: add `tenancy`, `affinity` and `host_id` attributes support
+* resource/aws_route53_record: remove the `StartRecordName`, `StartRecordType`, `MaxItems` parameters as they are not supported
+* resource/aws_instance: add `tenancy`, `affinity` and `host_id` arguments support
+* resource/aws_launch_template: add `tenancy`, `affinity` and `host_id` arguments of the `placement` block support
+* resource/aws_ami: update possible virtualization type values and the default value
+* resource/aws_ami: update volume type default value
+
+DOCUMENTATION FIXES:
+
+* datasource/aws_ami, datasource/aws_ami_ids: `executable_users` description: add `all` to the list of possible values
+* datasource/aws_ebs_snapshot, datasource/aws_ebs_snapshot_ids: `owners` description: add `self` to the list of possible values
+* resource/aws_route53_record: fix description in documentation about records that contain more than 255 characters
+
+## 24.0.1
+
+BUG FIXES:
+
+* resource/aws_paas_service: remove service from tfstate if it is not found when deleting
+* resource/aws_paas_service: update list of possible service statuses
+* resource/aws_paas_service: add proper type casting for `mongodb.storage_engine_cache_size` parameter
+
+ENHANCEMENTS:
+
+* resource/aws_paas_service: add examples for MongoDB, MySQL and RabbitMQ PaaS services to documentation
+* resource/aws_paas_service: remove default value for optional parameters
+* resource/aws_paas_service: add the ability to update service parameters for ElasticSearch, MongoDB, RabbitMQ and Redis PaaS services
+
+## 24.0.0
+
+NOTES:
+
+* Change versioning policy: `v4.14.0-CROCX` => semver started from `v24.0.0`
+
+FEATURES:
+
+* **New Data Source:** `aws_ec2_transit_gateway`
+* **New Data Source:** `aws_ec2_transit_gateway_route_table`
+* **New Data Source:** `aws_ec2_transit_gateway_route_tables`
+* **New Data Source:** `aws_ec2_transit_gateway_vpc_attachment`
+* **New Data Source:** `aws_ec2_transit_gateway_vpc_attachments`
+* **New Resource:** `aws_ec2_transit_gateway`
+* **New Resource:** `aws_ec2_transit_gateway_route`
+* **New Resource:** `aws_ec2_transit_gateway_route_table`
+* **New Resource:** `aws_ec2_transit_gateway_route_table_association`
+* **New Resource:** `aws_ec2_transit_gateway_route_table_propagation`
+* **New Resource:** `aws_ec2_transit_gateway_vpc_attachment`
+
+## 4.14.0-CROC10
+
+FEATURES:
+
+* PaaS support
+
+## 4.14.0-CROC9
+
+BUG FIXES:
+
+* ec2: volume_attachment: make device_name optional and deprecated
+
+ENHANCEMENTS:
+
+* update docs: s3, fix links and typos
+
+## 4.14.0-CROC8
+
+FEATURES:
+
+* EKS support
+
+## 4.14.0-CROC7
+
+BUG FIXES:
+
+* Fix VolumeModification not found while volume update
+
+## 4.14.0-CROC6
+
+FEATURES:
+
+* R53 support
+
+ENHANCEMENTS:
+
+* Update description in snapshot, ami, security group w/o replacement
+
+## 4.14.0-CROC5
+
+ENHANCEMENTS:
+
+* ELB support in the provider
+
+## 4.14.0-CROC4
+
+ENHANCEMENTS:
+
+* Network interfaces support in the Launch Template
+* Update provider start page
+* Remove access to aws_cloudtrail_service_account
+
 ## 4.14.0-CROC3
 
 ENHANCEMENTS:

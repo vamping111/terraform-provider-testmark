@@ -8,7 +8,6 @@ description: |-
 
 [metrics]: https://docs.cloud.croc.ru/en/services/monitoring/metrics.html
 [dimensions]: https://docs.cloud.croc.ru/en/services/monitoring/metrics.html#dimensions
-[default-tags]: https://www.terraform.io/docs/providers/aws/index.html#default_tags-configuration-block
 
 # Resource: aws_cloudwatch_metric_alarm
 

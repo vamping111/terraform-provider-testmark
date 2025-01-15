@@ -1,3 +1,28 @@
+## 24.3.0
+
+NOTES:
+
+* Release internal user documentation on MkDocs
+
+FEATURES:
+
+* **New Data Source:** `aws_dx_connection`
+* **New Data Source:** `aws_dx_gateway`
+* **New Data Source:** `aws_dx_lag`
+* **New Data Source:** `aws_ec2_transit_gateway_dx_gateway_attachment`
+* **New Resource:** `aws_dx_gateway`
+* **New Resource:** `aws_dx_gateway_association`
+* **New Resource:** `aws_dx_transit_virtual_interface`
+
+BUG FIXES:
+
+* resource/aws_launch_template: suppress diff if no `placement` block is specified
+* internal/conns: do not validate access key if it is not provided or empty because `AWS_ACCESS_KEY_ID` environment variable can be used
+
+ENHANCEMENTS:
+
+* resource/aws_eks_cluster, data-source/aws_eks_cluster: add `legacy_cluster_params.master_config` block
+
 ## 24.2.2
 
 BUG FIXES:

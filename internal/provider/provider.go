@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-provider-aws/internal/service/autoscaling"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/backup"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/cloudwatch"
+	"github.com/hashicorp/terraform-provider-aws/internal/service/directconnect"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/ec2"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/eks"
 	"github.com/hashicorp/terraform-provider-aws/internal/service/elbv2"
@@ -364,8 +365,9 @@ func Provider() *schema.Provider {
 			// "aws_docdb_engine_version":        docdb.DataSourceEngineVersion(),
 			// "aws_docdb_orderable_db_instance": docdb.DataSourceOrderableDBInstance(),
 			//
-			// "aws_dx_connection": directconnect.DataSourceConnection(),
-			// "aws_dx_gateway":    directconnect.DataSourceGateway(),
+			"aws_dx_connection": directconnect.DataSourceConnection(),
+			"aws_dx_gateway":    directconnect.DataSourceGateway(),
+			"aws_dx_lag":        directconnect.DataSourceLag(),
 			// "aws_dx_location":   directconnect.DataSourceLocation(),
 			// "aws_dx_locations":  directconnect.DataSourceLocations(),
 			//
@@ -405,7 +407,7 @@ func Provider() *schema.Provider {
 			"aws_ec2_transit_gateway": ec2.DataSourceTransitGateway(),
 			// "aws_ec2_transit_gateway_connect":               ec2.DataSourceTransitGatewayConnect(),
 			// "aws_ec2_transit_gateway_connect_peer":          ec2.DataSourceTransitGatewayConnectPeer(),
-			// "aws_ec2_transit_gateway_dx_gateway_attachment": ec2.DataSourceTransitGatewayDxGatewayAttachment(),
+			"aws_ec2_transit_gateway_dx_gateway_attachment": ec2.DataSourceTransitGatewayDxGatewayAttachment(),
 			// "aws_ec2_transit_gateway_multicast_domain":      ec2.DataSourceTransitGatewayMulticastDomain(),
 			// "aws_ec2_transit_gateway_peering_attachment":    ec2.DataSourceTransitGatewayPeeringAttachment(),
 			"aws_ec2_transit_gateway_route_table":     ec2.DataSourceTransitGatewayRouteTable(),
@@ -1027,8 +1029,8 @@ func Provider() *schema.Provider {
 			// "aws_dx_connection":                                directconnect.ResourceConnection(),
 			// "aws_dx_connection_association":                    directconnect.ResourceConnectionAssociation(),
 			// "aws_dx_connection_confirmation":                   directconnect.ResourceConnectionConfirmation(),
-			// "aws_dx_gateway":                                   directconnect.ResourceGateway(),
-			// "aws_dx_gateway_association":                       directconnect.ResourceGatewayAssociation(),
+			"aws_dx_gateway":             directconnect.ResourceGateway(),
+			"aws_dx_gateway_association": directconnect.ResourceGatewayAssociation(),
 			// "aws_dx_gateway_association_proposal":              directconnect.ResourceGatewayAssociationProposal(),
 			// "aws_dx_hosted_connection":                         directconnect.ResourceHostedConnection(),
 			// "aws_dx_hosted_private_virtual_interface":          directconnect.ResourceHostedPrivateVirtualInterface(),
@@ -1040,7 +1042,7 @@ func Provider() *schema.Provider {
 			// "aws_dx_lag":                       directconnect.ResourceLag(),
 			// "aws_dx_private_virtual_interface": directconnect.ResourcePrivateVirtualInterface(),
 			// "aws_dx_public_virtual_interface":  directconnect.ResourcePublicVirtualInterface(),
-			// "aws_dx_transit_virtual_interface": directconnect.ResourceTransitVirtualInterface(),
+			"aws_dx_transit_virtual_interface": directconnect.ResourceTransitVirtualInterface(),
 			//
 			// "aws_dlm_lifecycle_policy": dlm.ResourceLifecyclePolicy(),
 			//

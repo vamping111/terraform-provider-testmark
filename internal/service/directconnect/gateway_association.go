@@ -38,37 +38,27 @@ func ResourceGatewayAssociation() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"allowed_prefixes": {
 				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 			},
 
 			"associated_gateway_id": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Computed:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"associated_gateway_owner_account_id", "proposal_id"},
-				AtLeastOneOf:  []string{"associated_gateway_id", "associated_gateway_owner_account_id", "proposal_id"},
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 
 			"associated_gateway_owner_account_id": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Computed:      true,
-				ForceNew:      true,
-				ValidateFunc:  verify.ValidAccountID,
-				ConflictsWith: []string{"associated_gateway_id"},
-				RequiredWith:  []string{"proposal_id"},
-				AtLeastOneOf:  []string{"associated_gateway_id", "associated_gateway_owner_account_id", "proposal_id"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: verify.ValidAccountID,
+				RequiredWith: []string{"proposal_id"},
 			},
 
 			"associated_gateway_type": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"dx_gateway_association_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -85,18 +75,8 @@ func ResourceGatewayAssociation() *schema.Resource {
 			},
 
 			"proposal_id": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"associated_gateway_id", "vpn_gateway_id"},
-				AtLeastOneOf:  []string{"associated_gateway_id", "associated_gateway_owner_account_id", "proposal_id"},
-			},
-
-			"vpn_gateway_id": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"associated_gateway_id", "associated_gateway_owner_account_id", "proposal_id"},
-				Deprecated:    "use 'associated_gateway_id' argument instead",
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 
@@ -133,9 +113,8 @@ func resourceGatewayAssociationCreate(d *schema.ResourceData, meta interface{}) 
 			return fmt.Errorf("error accepting Direct Connect Gateway Association Proposal (%s): %w", proposalID, err)
 		}
 
-		// For historical reasons the resource ID isn't set to the association ID returned from the API.
 		associationID = aws.StringValue(output.DirectConnectGatewayAssociation.AssociationId)
-		d.SetId(GatewayAssociationCreateResourceID(directConnectGatewayID, aws.StringValue(output.DirectConnectGatewayAssociation.AssociatedGateway.Id)))
+		d.SetId(associationID)
 	} else {
 		associatedGatewayID := d.Get("associated_gateway_id").(string)
 		input := &directconnect.CreateDirectConnectGatewayAssociationInput{
@@ -154,12 +133,9 @@ func resourceGatewayAssociationCreate(d *schema.ResourceData, meta interface{}) 
 			return fmt.Errorf("error creating Direct Connect Gateway Association (%s/%s): %w", directConnectGatewayID, associatedGatewayID, err)
 		}
 
-		// For historical reasons the resource ID isn't set to the association ID returned from the API.
 		associationID = aws.StringValue(output.DirectConnectGatewayAssociation.AssociationId)
-		d.SetId(GatewayAssociationCreateResourceID(directConnectGatewayID, associatedGatewayID))
+		d.SetId(associationID)
 	}
-
-	d.Set("dx_gateway_association_id", associationID)
 
 	if _, err := waitGatewayAssociationCreated(conn, associationID, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return fmt.Errorf("error waiting for Direct Connect Gateway Association (%s) to create: %w", d.Id(), err)
@@ -171,9 +147,7 @@ func resourceGatewayAssociationCreate(d *schema.ResourceData, meta interface{}) 
 func resourceGatewayAssociationRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).DirectConnectConn
 
-	associationID := d.Get("dx_gateway_association_id").(string)
-
-	output, err := FindGatewayAssociationByID(conn, associationID)
+	output, err := FindGatewayAssociationByID(conn, d.Id())
 
 	if !d.IsNewResource() && tfresource.NotFound(err) {
 		log.Printf("[WARN] Direct Connect Gateway Association (%s) not found, removing from state", d.Id())
@@ -192,7 +166,6 @@ func resourceGatewayAssociationRead(d *schema.ResourceData, meta interface{}) er
 	d.Set("associated_gateway_id", output.AssociatedGateway.Id)
 	d.Set("associated_gateway_owner_account_id", output.AssociatedGateway.OwnerAccount)
 	d.Set("associated_gateway_type", output.AssociatedGateway.Type)
-	d.Set("dx_gateway_association_id", output.AssociationId)
 	d.Set("dx_gateway_id", output.DirectConnectGatewayId)
 	d.Set("dx_gateway_owner_account_id", output.DirectConnectGatewayOwnerAccount)
 
@@ -202,9 +175,8 @@ func resourceGatewayAssociationRead(d *schema.ResourceData, meta interface{}) er
 func resourceGatewayAssociationUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).DirectConnectConn
 
-	associationID := d.Get("dx_gateway_association_id").(string)
 	input := &directconnect.UpdateDirectConnectGatewayAssociationInput{
-		AssociationId: aws.String(associationID),
+		AssociationId: aws.String(d.Id()),
 	}
 
 	oraw, nraw := d.GetChange("allowed_prefixes")
@@ -225,7 +197,7 @@ func resourceGatewayAssociationUpdate(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("error updating Direct Connect Gateway Association (%s): %w", d.Id(), err)
 	}
 
-	if _, err := waitGatewayAssociationUpdated(conn, associationID, d.Timeout(schema.TimeoutUpdate)); err != nil {
+	if _, err := waitGatewayAssociationUpdated(conn, d.Id(), d.Timeout(schema.TimeoutUpdate)); err != nil {
 		return fmt.Errorf("error waiting for Direct Connect Gateway Association (%s) to update: %w", d.Id(), err)
 	}
 
@@ -235,11 +207,9 @@ func resourceGatewayAssociationUpdate(d *schema.ResourceData, meta interface{}) 
 func resourceGatewayAssociationDelete(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*conns.AWSClient).DirectConnectConn
 
-	associationID := d.Get("dx_gateway_association_id").(string)
-
 	log.Printf("[DEBUG] Deleting Direct Connect Gateway Association: %s", d.Id())
 	_, err := conn.DeleteDirectConnectGatewayAssociation(&directconnect.DeleteDirectConnectGatewayAssociationInput{
-		AssociationId: aws.String(associationID),
+		AssociationId: aws.String(d.Id()),
 	})
 
 	if tfawserr.ErrMessageContains(err, directconnect.ErrCodeClientException, "does not exist") {
@@ -250,7 +220,7 @@ func resourceGatewayAssociationDelete(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("error deleting Direct Connect Gateway Association (%s): %w", d.Id(), err)
 	}
 
-	if _, err := waitGatewayAssociationDeleted(conn, associationID, d.Timeout(schema.TimeoutDelete)); err != nil {
+	if _, err := waitGatewayAssociationDeleted(conn, d.Id(), d.Timeout(schema.TimeoutDelete)); err != nil {
 		return fmt.Errorf("error waiting for Direct Connect Gateway Association (%s) to delete: %w", d.Id(), err)
 	}
 
@@ -275,9 +245,8 @@ func resourceGatewayAssociationImport(d *schema.ResourceData, meta interface{}) 
 		return nil, err
 	}
 
-	d.SetId(GatewayAssociationCreateResourceID(directConnectGatewayID, associatedGatewayID))
+	d.SetId(aws.StringValue(output.AssociationId))
 	d.Set("dx_gateway_id", output.DirectConnectGatewayId)
-	d.Set("dx_gateway_association_id", output.AssociationId)
 
 	return []*schema.ResourceData{d}, nil
 }

@@ -30,7 +30,6 @@ func TestAccDirectConnectGateway_basic(t *testing.T) {
 				Config: testAccDxGatewayConfig(rName, rBgpAsn),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGatewayExists(resourceName, &v),
-					acctest.CheckResourceAttrAccountID(resourceName, "owner_account_id"),
 				),
 			},
 			{
@@ -61,34 +60,6 @@ func TestAccDirectConnectGateway_disappears(t *testing.T) {
 					acctest.CheckResourceDisappears(acctest.Provider, tfdirectconnect.ResourceGateway(), resourceName),
 				),
 				ExpectNonEmptyPlan: true,
-			},
-		},
-	})
-}
-
-func TestAccDirectConnectGateway_complex(t *testing.T) {
-	var v directconnect.Gateway
-	rName := sdkacctest.RandomWithPrefix(acctest.ResourcePrefix)
-	rBgpAsn := sdkacctest.RandIntRange(64512, 65534)
-	resourceName := "aws_dx_gateway.test"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { acctest.PreCheck(t) },
-		ErrorCheck:        acctest.ErrorCheck(t, directconnect.EndpointsID),
-		ProviderFactories: acctest.ProviderFactories,
-		CheckDestroy:      testAccCheckGatewayDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDxGatewayAssociationConfig_multiVpnGatewaysSingleAccount(rName, rBgpAsn),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGatewayExists(resourceName, &v),
-					acctest.CheckResourceAttrAccountID(resourceName, "owner_account_id"),
-				),
-			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})

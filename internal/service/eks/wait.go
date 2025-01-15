@@ -100,7 +100,7 @@ func waitClusterCreated(conn *eks.EKS, name string, timeout time.Duration) (*eks
 
 func waitClusterDeleted(conn *eks.EKS, name string, timeout time.Duration) (*eks.Cluster, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{eks.ClusterStatusPending, eks.ClusterStatusDeleting},
+		Pending: []string{eks.ClusterStatusPending, eks.ClusterStatusClaimed, eks.ClusterStatusDeleting},
 		Target:  []string{eks.ClusterStatusDeleted},
 		Refresh: statusCluster(conn, name),
 		Timeout: timeout,

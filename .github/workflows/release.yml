@@ -15,13 +15,13 @@ jobs:
     outputs:
       version: ${{ steps.go-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - id: go-version
         run: echo "::set-output name=version::$(cat ./.go-version)"
   release-notes:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Generate Release Notes
@@ -57,7 +57,7 @@ jobs:
     outputs:
       tag: ${{ steps.highest-version-tag.outputs.tag }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           # Allow tag to be fetched when ref is a commit
           fetch-depth: 0
@@ -75,7 +75,7 @@ jobs:
       if: github.ref_name == needs.highest-version-tag.outputs.tag
       runs-on: macos-latest
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
           with:
             fetch-depth: 0
             ref: main

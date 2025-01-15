@@ -7,8 +7,8 @@ replace github.com/aws/aws-sdk-go => github.com/C2Devel/aws-sdk-go v1.44.10-ROCK
 require (
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2
 	github.com/aws/aws-sdk-go v1.44.10
-	github.com/aws/aws-sdk-go-v2 v1.16.3
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.4
+	github.com/aws/aws-sdk-go-v2 v1.32.8
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.23
 	github.com/aws/aws-sdk-go-v2/service/route53domains v1.12.4
 	github.com/beevik/etree v1.1.0
 	github.com/google/go-cmp v0.6.0
@@ -44,7 +44,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.4 // indirect
-	github.com/aws/smithy-go v1.11.2 // indirect
+	github.com/aws/smithy-go v1.22.1 // indirect
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/evanphx/json-patch v0.5.2 // indirect

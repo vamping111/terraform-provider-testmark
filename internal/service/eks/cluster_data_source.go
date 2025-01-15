@@ -80,10 +80,49 @@ func DataSourceCluster() *schema.Resource {
 					},
 				},
 			},
+			"legacy_cluster_params": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"master_config": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"high_availability": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"instance_type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"public_ip": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"volume_iops": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"volume_size": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"volume_type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validClusterName,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"platform_version": {
 				Type:     schema.TypeString,
@@ -177,6 +216,10 @@ func dataSourceClusterRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err := d.Set("kubernetes_network_config", flattenNetworkConfig(cluster.KubernetesNetworkConfig)); err != nil {
 		return fmt.Errorf("error setting kubernetes_network_config: %w", err)
+	}
+
+	if err := d.Set("legacy_cluster_params", flattenLegacyClusterParams(cluster.LegacyClusterParams)); err != nil {
+		return fmt.Errorf("error setting legacy_cluster_params: %w", err)
 	}
 
 	d.Set("name", cluster.Name)

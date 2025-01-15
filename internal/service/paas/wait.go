@@ -35,7 +35,7 @@ func waitServiceCreated(ctx context.Context, conn *paas.PaaS, id string, timeout
 
 func waitServiceUpdated(ctx context.Context, conn *paas.PaaS, id string, timeout time.Duration) (*paas.Service, error) { //nolint:unparam
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{ServiceStatusUpdating, ServiceStatusRecovering},
+		Pending: []string{ServiceStatusClaimed, ServiceStatusUpdating, ServiceStatusRecovering},
 		Target:  []string{ServiceStatusReady},
 		Refresh: statusService(conn, id),
 		Timeout: timeout,

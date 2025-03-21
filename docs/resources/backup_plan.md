@@ -1,5 +1,5 @@
 ---
-subcategory: "Backup"
+subcategory: "Test Category"
 layout: "aws"
 page_title: "aws_backup_plan"
 description: |-

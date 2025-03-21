@@ -1,5 +1,5 @@
 ---
-subcategory: "EC2 (Elastic Compute Cloud)"
+subcategory: "Test Category"
 layout: "aws"
 page_title: "aws_ami"
 description: |-

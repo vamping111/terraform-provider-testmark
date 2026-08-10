@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Setup Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
       with:
         go-version: 1.21.x
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       with:
         ref: ${{ github.event.pull_request.head.sha }}
 
@@ -26,21 +26,26 @@ jobs:
       run: make tools
 
     - name: Install Docker
-      uses: docker/setup-docker-action@v4
+      uses: docker/setup-docker-action@e43656e248c0bd0647d3f5c195d116aacf6fcaf4 # v4
 
     - name: Define owner
       if: contains(github.event.pull_request.labels.*.name, 'NeedSDK')
+      env:
+        PR_FORK_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
       run: |
-        echo "FORK_OWNER=${{ github.event.pull_request.head.repo.owner.login }}" >> $GITHUB_ENV
+        echo "FORK_OWNER=${PR_FORK_OWNER}" >> "$GITHUB_ENV"
 
     - name: Define aws-sdk-go's branch
       if: contains(github.event.pull_request.labels.*.name, 'NeedSDK')
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+        PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
-        SDK_BRANCH=$(echo "${{ github.event.pull_request.body }}" | grep -oE 'aws-sdk-go=[^[:space:]]+' || true)
+        SDK_BRANCH=$(echo "${PR_BODY}" | grep -oE 'aws-sdk-go=[^[:space:]]+' || true)
         if [[ -n "$SDK_BRANCH" ]]; then
           BRANCH=$(echo "$SDK_BRANCH" | cut -d '=' -f2 | tr -d '\r')
         else
-          BRANCH="${{ github.event.pull_request.head.ref }}"
+          BRANCH="${PR_HEAD_REF}"
         fi
         echo "AWS_SDK_GO_BRANCH=$BRANCH" >> $GITHUB_ENV
 

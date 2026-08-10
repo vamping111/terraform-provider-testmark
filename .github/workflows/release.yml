@@ -1,0 +1,317 @@
+name: Release provider
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider_version:
+        description: 'Provider version without v prefix (for example 25.6.0)'
+        required: true
+        type: string
+      release_sdk:
+        description: 'Release accumulated aws-sdk-go changes'
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - always
+          - never
+      sdk_version:
+        description: 'Optional SDK tag override (for example v1.44.10-ROCKIT24)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Run all preflight tests without commits, tags, releases, or registry updates'
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: repository-write
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    if: github.repository == 'C2Devel/terraform-provider-rockitcloud' && github.ref == 'refs/heads/develop'
+    environment: provider-release
+    runs-on: ubuntu-22.04-large
+    timeout-minutes: 240
+    steps:
+      - name: Create GitHub App token for both repositories
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+          owner: C2Devel
+          repositories: |
+            terraform-provider-rockitcloud
+            aws-sdk-go
+
+      - name: Checkout provider develop
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Checkout SDK develop
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          repository: C2Devel/aws-sdk-go
+          ref: develop
+          path: .release/aws-sdk-go
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.21.x'
+          cache-dependency-path: |
+            go.sum
+            .release/aws-sdk-go/go.sum
+
+      - name: Resolve and validate release versions
+        id: versions
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PROVIDER_VERSION_INPUT: ${{ inputs.provider_version }}
+          RELEASE_SDK_INPUT: ${{ inputs.release_sdk }}
+          SDK_VERSION_INPUT: ${{ inputs.sdk_version }}
+        run: |
+          set -euo pipefail
+
+          provider_version="${PROVIDER_VERSION_INPUT#v}"
+          if [[ ! "${provider_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "provider_version must be a semantic version such as 25.6.0" >&2
+            exit 1
+          fi
+          if ! head -n 1 CHANGELOG.md | grep -Fxq "## ${provider_version} (Unreleased)"; then
+            echo "The first CHANGELOG.md entry must be '## ${provider_version} (Unreleased)'" >&2
+            exit 1
+          fi
+          if git rev-parse "v${provider_version}" >/dev/null 2>&1; then
+            echo "Provider tag v${provider_version} already exists" >&2
+            exit 1
+          fi
+
+          latest_sdk_tag=$(gh release view --repo C2Devel/aws-sdk-go --json tagName --jq .tagName)
+          if [[ -z "${latest_sdk_tag}" ]]; then
+            echo "Unable to determine the latest SDK release" >&2
+            exit 1
+          fi
+          git -C .release/aws-sdk-go fetch --force origin "refs/tags/${latest_sdk_tag}:refs/tags/${latest_sdk_tag}"
+          sdk_changes=$(git -C .release/aws-sdk-go rev-list --count "${latest_sdk_tag}..develop")
+
+          should_release_sdk=false
+          case "${RELEASE_SDK_INPUT}" in
+            auto) [[ "${sdk_changes}" -gt 0 ]] && should_release_sdk=true ;;
+            always) should_release_sdk=true ;;
+            never) ;;
+          esac
+
+          sdk_version="${latest_sdk_tag}"
+          if [[ "${should_release_sdk}" == true ]]; then
+            if [[ -n "${SDK_VERSION_INPUT}" ]]; then
+              sdk_version="${SDK_VERSION_INPUT}"
+            elif [[ "${latest_sdk_tag}" =~ ^(v[0-9]+\.[0-9]+\.[0-9]+-ROCKIT)([0-9]+)$ ]]; then
+              sdk_version="${BASH_REMATCH[1]}$((BASH_REMATCH[2] + 1))"
+            else
+              echo "Cannot calculate the next SDK tag from ${latest_sdk_tag}; provide sdk_version" >&2
+              exit 1
+            fi
+            if git -C .release/aws-sdk-go rev-parse "${sdk_version}" >/dev/null 2>&1; then
+              echo "SDK tag ${sdk_version} already exists" >&2
+              exit 1
+            fi
+          fi
+
+          echo "provider_version=${provider_version}" >> "${GITHUB_OUTPUT}"
+          echo "sdk_version=${sdk_version}" >> "${GITHUB_OUTPUT}"
+          echo "release_sdk=${should_release_sdk}" >> "${GITHUB_OUTPUT}"
+          echo "sdk_changes=${sdk_changes}" >> "${GITHUB_OUTPUT}"
+
+      - name: Test SDK release candidate
+        if: steps.versions.outputs.release_sdk == 'true'
+        working-directory: .release/aws-sdk-go
+        run: |
+          make install-deps-verify
+          make all
+          git diff --exit-code
+
+      - name: Test provider against SDK release candidate
+        if: steps.versions.outputs.release_sdk == 'true'
+        run: |
+          set -euo pipefail
+          backup_dir=$(mktemp -d)
+          cleanup() {
+            cp "${backup_dir}/go.mod" go.mod
+            cp "${backup_dir}/go.sum" go.sum
+            rm -rf "${backup_dir}"
+          }
+          trap cleanup EXIT
+          cp go.mod go.sum "${backup_dir}/"
+          go mod edit -replace github.com/aws/aws-sdk-go=./.release/aws-sdk-go
+          go mod tidy
+          make tools
+          make test
+          make lint
+
+      - name: Publish SDK release
+        if: steps.versions.outputs.release_sdk == 'true' && !inputs.dry_run
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SDK_VERSION: ${{ steps.versions.outputs.sdk_version }}
+        working-directory: .release/aws-sdk-go
+        run: |
+          set -euo pipefail
+          git tag -a "${SDK_VERSION}" -m "Release ${SDK_VERSION}" develop
+          git push origin "${SDK_VERSION}"
+          gh release create "${SDK_VERSION}" \
+            --repo C2Devel/aws-sdk-go \
+            --title "${SDK_VERSION}" \
+            --generate-notes \
+            --verify-tag
+
+      - name: Pin provider to released SDK
+        if: ${{ !inputs.dry_run }}
+        env:
+          SDK_VERSION: ${{ steps.versions.outputs.sdk_version }}
+        run: |
+          go mod edit -replace "github.com/aws/aws-sdk-go=github.com/C2Devel/aws-sdk-go@${SDK_VERSION}"
+          go mod tidy
+
+      - name: Finalize provider changelog
+        if: ${{ !inputs.dry_run }}
+        env:
+          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
+        run: |
+          release_date=$(date -u '+%B %d, %Y')
+          sed -i "1s/^## ${PROVIDER_VERSION} (Unreleased)$/## ${PROVIDER_VERSION} (${release_date})/" CHANGELOG.md
+
+      - name: Test provider release candidate
+        if: ${{ !inputs.dry_run }}
+        run: |
+          make tools
+          make test
+          make lint
+
+      - name: Test provider without SDK changes in dry-run
+        if: inputs.dry_run && steps.versions.outputs.release_sdk != 'true'
+        run: |
+          make tools
+          make test
+          make lint
+
+      - name: Commit and tag provider release
+        if: ${{ !inputs.dry_run }}
+        env:
+          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
+        run: |
+          set -euo pipefail
+          git config user.email "${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
+          git config user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
+          git add CHANGELOG.md go.mod go.sum
+          git commit -m "chore: release v${PROVIDER_VERSION}"
+          git push origin HEAD:develop
+          git tag -a "v${PROVIDER_VERSION}" -m "Release v${PROVIDER_VERSION}"
+          git push origin "v${PROVIDER_VERSION}"
+
+      - name: Refresh GitHub App token for artifact upload
+        if: ${{ !inputs.dry_run }}
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: release-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+          owner: C2Devel
+          repositories: terraform-provider-rockitcloud
+
+      - name: Import GPG key
+        if: ${{ !inputs.dry_run }}
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+
+      - name: Build and publish provider release
+        if: ${{ !inputs.dry_run }}
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
+        with:
+          version: '~> v1'
+          args: release --clean --timeout 180m
+        env:
+          GITHUB_TOKEN: ${{ steps.release-token.outputs.token }}
+          GPG_FINGERPRINT: ${{ steps.import-gpg.outputs.fingerprint }}
+
+      - name: Wait for the public Terraform Registry
+        if: ${{ !inputs.dry_run }}
+        env:
+          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error \
+              https://registry.terraform.io/v1/providers/c2devel/rockitcloud/versions \
+              | jq -e --arg version "${PROVIDER_VERSION}" '.versions[] | select(.version == $version)' >/dev/null; then
+              echo "Provider ${PROVIDER_VERSION} is available in the public registry"
+              exit 0
+            fi
+            echo "Attempt ${attempt}/60: provider is not visible yet"
+            sleep 30
+          done
+          echo "Timed out waiting for provider ${PROVIDER_VERSION}" >&2
+          exit 1
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        if: ${{ !inputs.dry_run }}
+        with:
+          python-version: '3.13'
+
+      - name: Install private registry client
+        if: ${{ !inputs.dry_run }}
+        run: python -m pip install s3cmd==2.4.0
+
+      - name: Update private registry
+        if: ${{ !inputs.dry_run }}
+        id: private-registry
+        env:
+          S3_CMD_CFG_LOCATION: ./.s3cfg
+        run: |
+          set -euo pipefail
+          cleanup() {
+            rm -f .s3cfg
+          }
+          trap cleanup EXIT
+          umask 077
+          printf '%s' "${{ secrets.s3_config }}" > .s3cfg
+          ./scripts/update-s3-registry.sh
+
+      - name: Upload private registry backup after failure
+        if: ${{ !inputs.dry_run && failure() && steps.private-registry.conclusion == 'failure' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: s3-backup-${{ steps.versions.outputs.provider_version }}
+          path: s3_backup/
+
+      - name: Write release summary
+        if: always()
+        env:
+          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
+          SDK_VERSION: ${{ steps.versions.outputs.sdk_version }}
+          SDK_RELEASED: ${{ steps.versions.outputs.release_sdk }}
+          SDK_CHANGES: ${{ steps.versions.outputs.sdk_changes }}
+        run: |
+          {
+            echo "## Release summary"
+            echo ""
+            echo "- Provider: v${PROVIDER_VERSION}"
+            echo "- SDK version: ${SDK_VERSION}"
+            echo "- SDK released: ${SDK_RELEASED} (${SDK_CHANGES} commits)"
+            echo "- Dry run: ${{ inputs.dry_run }}"
+            echo "- Public registry: https://registry.terraform.io/providers/c2devel/rockitcloud/${PROVIDER_VERSION}"
+            echo "- GitHub release: https://github.com/C2Devel/terraform-provider-rockitcloud/releases/tag/v${PROVIDER_VERSION}"
+          } >> "${GITHUB_STEP_SUMMARY}"

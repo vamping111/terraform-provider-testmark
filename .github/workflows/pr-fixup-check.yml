@@ -13,6 +13,6 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
     - name: Block Fixup Commit Merge
-      uses: 13rac1/block-fixup-merge-action@v2.0.0
+      uses: 13rac1/block-fixup-merge-action@bd5504fb9ca0253e109d98eb86b7debc01970cdc # v2.0.0

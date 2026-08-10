@@ -1,29 +1,49 @@
 name: Building the provider for the public registry
 
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing provider tag to republish (for recovery only)'
+        required: true
+        type: string
+
+concurrency:
+  group: provider-public-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   public-release:
     if: github.repository == 'C2Devel/terraform-provider-rockitcloud'
+    environment: provider-release
     runs-on: ubuntu-22.04-large
     steps:
-    - uses: actions/checkout@v4
+    - name: Create GitHub App token
+      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      id: app-token
       with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.APP_PEM }}
+
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      with:
+        ref: ${{ inputs.tag }}
+        token: ${{ steps.app-token.outputs.token }}
         persist-credentials: false
         clean: true
         fetch-depth: 0
 
     - name: Setup Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
       with:
         go-version: 1.21.x
 
     - name: Verify tag is on develop branch
       run: |
-        TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref_name }})
+        TAG_COMMIT=$(git rev-list -n 1 "${{ inputs.tag }}")
         echo "Tag commit: $TAG_COMMIT"
         
         DEVELOP_COMMIT=$(git rev-parse origin/develop)
@@ -38,15 +58,15 @@ jobs:
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v6
+      uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6
       with:
         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
 
     - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@v6
+      uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
       with:
         version: '~> v1'
         args: release --clean --timeout 180m
       env:
-        GITHUB_TOKEN: ${{ secrets.AUTOMATION_PAT }}
+        GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}

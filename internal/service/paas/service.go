@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/paas"
 	"github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2/tfawserr"
@@ -40,11 +41,19 @@ func ResourceService() *schema.Resource {
 			Delete: schema.DefaultTimeout(15 * time.Minute),
 		},
 
+		CustomizeDiff: validateServiceConfiguration,
+
 		Schema: map[string]*schema.Schema{
-			"available_environment_versions": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+			"additional_roles": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					// K2 PaaS Kafka currently exposes only the coordinator role here.
+					ValidateFunc: validation.StringInSlice([]string{"coordinator"}, false),
+				},
+				ConflictsWith: []string{"coordinator"},
 			},
 			"arbitrator_required": {
 				Type:     schema.TypeBool,
@@ -53,6 +62,11 @@ func ResourceService() *schema.Resource {
 				Default:  false,
 			},
 			"auto_created_security_group_ids": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"available_environment_versions": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -97,32 +111,74 @@ func ResourceService() *schema.Resource {
 					},
 				},
 			},
+			"coordinator": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"additional_roles"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"data_volume_iops": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							ForceNew: true,
+						},
+						"data_volume_size": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							ForceNew: true,
+						},
+						"data_volume_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"instance_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"root_volume_iops": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							ForceNew: true,
+						},
+						"root_volume_size": {
+							Type:     schema.TypeInt,
+							Required: true,
+							ForceNew: true,
+						},
+						"root_volume_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
 			"data_volume": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"iops": {
 							Type:             schema.TypeInt,
 							Optional:         true,
-							ForceNew:         true,
 							Computed:         true,
 							DiffSuppressFunc: iopsDiffSuppressFunc,
 						},
 						"size": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							ForceNew: true,
 							Default:  32,
 						},
 						"type": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ForceNew:     true,
-							Default:      ec2.VolumeTypeSt2,
-							ValidateFunc: validation.StringInSlice(ec2.VolumeType_Values(), false),
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+							Default:  ec2.VolumeTypeSt2,
 						},
 					},
 				},
@@ -222,7 +278,38 @@ func ResourceService() *schema.Resource {
 			"instance_type": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
+			},
+			"nodes": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"main": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"role": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"coordinator": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"role": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -265,11 +352,10 @@ func ResourceService() *schema.Resource {
 							Default:  32,
 						},
 						"type": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ForceNew:     true,
-							Default:      ec2.VolumeTypeSt2,
-							ValidateFunc: validation.StringInSlice(ec2.VolumeType_Values(), false),
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+							Default:  ec2.VolumeTypeSt2,
 						},
 					},
 				},
@@ -290,7 +376,7 @@ func ResourceService() *schema.Resource {
 			},
 			"ssh_key_name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"status": {
@@ -335,11 +421,14 @@ func ResourceService() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			services.ELK.ServiceType():           services.ELK.ResourceSchema(),
 			services.ElasticSearch.ServiceType(): services.ElasticSearch.ResourceSchema(),
+			services.Kafka.ServiceType():         services.Kafka.ResourceSchema(),
 			services.Memcached.ServiceType():     services.Memcached.ResourceSchema(),
 			services.MongoDB.ServiceType():       services.MongoDB.ResourceSchema(),
 			services.MySQL.ServiceType():         services.MySQL.ResourceSchema(),
 			services.PostgreSQL.ServiceType():    services.PostgreSQL.ResourceSchema(),
+			services.Prometheus.ServiceType():    services.Prometheus.ResourceSchema(),
 			services.RabbitMQ.ServiceType():      services.RabbitMQ.ResourceSchema(),
 			services.Redis.ServiceType():         services.Redis.ResourceSchema(),
 		},
@@ -363,8 +452,28 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, meta int
 		input.RootVolumeIops = aws.Int64(int64(d.Get("root_volume.0.iops").(int)))
 	}
 
-	if v, ok := d.GetOk("arbitrator_required"); ok {
-		input.ArbitratorRequired = aws.Bool(v.(bool))
+	// For services that support arbitrator_required, send an explicit boolean.
+	// For unsupported services (e.g. kafka), omit the field entirely.
+	manager := serviceManager(d)
+
+	if manager == nil {
+		return diag.Errorf("PaaS Service configuration error: unknown service")
+	}
+
+	if manager.Service().AllowArbitrator() {
+		// Send explicit boolean only for services that support arbitrator_required.
+		input.ArbitratorRequired = aws.Bool(d.Get("arbitrator_required").(bool))
+	}
+
+	if v, ok := d.GetOk("additional_roles"); ok {
+		input.AdditionalRoles = flex.ExpandStringList(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("coordinator"); ok {
+		coordList := v.([]interface{})
+		if len(coordList) > 0 && coordList[0] != nil {
+			input.Coordinator = expandCoordinator(coordList[0].(map[string]interface{}))
+		}
 	}
 
 	if v, ok := d.GetOk("backup_settings"); ok {
@@ -387,12 +496,6 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, meta int
 		input.SubnetIds = flex.ExpandStringSet(d.Get("subnet_ids").(*schema.Set))
 	}
 
-	manager := serviceManager(d)
-
-	if manager == nil {
-		return diag.Errorf("PaaS Service configuration error: unknown service")
-	}
-
 	input.ServiceType = aws.String(manager.ServiceType())
 
 	parametersMap := d.Get(manager.ServiceType()).([]interface{})[0].(map[string]interface{})
@@ -409,8 +512,22 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, meta int
 		input.UserDataContentType = aws.String(d.Get("user_data_content_type").(string))
 	}
 
-	log.Printf("[DEBUG] Creating PaaS Service: %s", input)
-	output, err := conn.CreateService(input)
+	if manager.ServiceType() == services.ServiceTypeELK {
+		log.Printf("[DEBUG] Creating PaaS ELK Service %q", name)
+	} else {
+		log.Printf("[DEBUG] Creating PaaS Service: %s", input)
+	}
+	var output *paas.CreateServiceOutput
+	var err error
+	if manager.ServiceType() == services.ServiceTypeELK {
+		output, err = conn.CreateServiceWithContext(
+			ctx,
+			input,
+			request.WithLogLevel(aws.LogOff),
+		)
+	} else {
+		output, err = conn.CreateService(input)
+	}
 
 	if err != nil {
 		return diag.Errorf("error creating PaaS Service with name %s: %s", name, err)
@@ -430,7 +547,26 @@ func resourceServiceCreate(ctx context.Context, d *schema.ResourceData, meta int
 	return resourceServiceUpdate(ctx, d, meta)
 }
 
-func resourceServiceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServiceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	diags := readService(d, meta)
+	if diags.HasError() || d.Id() == "" {
+		return diags
+	}
+
+	serviceType := d.Get("service_type").(string)
+	manager := services.Manager(serviceType)
+	if manager == nil {
+		return diag.Errorf("error reading PaaS Service (%s): unknown service type %q", d.Id(), serviceType)
+	}
+
+	if err := setUnsupportedArbitratorRequired(d, manager); err != nil {
+		return diag.Errorf("error setting arbitrator_required: %s", err)
+	}
+
+	return diags
+}
+
+func readService(d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conn := meta.(*conns.AWSClient).PaaSConn
 	id := d.Id()
 
@@ -472,18 +608,32 @@ func resourceServiceRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	d.Set("instances", flattenInstances(service.Instances))
 	d.Set("instance_type", service.InstanceType)
+	d.Set("nodes", flattenNodes(service.Nodes))
 
 	d.Set("name", service.Name)
+	if err := d.Set("additional_roles", flattenServiceAdditionalRoles(service)); err != nil {
+		return diag.Errorf("error setting additional_roles: %s", err)
+	}
+	if err := d.Set("coordinator", flattenServiceCoordinator(service)); err != nil {
+		return diag.Errorf("error setting coordinator: %s", err)
+	}
 
 	d.Set("network_interface_ids", service.NetworkInterfaceIds)
 
 	serviceType := aws.StringValue(service.ServiceType)
 	manager := services.Manager(serviceType)
+	if manager == nil {
+		return diag.Errorf("error reading PaaS Service (%s): unknown service type %q", id, serviceType)
+	}
+
 	parametersMap := manager.FlattenServiceParametersUsersDatabases(
 		service.Parameters,
 		service.Users,
 		service.Databases,
 	)
+	if serviceType == services.ServiceTypeELK {
+		preserveELKInputOnlyParameters(d, parametersMap)
+	}
 	parametersMap["class"] = service.ServiceClass
 	d.Set(serviceType, []map[string]interface{}{parametersMap})
 
@@ -527,6 +677,47 @@ func resourceServiceRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
+func setUnsupportedArbitratorRequired(d *schema.ResourceData, manager services.ServiceManager) error {
+	// DescribeService does not return arbitratorRequired. For service types that
+	// cannot use an arbitrator, however, its value is unambiguously false and
+	// must be restored during import. Otherwise Terraform sees the schema
+	// default as removed and proposes replacing the service.
+	if manager.Service().AllowArbitrator() {
+		return nil
+	}
+
+	return d.Set("arbitrator_required", false)
+}
+
+func preserveELKInputOnlyParameters(d *schema.ResourceData, parametersMap map[string]interface{}) {
+	if password, ok := parametersMap["password"].(string); !ok || password == "" {
+		if password, ok := d.GetOk(services.ServiceTypeELK + ".0.password"); ok {
+			parametersMap["password"] = password
+		}
+	}
+
+	if options, ok := parametersMap["options"].(map[string]interface{}); !ok || len(options) == 0 {
+		if options, ok := d.GetOk(services.ServiceTypeELK + ".0.options"); ok {
+			parametersMap["options"] = options
+		}
+	}
+}
+
+func serviceParametersForUpdate(serviceType string, input services.ServiceParameters) services.ServiceParameters {
+	if serviceType != services.ServiceTypeELK {
+		return input
+	}
+
+	output := services.ServiceParameters{}
+	for _, key := range []string{"monitoring", "monitor_by", "monitoring_labels"} {
+		if value, ok := input[key]; ok {
+			output[key] = value
+		}
+	}
+
+	return output
+}
+
 func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conn := meta.(*conns.AWSClient).PaaSConn
 	id := d.Id()
@@ -539,16 +730,112 @@ func resourceServiceUpdate(ctx context.Context, d *schema.ResourceData, meta int
 
 	serviceType := manager.ServiceType()
 
+	if d.HasChange("data_volume.0.size") && !d.IsNewResource() {
+		oldRaw, newRaw := d.GetChange("data_volume.0.size")
+		oldSize, newSize := oldRaw.(int), newRaw.(int)
+
+		if err := validateIncreaseOnly("data_volume.size", oldSize, newSize); err != nil {
+			return diag.FromErr(err)
+		}
+
+		input := &paas.ModifyInstanceVolumeSizeInput{
+			ServiceId: aws.String(id),
+			Size:      aws.Int64(int64(newSize)),
+		}
+
+		log.Printf("[DEBUG] Modifying PaaS Service data volume size: %+v", input)
+		_, err := conn.ModifyInstanceVolumeSize(input)
+
+		if err != nil {
+			return diag.Errorf("error modifying PaaS Service (%s) data volume size: %s", id, err)
+		}
+
+		_, err = waitServiceUpdated(ctx, conn, id, d.Timeout(schema.TimeoutUpdate))
+
+		if err != nil {
+			return diag.Errorf("error waiting for PaaS Service (%s) data volume size to update: %s", id, err)
+		}
+	}
+
+	if d.HasChange("data_volume.0.iops") && !d.IsNewResource() {
+		if volumeType := d.Get("data_volume.0.type").(string); strings.ToLower(volumeType) != ec2.VolumeTypeIo2 {
+			return diag.Errorf("data_volume.iops can only be updated when data_volume.type is %q", ec2.VolumeTypeIo2)
+		}
+
+		input := &paas.ModifyInstanceVolumeIopsInput{
+			ServiceId: aws.String(id),
+			Iops:      aws.Int64(int64(d.Get("data_volume.0.iops").(int))),
+		}
+
+		log.Printf("[DEBUG] Modifying PaaS Service data volume IOPS: %+v", input)
+		_, err := conn.ModifyInstanceVolumeIops(input)
+
+		if err != nil {
+			return diag.Errorf("error modifying PaaS Service (%s) data volume IOPS: %s", id, err)
+		}
+
+		_, err = waitServiceUpdated(ctx, conn, id, d.Timeout(schema.TimeoutUpdate))
+
+		if err != nil {
+			return diag.Errorf("error waiting for PaaS Service (%s) data volume IOPS to update: %s", id, err)
+		}
+	}
+
+	if d.HasChange("instance_type") && !d.IsNewResource() {
+		nodeRoles, ok := serviceInstanceTypeNodeRolesFromState(d)
+
+		if !ok {
+			return diag.Errorf("error determining PaaS Service (%s) node roles for instance type update: nodes not in state, run terraform refresh first", id)
+		}
+
+		for _, nodeRole := range nodeRoles {
+			input := &paas.ModifyInstanceTypeInput{
+				ServiceId:    aws.String(id),
+				InstanceType: aws.String(d.Get("instance_type").(string)),
+				NodeRole:     aws.String(nodeRole),
+			}
+
+			log.Printf("[DEBUG] Modifying PaaS Service instance type: %+v", input)
+			_, err := conn.ModifyInstanceType(input)
+
+			if err != nil {
+				return diag.Errorf("error modifying PaaS Service (%s) instance type for node role %s: %s", id, nodeRole, err)
+			}
+
+			_, err = waitServiceUpdated(ctx, conn, id, d.Timeout(schema.TimeoutUpdate))
+
+			if err != nil {
+				return diag.Errorf("error waiting for PaaS Service (%s) instance type for node role %s to update: %s", id, nodeRole, err)
+			}
+		}
+	}
+
 	if d.HasChange(serviceType) && !d.IsNewResource() {
 		input := &paas.ModifyServiceParametersInput{
 			ServiceId: aws.String(id),
 		}
 
 		parametersMap := d.Get(serviceType).([]interface{})[0].(map[string]interface{})
-		input.Parameters = manager.ExpandServiceParameters(parametersMap)
+		input.Parameters = serviceParametersForUpdate(
+			serviceType,
+			manager.ExpandServiceParameters(parametersMap),
+		)
 
-		log.Printf("[DEBUG] Modifying PaaS Service parameters: %s", input)
-		_, err := conn.ModifyServiceParameters(input)
+		if serviceType == services.ServiceTypeELK {
+			log.Printf("[DEBUG] Modifying PaaS ELK Service (%s) parameters", id)
+		} else {
+			log.Printf("[DEBUG] Modifying PaaS Service parameters: %s", input)
+		}
+		var err error
+		if serviceType == services.ServiceTypeELK {
+			_, err = conn.ModifyServiceParametersWithContext(
+				ctx,
+				input,
+				request.WithLogLevel(aws.LogOff),
+			)
+		} else {
+			_, err = conn.ModifyServiceParameters(input)
+		}
 
 		if err != nil {
 			return diag.Errorf("error modifying PaaS Service (%s) parameters: %s", id, err)
@@ -644,6 +931,27 @@ func resourceServiceDelete(ctx context.Context, d *schema.ResourceData, meta int
 func iopsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	volumeType := d.Get(strings.Replace(k, "iops", "type", 1)).(string)
 	return strings.ToLower(volumeType) != ec2.VolumeTypeIo2 && new == "0"
+}
+
+func validateIncreaseOnly(name string, oldValue, newValue int) error {
+	if newValue < oldValue {
+		return fmt.Errorf("%s can only be increased in-place, got decrease from %d to %d", name, oldValue, newValue)
+	}
+
+	return nil
+}
+
+func serviceInstanceTypeNodeRolesFromState(d *schema.ResourceData) ([]string, bool) {
+	v, ok := d.GetOk("nodes.0.main.0.role")
+	if !ok {
+		return nil, false
+	}
+
+	roles := []string{v.(string)}
+	if v2, ok := d.GetOk("nodes.0.coordinator.0.role"); ok {
+		roles = append(roles, v2.(string))
+	}
+	return roles, true
 }
 
 func serviceManager(d *schema.ResourceData) services.ServiceManager {
@@ -763,6 +1071,32 @@ func flattenServiceEndpoints(endpoints []*paas.ServiceEndpoint) []map[string]int
 	return tfList
 }
 
+func flattenNodes(nodes *paas.Nodes) []map[string]interface{} {
+	if nodes == nil {
+		return []map[string]interface{}{}
+	}
+
+	tfMap := map[string]interface{}{}
+
+	if nodes.Main != nil {
+		if role := aws.StringValue(nodes.Main.Role); role != "" {
+			tfMap["main"] = []map[string]interface{}{{"role": role}}
+		}
+	}
+
+	if nodes.Coordinator != nil {
+		if role := aws.StringValue(nodes.Coordinator.Role); role != "" {
+			tfMap["coordinator"] = []map[string]interface{}{{"role": role}}
+		}
+	}
+
+	if len(tfMap) == 0 {
+		return []map[string]interface{}{}
+	}
+
+	return []map[string]interface{}{tfMap}
+}
+
 func flattenInstances(instances []*paas.Instance) []map[string]interface{} {
 	if instances == nil {
 		return []map[string]interface{}{}
@@ -839,4 +1173,73 @@ func flattenInstanceEndpoints(endpoints []*paas.InstanceEndpoint) []map[string]i
 	}
 
 	return tfList
+}
+
+func expandCoordinator(tfMap map[string]interface{}) *paas.NodeRequest {
+	if tfMap == nil {
+		return nil
+	}
+
+	nodeRequest := &paas.NodeRequest{
+		InstanceType:   aws.String(tfMap["instance_type"].(string)),
+		RootVolumeType: aws.String(tfMap["root_volume_type"].(string)),
+		RootVolumeSize: aws.Int64(int64(tfMap["root_volume_size"].(int))),
+	}
+
+	if v, ok := tfMap["root_volume_iops"].(int); ok && v > 0 {
+		nodeRequest.RootVolumeIops = aws.Int64(int64(v))
+	}
+
+	if v, ok := tfMap["data_volume_type"].(string); ok && v != "" {
+		nodeRequest.DataVolumeType = aws.String(v)
+	}
+
+	if v, ok := tfMap["data_volume_size"].(int); ok && v > 0 {
+		nodeRequest.DataVolumeSize = aws.Int64(int64(v))
+	}
+
+	if v, ok := tfMap["data_volume_iops"].(int); ok && v > 0 {
+		nodeRequest.DataVolumeIops = aws.Int64(int64(v))
+	}
+
+	return nodeRequest
+}
+
+func flattenServiceAdditionalRoles(service *paas.Service) []string {
+	if service == nil || service.Nodes == nil || service.Nodes.Main == nil {
+		return nil
+	}
+
+	// Dedicated coordinator nodes are represented explicitly by nodes.coordinator.
+	if service.Nodes.Coordinator != nil {
+		return nil
+	}
+
+	for _, role := range strings.Split(aws.StringValue(service.Nodes.Main.Role), ",") {
+		if strings.TrimSpace(role) == "coordinator" {
+			return []string{"coordinator"}
+		}
+	}
+
+	return nil
+}
+
+func flattenServiceCoordinator(service *paas.Service) []map[string]interface{} {
+	if service == nil || service.Nodes == nil || service.Nodes.Coordinator == nil {
+		return nil
+	}
+
+	node := service.Nodes.Coordinator
+
+	return []map[string]interface{}{
+		{
+			"data_volume_iops": aws.Int64Value(node.DataVolumeIops),
+			"data_volume_size": aws.Int64Value(node.DataVolumeSize),
+			"data_volume_type": aws.StringValue(node.DataVolumeType),
+			"instance_type":    aws.StringValue(node.InstanceType),
+			"root_volume_iops": aws.Int64Value(node.RootVolumeIops),
+			"root_volume_size": aws.Int64Value(node.RootVolumeSize),
+			"root_volume_type": aws.StringValue(node.RootVolumeType),
+		},
+	}
 }

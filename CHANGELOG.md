@@ -1,3 +1,102 @@
+## 25.6.0 (Unreleased)
+
+## 25.5.5 (August 10, 2026)
+
+FEATURES:
+
+* **New Data Source:** `aws_nat_gateway` ([#161](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/161))
+* **New Data Source:** `aws_nat_gateways` ([#161](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/161))
+* **New Resource:** `aws_nat_gateway` ([#161](https://github.com/C2Devel/terraform-provider-rockitcloud/pull/161))
+* **New Resource:** `aws_paas_logstash_pipeline` ([#174](https://github.com/C2Devel/terraform-provider-rockitcloud/pull/174))
+
+ENHANCEMENTS:
+
+* data-source/aws_eks_cluster_auth: Return an actionable error directing K2Cloud users to `aws_eks_cluster_kubeconfig` ([#177](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/177))
+* resource/aws_eks_cluster: Add K2Cloud Pod CIDR, remote access, Cluster Autoscaler, in-place security group updates, and in-place user-data updates ([#177](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/177))
+* resource/aws_eks_cluster: Propagate K2Cloud health and update failures from waiters and align delete timeouts ([#177](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/177))
+* resource/aws_eks_node_group: Reject unsupported version and custom launch-template inputs while preserving platform-managed launch-template state ([#177](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/177))
+* resource/aws_paas_service, data-source/aws_paas_service: add ELK PaaS support ([#174](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/174))
+
+## 25.5.4 (August 04, 2026)
+
+FEATURES:
+
+* **New Resource:** `aws_paas_prometheus_notification_channel` ([#150](https://github.com/C2Devel/terraform-provider-rockitcloud/pull/150))
+* **New Resource:** `aws_paas_prometheus_route` ([#150](https://github.com/C2Devel/terraform-provider-rockitcloud/pull/150))
+* **New Resource:** `aws_paas_prometheus_scrape_job` ([#150](https://github.com/C2Devel/terraform-provider-rockitcloud/pull/150))
+
+ENHANCEMENTS:
+
+* resource/aws_paas_service, data-source/aws_paas_service: add Prometheus PaaS support ([#150](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/150))
+
+## 25.5.3 (July 23, 2026)
+
+ENHANCEMENTS:
+
+* resource/aws_paas_service: Add `vector` as a valid PostgreSQL extension ([#166](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/166))
+* resource/aws_paas_service: Make `ssh_key_name` optional ([#166](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/166))
+
+BUG FIXES:
+
+* resource/aws_paas_service: Fix validation of the `pg_visibility` PostgreSQL extension ([#166](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/166))
+
+## 25.5.2 (June 09, 2026)
+
+ENHANCEMENTS:
+
+* resource/aws_paas_service: add new Kafka PaaS support ([#156](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/156))
+
+## 25.5.1 (May 20, 2026)
+
+ENHANCEMENTS:
+
+* resource/aws_paas_service: Support in-place updates for `instance_type`, `data_volume.size`, and `data_volume.iops` ([#151](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/151))
+
+## 25.5.0 (April 16, 2026)
+
+FEATURES:
+
+* **New Data Source:** `aws_efs_file_system` ([#140](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/140))
+* **New Data Source:** `aws_efs_mount_target` ([#140](https://github.com/C2Devel/terraform-provider-rockitcloud/issues/140))
+* **New Resource:** `aws_efs_file_system` ([#140](https://github.com/C2Devel/terraform-provider-rockitcloud/pull/140))
+* **New Resource:** `aws_efs_mount_target` ([#140](https://github.com/C2Devel/terraform-provider-rockitcloud/pull/140))
+
+## 25.4.2 (April 07, 2026)
+
+ENHANCEMENTS:
+
+* resource/aws_ebs_snapshot_import: remove image type validation
+
+## 25.4.1 (January 29, 2026)
+
+ENHANCEMENTS / BUG FIXES:
+
+* resource/aws_ami, resource/aws_eks_cluster, resource/aws_instance, resource/aws_launch_template, resource/aws_paas_service: remove volume type validation
+* resource/aws_eks_node_group: add `CLAIMED` as pending status when updating or deleting a nodegroup
+
+## 25.4.0
+
+NOTES:
+
+* acctest: use "c2" partition for acceptance testing
+
+FEATURES:
+
+* **New Data Source:** `aws_iam_server_certificate`
+* **New Resource:** `aws_iam_server_certificate`
+* **New Resource:** `aws_ec2_traffic_mirror_filter`
+* **New Resource:** `aws_ec2_traffic_mirror_filter_rule`
+* **New Resource:** `aws_ec2_traffic_mirror_session`
+* **New Resource:** `aws_ec2_traffic_mirror_target`
+* **New Resource:** `aws_ec2_transit_gateway_project_access`
+
+ENHANCEMENTS:
+
+* resource/aws_eks_cluster, data-source/aws_eks_cluster: add new `docker_registry_config`, `ebs_provider_config`,
+`ingress_config`, `nlb_provider_config`, `placement_config`, `user_data_config` blocks to the `legacy_cluster_params` block for EKS clusters
+* resource/aws_iam_user: add tags support for the IAM user
+* provider: support `IAM_URL` environment variable
+
 ## 25.3.0
 
 FEATURES:

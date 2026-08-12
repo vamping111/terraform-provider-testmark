@@ -6,7 +6,9 @@ on:
     types: 
       - labeled
       - unlabeled
+      - edited
       - opened
+      - ready_for_review
       - reopened
       - synchronize
 
@@ -27,7 +29,7 @@ jobs:
       uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
       with:
         go-version: 1.21.x
-        cache: true
+        cache: false
 
     - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       with:
@@ -35,7 +37,10 @@ jobs:
         persist-credentials: false
 
     - name: Install tools
-      run: make tools
+      run: |
+        export GOCACHE="${RUNNER_TEMP}/pr-gocache"
+        export GOMODCACHE="${RUNNER_TEMP}/pr-gomodcache"
+        make tools
 
     - name: Install Docker
       uses: docker/setup-docker-action@e43656e248c0bd0647d3f5c195d116aacf6fcaf4 # v4
@@ -87,10 +92,19 @@ jobs:
         go mod edit -replace "github.com/aws/aws-sdk-go=github.com/${FORK_OWNER}/testmark-sdk-go@${FORK_COMMIT}"
 
     - name: Apply dependencies
-      run: go mod tidy
+      run: |
+        export GOCACHE="${RUNNER_TEMP}/pr-gocache"
+        export GOMODCACHE="${RUNNER_TEMP}/pr-gomodcache"
+        go mod tidy
 
     - name: Run unit tests for the code
-      run: make test
+      run: |
+        export GOCACHE="${RUNNER_TEMP}/pr-gocache"
+        export GOMODCACHE="${RUNNER_TEMP}/pr-gomodcache"
+        make test
 
     - name: Run linters for the code
-      run: make lint
+      run: |
+        export GOCACHE="${RUNNER_TEMP}/pr-gocache"
+        export GOMODCACHE="${RUNNER_TEMP}/pr-gomodcache"
+        make lint

@@ -142,20 +142,19 @@ replace github.com/aws/aws-sdk-go => <path-to-aws-sdk-go>
 
 ### Изменение версии aws-sdk-go
 
-1. Обновление тега `github.com/C2Devel/aws-sdk-go`:
+Для локальной проверки разработчик может временно изменить `replace` и вызвать
+`go mod tidy`, но эти изменения не нужно коммитить в PR провайдера.
 
-   ```
-   # go.mod
-   ...
-   replace github.com/aws/aws-sdk-go => github.com/C2Devel/aws-sdk-go v1.44.10-new
-   ```
+Если изменение провайдера зависит от PR в `aws-sdk-go`, поставьте provider PR
+лейбл `NeedSDK`, добавьте в описание `aws-sdk-go-pr=#<номер SDK PR>`, дождитесь
+merge SDK PR и оставьте `go.mod`/`go.sum` без
+изменений. Maintainer запустит `Land SDK-linked provider PR`: автоматизация
+проверит объединённый код с точным SHA центральной SDK-ветки и добавит
+канонический tag или pseudo-version вместе с кодом provider PR одним merge
+commit. Обычная кнопка Merge для `NeedSDK` PR намеренно заблокирована.
 
-2. **Опционально.** Если изменилась upstream версия: обновление тега `github.com/aws/aws-sdk-go` в блоке `require`.
-   Не влияет на сборку.
-3. Обновление зависимостей: `go mod tidy`
-
-**Важно!** `go mod tidy` актуализирует все зависимости в `go.mod`, т.е. итоговые изменения могут касаться
-не только **aws-sdk-go**.
+Редкие изменения других зависимостей или build/release-файлов выполняются
+отдельным обычным PR; автоматический SDK landing их отклонит.
 
 ## Тесты
 
@@ -181,7 +180,9 @@ aws-sdk-go=<имя ветки в aws-sdk-go>
 ...
 ```
 
-А так же, нужно проставить лейбл в PR'е провайдера `NeedSDK`.
+А так же, нужно проставить лейбл в PR'е провайдера `NeedSDK`. После merge SDK PR
+не снимайте этот лейбл, не делайте dependency bump и не коммитьте `go.mod` или
+`go.sum`: это выполнит maintainer через защищённый landing workflow.
 
 ### Acceptance
 

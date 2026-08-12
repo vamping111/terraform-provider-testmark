@@ -1,0 +1,138 @@
+name: SDK-linked merge policy
+
+# The workflow definition comes from the trusted base branch and never checks
+# out or executes pull-request code. It publishes an explicit check on the PR
+# head SHA because pull_request_target itself runs on the base-branch SHA.
+on:
+  pull_request_target:
+    branches:
+      - develop
+    types:
+      - converted_to_draft
+      - edited
+      - labeled
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+      - unlabeled
+
+concurrency:
+  group: sdk-linked-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  publish-policy:
+    name: Publish SDK-linked merge policy
+    if: github.repository == 'vamping111/terraform-provider-testmark'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Publish policy check on the current PR head
+        env:
+          CHECK_NAME: sdk-linked-policy/head
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          [[ "${PR_NUMBER}" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid PR number" >&2; exit 1; }
+          snapshot=$(gh api graphql \
+            -f query='query($owner:String!, $name:String!, $number:Int!) {
+              repository(owner:$owner, name:$name) {
+                pullRequest(number:$number) {
+                  state
+                  headRefOid
+                  timelineItems(first:100, itemTypes:[LABELED_EVENT]) {
+                    totalCount
+                    nodes {
+                      ... on LabeledEvent { label { name } }
+                    }
+                  }
+                }
+              }
+            }' \
+            -f owner="${GITHUB_REPOSITORY_OWNER}" \
+            -f name="${GITHUB_REPOSITORY#*/}" \
+            -F number="${PR_NUMBER}")
+
+          head_sha=$(jq -r '.data.repository.pullRequest.headRefOid // empty' <<< "${snapshot}")
+          [[ "${head_sha}" =~ ^[0-9a-f]{40}$ ]] || { echo "Unable to resolve current PR head" >&2; exit 1; }
+
+          external_id="sdk-linked-policy-pr-${PR_NUMBER}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
+          details_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}"
+          pending=$(jq -n \
+            --arg name "${CHECK_NAME}" \
+            --arg head_sha "${head_sha}" \
+            --arg status in_progress \
+            --arg external_id "${external_id}" \
+            --arg details_url "${details_url}" '
+              {
+                name: $name,
+                head_sha: $head_sha,
+                status: $status,
+                external_id: $external_id,
+                details_url: $details_url,
+                output: {
+                  title: "Evaluating SDK-linked merge policy",
+                  summary: "This PR cannot merge until the current policy event is evaluated."
+                }
+              }
+            ')
+          check_id=$(gh api --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            "repos/${GITHUB_REPOSITORY}/check-runs" \
+            --input - --jq .id <<< "${pending}")
+          [[ "${check_id}" =~ ^[1-9][0-9]*$ ]] || { echo "Unable to create fail-closed policy check" >&2; exit 1; }
+
+          # NeedSDK is sticky for the lifetime of the PR. Removing the label
+          # cannot silently reopen the ordinary merge path.
+          timeline_count=$(jq -r '.data.repository.pullRequest.timelineItems.totalCount' <<< "${snapshot}")
+          ever_needed_sdk=false
+          if [[ "${timeline_count}" -gt 100 ]]; then
+            ever_needed_sdk=true
+            reason="The label timeline is too large to audit safely; use the SDK landing workflow."
+          elif jq -e 'any(.data.repository.pullRequest.timelineItems.nodes[]?; .label.name == "NeedSDK")' \
+            <<< "${snapshot}" >/dev/null; then
+            ever_needed_sdk=true
+            reason="NeedSDK was applied to this PR, so only the audited SDK landing workflow may merge it."
+          else
+            reason="NeedSDK has never been applied; the ordinary reviewed merge path is allowed."
+          fi
+
+          conclusion=success
+          title="Ordinary merge is allowed"
+          if [[ "${ever_needed_sdk}" == true ]]; then
+            conclusion=failure
+            title="Use the SDK-linked landing workflow"
+          fi
+
+          payload=$(jq -n \
+            --arg name "${CHECK_NAME}" \
+            --arg status completed \
+            --arg conclusion "${conclusion}" \
+            --arg external_id "${external_id}" \
+            --arg details_url "${details_url}" \
+            --arg title "${title}" \
+            --arg summary "${reason}" '
+              {
+                name: $name,
+                status: $status,
+                conclusion: $conclusion,
+                external_id: $external_id,
+                details_url: $details_url,
+                output: {title: $title, summary: $summary}
+              }
+            ')
+
+          gh api --method PATCH \
+            -H 'Accept: application/vnd.github+json' \
+            "repos/${GITHUB_REPOSITORY}/check-runs/${check_id}" \
+            --input - <<< "${payload}" >/dev/null
+
+          echo "Published ${CHECK_NAME}=${conclusion} on ${head_sha}: ${reason}"

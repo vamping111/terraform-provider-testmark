@@ -1,0 +1,1239 @@
+name: Land SDK-linked provider PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider_pr:
+        description: 'Open provider PR with the NeedSDK label'
+        required: true
+        type: string
+      sdk_pr:
+        description: 'Merged testmark-sdk-go PR used by the provider PR'
+        required: true
+        type: string
+      dry_run:
+        description: 'Build and test the exact merge without writing to develop'
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: repository-write
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  pull-requests: read
+
+env:
+  PROVIDER_REPOSITORY: vamping111/terraform-provider-testmark
+  PROVIDER_OWNER: vamping111
+  PROVIDER_NAME: terraform-provider-testmark
+  PROVIDER_BRANCH: develop
+  SDK_REPOSITORY: vamping111/testmark-sdk-go
+  SDK_OWNER: vamping111
+  SDK_NAME: testmark-sdk-go
+  SDK_BRANCH: codex/release-automation
+  SDK_MODULE: github.com/vamping111/testmark-sdk-go
+  ORIGINAL_SDK_MODULE: github.com/aws/aws-sdk-go
+  REQUIRED_WORKFLOW: pr-unit-tests.yml
+  REQUIRED_JOB: required
+  SDK_REQUIRED_WORKFLOW: checks.yml
+  SDK_REQUIRED_JOB: required
+  GITHUB_ACTIONS_APP_ID: '15368'
+  ELIGIBLE_PROVIDER_PATH_RE: '^((\.changelog|dev-docs|docs|examples|internal|mkdocs|names|skaff|version|website_unsupported)/|CHANGELOG\.md$|README\.md$|ROADMAP\.md$)'
+
+jobs:
+  guard:
+    name: Validate dispatch target
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Require the trusted workflow ref
+        env:
+          ACTUAL_REF: ${{ github.ref }}
+          ACTUAL_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          [[ "${ACTUAL_REPOSITORY}" == "${PROVIDER_REPOSITORY}" ]] || { echo "Run this workflow only in ${PROVIDER_REPOSITORY}" >&2; exit 1; }
+          [[ "${ACTUAL_REF}" == "refs/heads/${PROVIDER_BRANCH}" ]] || { echo "Select ${PROVIDER_BRANCH} in the 'Use workflow from' menu" >&2; exit 1; }
+
+  test:
+    name: Authorize immutable integration inputs
+    needs: guard
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    outputs:
+      base_sha: ${{ steps.resolve.outputs.base_sha }}
+      head_repo_id: ${{ steps.resolve.outputs.head_repo_id }}
+      head_sha: ${{ steps.resolve.outputs.head_sha }}
+      required_run_id: ${{ steps.resolve.outputs.required_run_id }}
+      sdk_required_run_id: ${{ steps.resolve.outputs.sdk_required_run_id }}
+      sdk_merge_sha: ${{ steps.resolve.outputs.sdk_merge_sha }}
+      sdk_sha: ${{ steps.resolve.outputs.sdk_sha }}
+      sdk_version: ${{ steps.sdk-version.outputs.sdk_version }}
+    steps:
+      # This job resolves and authorizes immutable inputs. It intentionally has
+      # no App token, environment, OIDC permission, or write permission.
+      - name: Resolve and authorize immutable revisions
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROVIDER_PR: ${{ inputs.provider_pr }}
+          SDK_PR: ${{ inputs.sdk_pr }}
+        run: |
+          set -euo pipefail
+
+          [[ "${PROVIDER_PR}" =~ ^[1-9][0-9]*$ ]] || { echo "provider_pr must be a positive integer" >&2; exit 1; }
+          [[ "${SDK_PR}" =~ ^[1-9][0-9]*$ ]] || { echo "sdk_pr must be a positive integer" >&2; exit 1; }
+
+          snapshot=$(gh api graphql \
+            -f query='query($providerOwner:String!, $providerName:String!, $providerNumber:Int!, $providerRef:String!, $sdkOwner:String!, $sdkName:String!, $sdkNumber:Int!, $sdkRef:String!) {
+              providerRepo: repository(owner:$providerOwner, name:$providerName) {
+                id
+                ref(qualifiedName:$providerRef) { target { oid } }
+                pullRequest(number:$providerNumber) {
+                  state
+                  isDraft
+                  baseRefName
+                  headRefOid
+                  body
+                  headRepository { id nameWithOwner }
+                  reviewDecision
+                  labels(first:100) { totalCount nodes { name } }
+                  reviewThreads(first:100) { totalCount nodes { isResolved } }
+                  reviews(first:100, states:[APPROVED]) {
+                    totalCount
+                    nodes { commit { oid } author { login } }
+                  }
+                }
+              }
+              sdkRepo: repository(owner:$sdkOwner, name:$sdkName) {
+                id
+                ref(qualifiedName:$sdkRef) { target { oid } }
+                pullRequest(number:$sdkNumber) {
+                  state
+                  isDraft
+                  merged
+                  baseRefName
+                  headRefOid
+                  reviewDecision
+                  mergeCommit { oid }
+                  reviews(first:100, states:[APPROVED]) {
+                    totalCount
+                    nodes { commit { oid } }
+                  }
+                }
+              }
+            }' \
+            -f providerOwner="${PROVIDER_OWNER}" \
+            -f providerName="${PROVIDER_NAME}" \
+            -F providerNumber="${PROVIDER_PR}" \
+            -f providerRef="refs/heads/${PROVIDER_BRANCH}" \
+            -f sdkOwner="${SDK_OWNER}" \
+            -f sdkName="${SDK_NAME}" \
+            -F sdkNumber="${SDK_PR}" \
+            -f sdkRef="refs/heads/${SDK_BRANCH}")
+
+          jq -e \
+            --arg provider_branch "${PROVIDER_BRANCH}" \
+            --arg sdk_branch "${SDK_BRANCH}" '
+              .data.providerRepo.pullRequest as $provider
+              | .data.sdkRepo.pullRequest as $sdk
+              | ($provider != null)
+                and ($provider.state == "OPEN")
+                and ($provider.isDraft == false)
+                and ($provider.baseRefName == $provider_branch)
+                and ($provider.headRepository != null)
+                and ($provider.headRefOid | test("^[0-9a-f]{40}$"))
+                and ($provider.reviewDecision == "APPROVED")
+                and ($provider.labels.totalCount <= 100)
+                and any($provider.labels.nodes[]?; .name == "NeedSDK")
+                and ($provider.reviewThreads.totalCount <= 100)
+                and all($provider.reviewThreads.nodes[]?; .isResolved)
+                and ($provider.reviews.totalCount <= 100)
+                and any($provider.reviews.nodes[]?; .commit.oid == $provider.headRefOid)
+                and ($sdk != null)
+                and ($sdk.state == "MERGED")
+                and ($sdk.isDraft == false)
+                and ($sdk.merged == true)
+                and ($sdk.baseRefName == $sdk_branch)
+                and ($sdk.headRefOid | test("^[0-9a-f]{40}$"))
+                and ($sdk.reviewDecision == "APPROVED")
+                and ($sdk.reviews.totalCount <= 100)
+                and any($sdk.reviews.nodes[]?; .commit.oid == $sdk.headRefOid)
+                and ($sdk.mergeCommit.oid | test("^[0-9a-f]{40}$"))
+                and (.data.providerRepo.ref.target.oid | test("^[0-9a-f]{40}$"))
+                and (.data.sdkRepo.ref.target.oid | test("^[0-9a-f]{40}$"))
+            ' <<< "${snapshot}" >/dev/null || {
+              echo "PR gate failed: require an approved, non-draft NeedSDK provider PR with resolved threads and a merged SDK PR" >&2
+              exit 1
+            }
+
+          base_sha=$(jq -r '.data.providerRepo.ref.target.oid' <<< "${snapshot}")
+          head_repo_id=$(jq -r '.data.providerRepo.pullRequest.headRepository.id' <<< "${snapshot}")
+          head_sha=$(jq -r '.data.providerRepo.pullRequest.headRefOid' <<< "${snapshot}")
+          sdk_merge_sha=$(jq -r '.data.sdkRepo.pullRequest.mergeCommit.oid' <<< "${snapshot}")
+          sdk_sha=$(jq -r '.data.sdkRepo.ref.target.oid' <<< "${snapshot}")
+
+          linked_sdk_pr=$(jq -r '.data.providerRepo.pullRequest.body // ""' <<< "${snapshot}" | \
+            grep -oE '(^|[[:space:]])aws-sdk-go-pr=#[1-9][0-9]*([[:space:]]|$)' | \
+            tail -n 1 | grep -oE '[1-9][0-9]*' || true)
+          [[ "${linked_sdk_pr}" == "${SDK_PR}" ]] || {
+            echo "Provider PR body must contain the exact marker: aws-sdk-go-pr=#${SDK_PR}" >&2
+            exit 1
+          }
+
+          compare=$(gh api "repos/${SDK_REPOSITORY}/compare/${sdk_merge_sha}...${sdk_sha}")
+          jq -e --arg merged "${sdk_merge_sha}" '
+            ((.status == "ahead") or (.status == "identical"))
+            and (.merge_base_commit.sha == $merged)
+          ' <<< "${compare}" >/dev/null || {
+            echo "SDK PR merge commit is not an ancestor of the trusted SDK release branch" >&2
+            exit 1
+          }
+
+          sdk_runs=$(gh api -X GET \
+            "repos/${SDK_REPOSITORY}/actions/workflows/${SDK_REQUIRED_WORKFLOW}/runs" \
+            -f event=push \
+            -f branch="${SDK_BRANCH}" \
+            -f head_sha="${sdk_sha}" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${sdk_runs}") -le 100 ]] || { echo "Too many matching SDK workflow runs" >&2; exit 1; }
+          sdk_required_run=$(jq -c \
+            --arg head "${sdk_sha}" \
+            --arg branch "${SDK_BRANCH}" \
+            --arg path ".github/workflows/${SDK_REQUIRED_WORKFLOW}" '
+              .workflow_runs
+              | map(select(
+                  .event == "push"
+                  and .head_sha == $head
+                  and .head_branch == $branch
+                  and ((.path | split("@")[0]) == $path)
+                ))
+              | sort_by(.id)
+              | last // empty
+            ' <<< "${sdk_runs}")
+          [[ -n "${sdk_required_run}" ]] || { echo "No SDK required-check run exists for the exact trusted SDK head" >&2; exit 1; }
+          jq -e '.status == "completed" and .conclusion == "success"' <<< "${sdk_required_run}" >/dev/null || {
+            echo "The latest SDK required-check run is not successful" >&2
+            exit 1
+          }
+          sdk_required_run_id=$(jq -r '.id' <<< "${sdk_required_run}")
+          sdk_required_attempt=$(jq -r '.run_attempt // 1' <<< "${sdk_required_run}")
+          sdk_jobs=$(gh api -X GET \
+            "repos/${SDK_REPOSITORY}/actions/runs/${sdk_required_run_id}/attempts/${sdk_required_attempt}/jobs" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${sdk_jobs}") -le 100 ]] || { echo "Too many jobs in the SDK required workflow" >&2; exit 1; }
+          sdk_required_jobs=$(jq -c --arg name "${SDK_REQUIRED_JOB}" '[.jobs[] | select(.name == $name)]' <<< "${sdk_jobs}")
+          [[ $(jq 'length' <<< "${sdk_required_jobs}") -eq 1 ]] || { echo "Expected exactly one SDK required job" >&2; exit 1; }
+          jq -e '.[0].status == "completed" and .[0].conclusion == "success"' <<< "${sdk_required_jobs}" >/dev/null || {
+            echo "The unique SDK required job is not successful" >&2
+            exit 1
+          }
+          sdk_required_job_id=$(jq -r '.[0].id' <<< "${sdk_required_jobs}")
+          sdk_check_id=$(jq -r '.[0].check_run_url | split("/") | last' <<< "${sdk_required_jobs}")
+          [[ "${sdk_check_id}" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid SDK check-run URL" >&2; exit 1; }
+          sdk_check=$(gh api "repos/${SDK_REPOSITORY}/check-runs/${sdk_check_id}")
+          jq -e \
+            --arg name "${SDK_REQUIRED_JOB}" \
+            --arg head "${sdk_sha}" \
+            --arg app_id "${GITHUB_ACTIONS_APP_ID}" \
+            --arg details "https://github.com/${SDK_REPOSITORY}/actions/runs/${sdk_required_run_id}/job/${sdk_required_job_id}" '
+              .name == $name
+              and .head_sha == $head
+              and ((.app.id | tostring) == $app_id)
+              and .status == "completed"
+              and .conclusion == "success"
+              and .details_url == $details
+            ' <<< "${sdk_check}" >/dev/null || { echo "SDK required check identity validation failed" >&2; exit 1; }
+
+          runs=$(gh api -X GET \
+            "repos/${PROVIDER_REPOSITORY}/actions/workflows/${REQUIRED_WORKFLOW}/runs" \
+            -f event=pull_request \
+            -f head_sha="${head_sha}" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${runs}") -le 100 ]] || { echo "Too many matching workflow runs to validate safely" >&2; exit 1; }
+          required_run=$(jq -c \
+            --arg head "${head_sha}" \
+            --arg path ".github/workflows/${REQUIRED_WORKFLOW}" \
+            --argjson pr "${PROVIDER_PR}" '
+              .workflow_runs
+              | map(select(
+                  .event == "pull_request"
+                  and .head_sha == $head
+                  and ((.path | split("@")[0]) == $path)
+                  and any((.pull_requests // [])[]?; .number == $pr)
+                ))
+              | sort_by(.id)
+              | last // empty
+            ' <<< "${runs}")
+          [[ -n "${required_run}" ]] || { echo "No required-check workflow run exists for this exact provider PR head" >&2; exit 1; }
+          jq -e '.status == "completed" and .conclusion == "success"' <<< "${required_run}" >/dev/null || {
+            echo "The latest required-check workflow run for this PR head is not successful" >&2
+            exit 1
+          }
+
+          required_run_id=$(jq -r '.id' <<< "${required_run}")
+          required_attempt=$(jq -r '.run_attempt // 1' <<< "${required_run}")
+          jobs=$(gh api -X GET \
+            "repos/${PROVIDER_REPOSITORY}/actions/runs/${required_run_id}/attempts/${required_attempt}/jobs" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${jobs}") -le 100 ]] || { echo "Too many jobs in the required workflow run" >&2; exit 1; }
+          required_jobs=$(jq -c --arg name "${REQUIRED_JOB}" '
+            [.jobs[] | select(.name == $name)]
+          ' <<< "${jobs}")
+          [[ $(jq 'length' <<< "${required_jobs}") -eq 1 ]] || { echo "Expected exactly one required job" >&2; exit 1; }
+          jq -e '.[0].status == "completed" and .[0].conclusion == "success"' <<< "${required_jobs}" >/dev/null || {
+            echo "The unique required job is not successful" >&2
+            exit 1
+          }
+
+          required_job_id=$(jq -r '.[0].id' <<< "${required_jobs}")
+          check_url=$(jq -r '.[0].check_run_url' <<< "${required_jobs}")
+          check_id=${check_url##*/}
+          [[ "${check_id}" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid check-run URL" >&2; exit 1; }
+          check=$(gh api "repos/${PROVIDER_REPOSITORY}/check-runs/${check_id}")
+          jq -e \
+            --arg name "${REQUIRED_JOB}" \
+            --arg head "${head_sha}" \
+            --arg app_id "${GITHUB_ACTIONS_APP_ID}" \
+            --arg details "https://github.com/${PROVIDER_REPOSITORY}/actions/runs/${required_run_id}/job/${required_job_id}" '
+              .name == $name
+              and .head_sha == $head
+              and ((.app.id | tostring) == $app_id)
+              and .status == "completed"
+              and .conclusion == "success"
+              and .details_url == $details
+            ' <<< "${check}" >/dev/null || { echo "Required check identity validation failed" >&2; exit 1; }
+
+          echo "base_sha=${base_sha}" >> "${GITHUB_OUTPUT}"
+          echo "head_repo_id=${head_repo_id}" >> "${GITHUB_OUTPUT}"
+          echo "head_sha=${head_sha}" >> "${GITHUB_OUTPUT}"
+          echo "required_run_id=${required_run_id}" >> "${GITHUB_OUTPUT}"
+          echo "sdk_required_run_id=${sdk_required_run_id}" >> "${GITHUB_OUTPUT}"
+          echo "sdk_merge_sha=${sdk_merge_sha}" >> "${GITHUB_OUTPUT}"
+          echo "sdk_sha=${sdk_sha}" >> "${GITHUB_OUTPUT}"
+
+      - name: Checkout exact provider base
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ steps.resolve.outputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.21.x'
+          cache: false
+
+      - name: Resolve canonical SDK module version
+        id: sdk-version
+        env:
+          SDK_SHA: ${{ steps.resolve.outputs.sdk_sha }}
+        run: |
+          set -euo pipefail
+          export GOCACHE="${RUNNER_TEMP}/untrusted-gocache"
+          export GOMODCACHE="${RUNNER_TEMP}/untrusted-gomodcache"
+          export GOTOOLCHAIN=local
+          export GOWORK=off
+          module=$(GO111MODULE=on GOPROXY=https://proxy.golang.org,direct \
+            go list -m -json "${SDK_MODULE}@${SDK_SHA}")
+          sdk_version=$(jq -r '.Version' <<< "${module}")
+          origin_sha=$(jq -r '.Origin.Hash // empty' <<< "${module}")
+          [[ "${sdk_version}" =~ ^v[0-9A-Za-z.+-]+$ ]] || { echo "Go returned an invalid SDK version" >&2; exit 1; }
+          [[ "${origin_sha}" == "${SDK_SHA}" ]] || { echo "Resolved SDK version does not point to the selected SDK commit" >&2; exit 1; }
+          echo "sdk_version=${sdk_version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Fetch and validate provider PR contents
+        env:
+          BASE_SHA: ${{ steps.resolve.outputs.base_sha }}
+          HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
+          PROVIDER_PR: ${{ inputs.provider_pr }}
+        run: |
+          set -euo pipefail
+          export GOCACHE="${RUNNER_TEMP}/untrusted-gocache"
+          export GOMODCACHE="${RUNNER_TEMP}/untrusted-gomodcache"
+          export GOTOOLCHAIN=local
+          export GOWORK=off
+          git fetch --no-tags --force origin \
+            "refs/pull/${PROVIDER_PR}/head:refs/remotes/origin/sdk-linked-pr"
+          [[ $(git rev-parse refs/remotes/origin/sdk-linked-pr) == "${HEAD_SHA}" ]] || { echo "Provider PR head changed while resolving it" >&2; exit 1; }
+          git merge-base "${BASE_SHA}" "${HEAD_SHA}" >/dev/null
+
+          count=0
+          total_bytes=0
+          while IFS= read -r -d '' path; do
+            count=$((count + 1))
+            [[ ! "${path}" =~ [[:cntrl:]] ]] || { echo "Control character in changed path" >&2; exit 1; }
+            [[ "${path}" =~ ${ELIGIBLE_PROVIDER_PATH_RE} ]] || {
+              echo "${path} is outside the positive allowlist for automated SDK landing" >&2
+              exit 1
+            }
+            if [[ "${path}" =~ (^|/)(go\.mod|go\.sum|go\.work|go\.work\.sum|GNUmakefile|Makefile|makefile)$ ]]; then
+              echo "${path} must not be changed by an SDK-linked provider PR" >&2
+              exit 1
+            fi
+            mode=$(git ls-tree "${HEAD_SHA}" -- "${path}" | awk 'NR == 1 { print $1 }')
+            [[ "${mode}" != 120000 && "${mode}" != 160000 ]] || { echo "Symlinks and submodules are not eligible for automated landing: ${path}" >&2; exit 1; }
+            if git cat-file -e "${HEAD_SHA}:${path}" 2>/dev/null; then
+              size=$(git cat-file -s "${HEAD_SHA}:${path}")
+              [[ "${size}" -le 5242880 ]] || { echo "Changed file is too large for automated landing: ${path}" >&2; exit 1; }
+              total_bytes=$((total_bytes + size))
+            fi
+          done < <(git diff --no-renames --name-only -z "${BASE_SHA}...${HEAD_SHA}")
+          [[ "${count}" -gt 0 && "${count}" -le 500 ]] || { echo "Automated landing accepts between 1 and 500 changed files" >&2; exit 1; }
+          [[ "${total_bytes}" -le 20971520 ]] || { echo "Changed files are too large for automated landing" >&2; exit 1; }
+
+          total_lines=0
+          while IFS=$'\t' read -r added deleted _; do
+            [[ "${added}" != "-" && "${deleted}" != "-" ]] || { echo "Binary changes require the normal merge path" >&2; exit 1; }
+            total_lines=$((total_lines + added + deleted))
+          done < <(git diff --no-renames --numstat "${BASE_SHA}...${HEAD_SHA}")
+          [[ "${total_lines}" -le 200000 ]] || { echo "Provider PR is too large for automated landing" >&2; exit 1; }
+
+      - name: Write authorization summary
+        env:
+          BASE_SHA: ${{ steps.resolve.outputs.base_sha }}
+          HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
+          SDK_SHA: ${{ steps.resolve.outputs.sdk_sha }}
+          SDK_VERSION: ${{ steps.sdk-version.outputs.sdk_version }}
+        run: |
+          {
+            echo "## SDK-linked revisions authorized"
+            echo ""
+            echo "- Provider base: ${BASE_SHA}"
+            echo "- Provider PR head: ${HEAD_SHA}"
+            echo "- SDK commit: ${SDK_SHA}"
+            echo "- SDK module version: ${SDK_VERSION}"
+            echo "The immutable candidate is prepared and tested in the following jobs."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  prepare:
+    name: Prepare deterministic merge tree
+    needs: test
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      # This fresh job receives no artifact or cache from the job that executed
+      # fork code. It creates the candidate again and never runs repository code.
+      - name: Revalidate immutable source revisions
+        env:
+          BASE_SHA: ${{ needs.test.outputs.base_sha }}
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REPO_ID: ${{ needs.test.outputs.head_repo_id }}
+          HEAD_SHA: ${{ needs.test.outputs.head_sha }}
+          PROVIDER_PR: ${{ inputs.provider_pr }}
+          SDK_MERGE_SHA: ${{ needs.test.outputs.sdk_merge_sha }}
+          SDK_PR: ${{ inputs.sdk_pr }}
+          SDK_SHA: ${{ needs.test.outputs.sdk_sha }}
+        run: |
+          set -euo pipefail
+          provider=$(gh api "repos/${PROVIDER_REPOSITORY}/pulls/${PROVIDER_PR}")
+          provider_ref=$(gh api "repos/${PROVIDER_REPOSITORY}/git/ref/heads/${PROVIDER_BRANCH}" --jq .object.sha)
+          sdk=$(gh api "repos/${SDK_REPOSITORY}/pulls/${SDK_PR}")
+          sdk_ref=$(gh api "repos/${SDK_REPOSITORY}/git/ref/heads/${SDK_BRANCH}" --jq .object.sha)
+
+          jq -e \
+            --arg base "${PROVIDER_BRANCH}" \
+            --arg head "${HEAD_SHA}" \
+            --arg repo_id "${HEAD_REPO_ID}" '
+              .state == "open"
+              and .draft == false
+              and .base.ref == $base
+              and .head.sha == $head
+              and .head.repo.node_id == $repo_id
+              and any(.labels[]?; .name == "NeedSDK")
+            ' <<< "${provider}" >/dev/null || { echo "Provider PR changed after testing" >&2; exit 1; }
+          [[ "${provider_ref}" == "${BASE_SHA}" ]] || { echo "Provider develop changed after testing" >&2; exit 1; }
+
+          jq -e \
+            --arg base "${SDK_BRANCH}" \
+            --arg merged "${SDK_MERGE_SHA}" '
+              .state == "closed"
+              and .draft == false
+              and .merged == true
+              and .base.ref == $base
+              and .merge_commit_sha == $merged
+            ' <<< "${sdk}" >/dev/null || { echo "SDK PR changed after testing" >&2; exit 1; }
+          [[ "${sdk_ref}" == "${SDK_SHA}" ]] || { echo "SDK release branch changed after testing" >&2; exit 1; }
+
+          compare=$(gh api "repos/${SDK_REPOSITORY}/compare/${SDK_MERGE_SHA}...${SDK_SHA}")
+          jq -e --arg merged "${SDK_MERGE_SHA}" '
+            ((.status == "ahead") or (.status == "identical"))
+            and (.merge_base_commit.sha == $merged)
+          ' <<< "${compare}" >/dev/null || { echo "SDK ancestry changed" >&2; exit 1; }
+
+      - name: Checkout exact provider base
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ needs.test.outputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Go without cache
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.21.x'
+          cache: false
+
+      - name: Recreate clean candidate tree
+        id: candidate
+        env:
+          BASE_SHA: ${{ needs.test.outputs.base_sha }}
+          HEAD_REPO_ID: ${{ needs.test.outputs.head_repo_id }}
+          HEAD_SHA: ${{ needs.test.outputs.head_sha }}
+          PROVIDER_PR: ${{ inputs.provider_pr }}
+          REQUIRED_RUN_ID: ${{ needs.test.outputs.required_run_id }}
+          SDK_MERGE_SHA: ${{ needs.test.outputs.sdk_merge_sha }}
+          SDK_PR: ${{ inputs.sdk_pr }}
+          SDK_REQUIRED_RUN_ID: ${{ needs.test.outputs.sdk_required_run_id }}
+          SDK_SHA: ${{ needs.test.outputs.sdk_sha }}
+          SDK_VERSION: ${{ needs.test.outputs.sdk_version }}
+        run: |
+          set -euo pipefail
+          export GOCACHE="${RUNNER_TEMP}/prepare-gocache"
+          export GOMODCACHE="${RUNNER_TEMP}/prepare-gomodcache"
+          export GOTOOLCHAIN=local
+          export GOWORK=off
+
+          module=$(GO111MODULE=on GOPROXY=https://proxy.golang.org,direct \
+            go list -m -json "${SDK_MODULE}@${SDK_SHA}")
+          [[ $(jq -r '.Version' <<< "${module}") == "${SDK_VERSION}" ]] || { echo "SDK module version changed" >&2; exit 1; }
+          [[ $(jq -r '.Origin.Hash // empty' <<< "${module}") == "${SDK_SHA}" ]] || { echo "SDK module version no longer resolves to the tested commit" >&2; exit 1; }
+
+          git fetch --no-tags --force origin \
+            "refs/pull/${PROVIDER_PR}/head:refs/remotes/origin/sdk-linked-pr"
+          [[ $(git rev-parse refs/remotes/origin/sdk-linked-pr) == "${HEAD_SHA}" ]] || { echo "Provider PR head changed before candidate creation" >&2; exit 1; }
+
+          count=0
+          while IFS= read -r -d '' path; do
+            count=$((count + 1))
+            [[ ! "${path}" =~ [[:cntrl:]] ]] || { echo "Control character in changed path" >&2; exit 1; }
+            [[ "${path}" =~ ${ELIGIBLE_PROVIDER_PATH_RE} ]] || {
+              echo "Path is outside the positive landing allowlist: ${path}" >&2
+              exit 1
+            }
+            if [[ "${path}" =~ (^|/)(go\.mod|go\.sum|go\.work|go\.work\.sum|GNUmakefile|Makefile|makefile)$ ]]; then
+              echo "Dependency and build files are bot-owned in this workflow: ${path}" >&2
+              exit 1
+            fi
+            mode=$(git ls-tree "${HEAD_SHA}" -- "${path}" | awk 'NR == 1 { print $1 }')
+            [[ "${mode}" != 120000 && "${mode}" != 160000 ]] || { echo "Symlink or submodule found: ${path}" >&2; exit 1; }
+          done < <(git diff --no-renames --name-only -z "${BASE_SHA}...${HEAD_SHA}")
+          [[ "${count}" -gt 0 && "${count}" -le 500 ]] || { echo "Unexpected provider PR size" >&2; exit 1; }
+
+          git -c core.hooksPath=/dev/null merge --no-commit --no-ff "${HEAD_SHA}"
+          baseline_tree=$(git write-tree)
+
+          go mod edit -replace "${ORIGINAL_SDK_MODULE}=${SDK_MODULE}@${SDK_VERSION}"
+          go mod tidy
+          git add -- go.mod go.sum
+          candidate_tree=$(git write-tree)
+
+          mapfile -d '' generated < <(git diff --name-only -z "${baseline_tree}" "${candidate_tree}")
+          [[ "${#generated[@]}" -ge 1 && "${#generated[@]}" -le 2 ]] || { echo "Expected only generated go.mod/go.sum changes" >&2; exit 1; }
+          saw_go_mod=false
+          for path in "${generated[@]}"; do
+            [[ "${path}" == go.mod || "${path}" == go.sum ]] || { echo "Unexpected generated path: ${path}" >&2; exit 1; }
+            [[ "${path}" == go.mod ]] && saw_go_mod=true
+          done
+          [[ "${saw_go_mod}" == true ]] || { echo "SDK pin did not change go.mod" >&2; exit 1; }
+          git diff --quiet "${candidate_tree}" -- || { echo "Candidate worktree differs from the candidate tree" >&2; exit 1; }
+          [[ -z $(git ls-files --others --exclude-standard) ]] || { echo "Candidate generation created untracked files" >&2; exit 1; }
+
+          message=$(printf 'Merge SDK-linked provider pull request #%s\n\nPin aws-sdk-go to %s (%s)' \
+            "${PROVIDER_PR}" "${SDK_VERSION}" "${SDK_SHA}")
+          export GIT_AUTHOR_NAME='github-actions[bot]'
+          export GIT_AUTHOR_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
+          export GIT_COMMITTER_NAME="${GIT_AUTHOR_NAME}"
+          export GIT_COMMITTER_EMAIL="${GIT_AUTHOR_EMAIL}"
+          export GIT_AUTHOR_DATE='2000-01-01T00:00:00Z'
+          export GIT_COMMITTER_DATE="${GIT_AUTHOR_DATE}"
+          candidate_commit=$(printf '%s\n' "${message}" | \
+            git -c commit.gpgsign=false -c core.hooksPath=/dev/null commit-tree \
+              "${candidate_tree}" -p "${BASE_SHA}" -p "${HEAD_SHA}")
+          git update-ref refs/sdk-linked-land/candidate "${candidate_commit}"
+
+          artifact_dir="${RUNNER_TEMP}/sdk-linked-land"
+          mkdir -p "${artifact_dir}"
+          git bundle create "${artifact_dir}/candidate.bundle" \
+            refs/sdk-linked-land/candidate "^${BASE_SHA}" "^${HEAD_SHA}"
+          git bundle verify "${artifact_dir}/candidate.bundle"
+          bundle_sha256=$(sha256sum "${artifact_dir}/candidate.bundle" | awk '{print $1}')
+
+          jq -n \
+            --arg repository "${GITHUB_REPOSITORY}" \
+            --arg repository_id "${GITHUB_REPOSITORY_ID}" \
+            --arg run_id "${GITHUB_RUN_ID}" \
+            --arg run_attempt "${GITHUB_RUN_ATTEMPT}" \
+            --arg provider_pr "${PROVIDER_PR}" \
+            --arg sdk_pr "${SDK_PR}" \
+            --arg base_sha "${BASE_SHA}" \
+            --arg head_repo_id "${HEAD_REPO_ID}" \
+            --arg head_sha "${HEAD_SHA}" \
+            --arg required_run_id "${REQUIRED_RUN_ID}" \
+            --arg sdk_required_run_id "${SDK_REQUIRED_RUN_ID}" \
+            --arg sdk_merge_sha "${SDK_MERGE_SHA}" \
+            --arg sdk_sha "${SDK_SHA}" \
+            --arg sdk_version "${SDK_VERSION}" \
+            --arg baseline_tree "${baseline_tree}" \
+            --arg candidate_tree "${candidate_tree}" \
+            --arg candidate_commit "${candidate_commit}" \
+            --arg bundle_sha256 "${bundle_sha256}" '
+              {
+                schema: 1,
+                repository: $repository,
+                repository_id: $repository_id,
+                run_id: $run_id,
+                run_attempt: $run_attempt,
+                provider_pr: $provider_pr,
+                sdk_pr: $sdk_pr,
+                base_sha: $base_sha,
+                head_repo_id: $head_repo_id,
+                head_sha: $head_sha,
+                required_run_id: $required_run_id,
+                sdk_required_run_id: $sdk_required_run_id,
+                sdk_merge_sha: $sdk_merge_sha,
+                sdk_sha: $sdk_sha,
+                sdk_version: $sdk_version,
+                baseline_tree: $baseline_tree,
+                candidate_tree: $candidate_tree,
+                candidate_commit: $candidate_commit,
+                bundle_sha256: $bundle_sha256
+              }
+            ' > "${artifact_dir}/manifest.json"
+
+          echo "artifact_dir=${artifact_dir}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload exact candidate
+        id: upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sdk-linked-land-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.candidate.outputs.artifact_dir }}
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Write candidate summary
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          {
+            echo "## Deterministic merge candidate prepared"
+            echo ""
+            echo "The authorized provider PR and generated SDK pin are represented by one immutable tree."
+            if [[ "${DRY_RUN}" == true ]]; then
+              echo "Dry run requested; no write job will run."
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  verify-candidate:
+    name: Test immutable prepared candidate
+    needs:
+      - test
+      - prepare
+    permissions: {}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    steps:
+      # This unprivileged job receives only the immutable candidate from the
+      # trusted prepare job. It has no repository/API token, cache, secret,
+      # environment, or OIDC permission.
+      - name: Download exact current-run candidate
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact_id }}
+          path: candidate-artifact
+          merge-multiple: true
+
+      - name: Set up Go without cache
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.21.x'
+          cache: false
+
+      - name: Materialize the exact candidate tree
+        env:
+          EXPECTED_BASE_SHA: ${{ needs.test.outputs.base_sha }}
+          EXPECTED_HEAD_SHA: ${{ needs.test.outputs.head_sha }}
+          EXPECTED_SDK_SHA: ${{ needs.test.outputs.sdk_sha }}
+          EXPECTED_SDK_VERSION: ${{ needs.test.outputs.sdk_version }}
+          PROVIDER_PR: ${{ inputs.provider_pr }}
+        run: |
+          set -euo pipefail
+          [[ "${PROVIDER_PR}" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid provider PR number" >&2; exit 1; }
+          artifact_dir="${GITHUB_WORKSPACE}/candidate-artifact"
+          manifest="${artifact_dir}/manifest.json"
+          bundle="${artifact_dir}/candidate.bundle"
+          mapfile -t entries < <(find "${artifact_dir}" -mindepth 1 -maxdepth 1 -printf '%f\n' | sort)
+          [[ "${#entries[@]}" -eq 2 && "${entries[0]}" == candidate.bundle && "${entries[1]}" == manifest.json ]] || { echo "Unexpected artifact contents" >&2; exit 1; }
+          [[ -f "${manifest}" && ! -L "${manifest}" && -f "${bundle}" && ! -L "${bundle}" ]] || { echo "Artifact entries must be regular files" >&2; exit 1; }
+          jq -e \
+            --arg base "${EXPECTED_BASE_SHA}" \
+            --arg head "${EXPECTED_HEAD_SHA}" \
+            --arg sdk "${EXPECTED_SDK_SHA}" \
+            --arg version "${EXPECTED_SDK_VERSION}" '
+              .base_sha == $base
+              and .head_sha == $head
+              and .sdk_sha == $sdk
+              and .sdk_version == $version
+              and (.candidate_commit | test("^[0-9a-f]{40}$"))
+              and (.candidate_tree | test("^[0-9a-f]{40}$"))
+              and (.bundle_sha256 | test("^[0-9a-f]{64}$"))
+            ' "${manifest}" >/dev/null || { echo "Candidate manifest does not match authorized revisions" >&2; exit 1; }
+          [[ $(sha256sum "${bundle}" | awk '{print $1}') == $(jq -r '.bundle_sha256' "${manifest}") ]] || { echo "Candidate digest mismatch" >&2; exit 1; }
+
+          candidate_commit=$(jq -r '.candidate_commit' "${manifest}")
+          candidate_tree=$(jq -r '.candidate_tree' "${manifest}")
+          git init --bare "${RUNNER_TEMP}/candidate.git"
+          git -C "${RUNNER_TEMP}/candidate.git" remote add origin \
+            "https://github.com/${PROVIDER_REPOSITORY}.git"
+          git -C "${RUNNER_TEMP}/candidate.git" fetch --no-tags origin \
+            "+refs/heads/${PROVIDER_BRANCH}:refs/remotes/origin/${PROVIDER_BRANCH}" \
+            "+refs/pull/${PROVIDER_PR}/head:refs/remotes/origin/sdk-linked-pr"
+          [[ $(git -C "${RUNNER_TEMP}/candidate.git" rev-parse "refs/remotes/origin/${PROVIDER_BRANCH}") == "${EXPECTED_BASE_SHA}" ]] || { echo "Provider base changed before candidate test" >&2; exit 1; }
+          [[ $(git -C "${RUNNER_TEMP}/candidate.git" rev-parse refs/remotes/origin/sdk-linked-pr) == "${EXPECTED_HEAD_SHA}" ]] || { echo "Provider PR changed before candidate test" >&2; exit 1; }
+          git -C "${RUNNER_TEMP}/candidate.git" fetch "${bundle}" \
+            refs/sdk-linked-land/candidate:refs/sdk-linked-land/candidate
+          [[ $(git -C "${RUNNER_TEMP}/candidate.git" rev-parse refs/sdk-linked-land/candidate) == "${candidate_commit}" ]] || { echo "Candidate commit mismatch" >&2; exit 1; }
+          [[ $(git -C "${RUNNER_TEMP}/candidate.git" show -s --format=%T "${candidate_commit}") == "${candidate_tree}" ]] || { echo "Candidate tree mismatch" >&2; exit 1; }
+
+          git -C "${RUNNER_TEMP}/candidate.git" worktree add --detach "${GITHUB_WORKSPACE}/candidate" "${candidate_commit}"
+
+      - name: Install Docker
+        uses: docker/setup-docker-action@e43656e248c0bd0647d3f5c195d116aacf6fcaf4 # v4
+
+      - name: Test exact immutable candidate
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          export GOCACHE="${RUNNER_TEMP}/candidate-gocache"
+          export GOMODCACHE="${RUNNER_TEMP}/candidate-gomodcache"
+          export GOTOOLCHAIN=local
+          export GOWORK=off
+          make tools
+          make test
+          make lint
+
+  land:
+    name: Verify and fast-forward develop
+    if: needs.verify-candidate.result == 'success' && !inputs.dry_run
+    needs:
+      - test
+      - prepare
+      - verify-candidate
+    environment: provider-pr-land
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      # This job never checks out a worktree and never executes repository code.
+      # The environment is intentionally reviewed before this job starts. It
+      # treats the artifact as hostile, verifies Git objects, and mints the
+      # dedicated provider-only write token only after read-only checks pass.
+      - name: Download exact current-run candidate
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact_id }}
+          path: landing-artifact
+          merge-multiple: true
+
+      - name: Set up Go parser without cache
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.21.x'
+          cache: false
+
+      - name: Verify artifact, live approvals, checks, and Git tree
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROVIDER_PR: ${{ inputs.provider_pr }}
+          SDK_PR: ${{ inputs.sdk_pr }}
+        run: |
+          set -euo pipefail
+          artifact_dir="${GITHUB_WORKSPACE}/landing-artifact"
+          manifest="${artifact_dir}/manifest.json"
+          bundle="${artifact_dir}/candidate.bundle"
+
+          mapfile -t entries < <(find "${artifact_dir}" -mindepth 1 -maxdepth 1 -printf '%f\n' | sort)
+          [[ "${#entries[@]}" -eq 2 && "${entries[0]}" == candidate.bundle && "${entries[1]}" == manifest.json ]] || { echo "Unexpected artifact contents" >&2; exit 1; }
+          [[ -f "${manifest}" && ! -L "${manifest}" && -f "${bundle}" && ! -L "${bundle}" ]] || { echo "Artifact entries must be regular files" >&2; exit 1; }
+          [[ $(stat -c '%s' "${manifest}") -le 32768 ]] || { echo "Manifest is too large" >&2; exit 1; }
+          [[ $(stat -c '%s' "${bundle}") -le 20971520 ]] || { echo "Candidate bundle is too large" >&2; exit 1; }
+
+          jq -e \
+            --arg repository "${GITHUB_REPOSITORY}" \
+            --arg repository_id "${GITHUB_REPOSITORY_ID}" \
+            --arg run_id "${GITHUB_RUN_ID}" \
+            --arg run_attempt "${GITHUB_RUN_ATTEMPT}" \
+            --arg provider_pr "${PROVIDER_PR}" \
+            --arg sdk_pr "${SDK_PR}" '
+              .schema == 1
+              and .repository == $repository
+              and .repository_id == $repository_id
+              and .run_id == $run_id
+              and .run_attempt == $run_attempt
+              and .provider_pr == $provider_pr
+              and .sdk_pr == $sdk_pr
+              and (.required_run_id | test("^[1-9][0-9]*$"))
+              and (.sdk_required_run_id | test("^[1-9][0-9]*$"))
+              and (.head_repo_id | type == "string" and length > 0)
+              and (.sdk_version | test("^v[0-9A-Za-z.+-]+$"))
+              and all(.base_sha, .head_sha, .sdk_merge_sha, .sdk_sha, .baseline_tree, .candidate_tree, .candidate_commit, .bundle_sha256; test("^[0-9a-f]{40}$|^[0-9a-f]{64}$"))
+              and (.bundle_sha256 | test("^[0-9a-f]{64}$"))
+              and all(.base_sha, .head_sha, .sdk_merge_sha, .sdk_sha, .baseline_tree, .candidate_tree, .candidate_commit; test("^[0-9a-f]{40}$"))
+            ' "${manifest}" >/dev/null || { echo "Candidate manifest validation failed" >&2; exit 1; }
+
+          expected_bundle_sha=$(jq -r '.bundle_sha256' "${manifest}")
+          actual_bundle_sha=$(sha256sum "${bundle}" | awk '{print $1}')
+          [[ "${actual_bundle_sha}" == "${expected_bundle_sha}" ]] || { echo "Candidate bundle digest mismatch" >&2; exit 1; }
+
+          base_sha=$(jq -r '.base_sha' "${manifest}")
+          head_repo_id=$(jq -r '.head_repo_id' "${manifest}")
+          head_sha=$(jq -r '.head_sha' "${manifest}")
+          sdk_merge_sha=$(jq -r '.sdk_merge_sha' "${manifest}")
+          sdk_sha=$(jq -r '.sdk_sha' "${manifest}")
+          sdk_version=$(jq -r '.sdk_version' "${manifest}")
+          baseline_tree=$(jq -r '.baseline_tree' "${manifest}")
+          candidate_tree=$(jq -r '.candidate_tree' "${manifest}")
+          candidate_commit=$(jq -r '.candidate_commit' "${manifest}")
+          expected_sdk_required_run_id=$(jq -r '.sdk_required_run_id' "${manifest}")
+
+          snapshot=$(gh api graphql \
+            -f query='query($providerOwner:String!, $providerName:String!, $providerNumber:Int!, $providerRef:String!, $sdkOwner:String!, $sdkName:String!, $sdkNumber:Int!, $sdkRef:String!) {
+              providerRepo: repository(owner:$providerOwner, name:$providerName) {
+                ref(qualifiedName:$providerRef) { target { oid } }
+                pullRequest(number:$providerNumber) {
+                  state isDraft baseRefName headRefOid
+                  headRepository { id nameWithOwner }
+                  reviewDecision
+                  labels(first:100) { totalCount nodes { name } }
+                  reviewThreads(first:100) { totalCount nodes { isResolved } }
+                  reviews(first:100, states:[APPROVED]) { totalCount nodes { commit { oid } } }
+                }
+              }
+              sdkRepo: repository(owner:$sdkOwner, name:$sdkName) {
+                ref(qualifiedName:$sdkRef) { target { oid } }
+                pullRequest(number:$sdkNumber) {
+                  state isDraft merged baseRefName headRefOid reviewDecision
+                  mergeCommit { oid }
+                  reviews(first:100, states:[APPROVED]) {
+                    totalCount
+                    nodes { commit { oid } }
+                  }
+                }
+              }
+            }' \
+            -f providerOwner="${PROVIDER_OWNER}" \
+            -f providerName="${PROVIDER_NAME}" \
+            -F providerNumber="${PROVIDER_PR}" \
+            -f providerRef="refs/heads/${PROVIDER_BRANCH}" \
+            -f sdkOwner="${SDK_OWNER}" \
+            -f sdkName="${SDK_NAME}" \
+            -F sdkNumber="${SDK_PR}" \
+            -f sdkRef="refs/heads/${SDK_BRANCH}")
+
+          jq -e \
+            --arg provider_branch "${PROVIDER_BRANCH}" \
+            --arg sdk_branch "${SDK_BRANCH}" \
+            --arg base_sha "${base_sha}" \
+            --arg head_repo_id "${head_repo_id}" \
+            --arg head_sha "${head_sha}" \
+            --arg sdk_merge_sha "${sdk_merge_sha}" \
+            --arg sdk_sha "${sdk_sha}" '
+              .data.providerRepo.pullRequest as $provider
+              | .data.sdkRepo.pullRequest as $sdk
+              | ($provider.state == "OPEN")
+                and ($provider.isDraft == false)
+                and ($provider.baseRefName == $provider_branch)
+                and ($provider.headRepository.id == $head_repo_id)
+                and ($provider.headRefOid == $head_sha)
+                and ($provider.reviewDecision == "APPROVED")
+                and ($provider.labels.totalCount <= 100)
+                and any($provider.labels.nodes[]?; .name == "NeedSDK")
+                and ($provider.reviewThreads.totalCount <= 100)
+                and all($provider.reviewThreads.nodes[]?; .isResolved)
+                and ($provider.reviews.totalCount <= 100)
+                and any($provider.reviews.nodes[]?; .commit.oid == $head_sha)
+                and (.data.providerRepo.ref.target.oid == $base_sha)
+                and ($sdk.state == "MERGED")
+                and ($sdk.isDraft == false)
+                and ($sdk.merged == true)
+                and ($sdk.baseRefName == $sdk_branch)
+                and ($sdk.reviewDecision == "APPROVED")
+                and ($sdk.reviews.totalCount <= 100)
+                and any($sdk.reviews.nodes[]?; .commit.oid == $sdk.headRefOid)
+                and ($sdk.mergeCommit.oid == $sdk_merge_sha)
+                and (.data.sdkRepo.ref.target.oid == $sdk_sha)
+            ' <<< "${snapshot}" >/dev/null || { echo "Live PR, approval, or branch state changed after testing" >&2; exit 1; }
+
+          compare=$(gh api "repos/${SDK_REPOSITORY}/compare/${sdk_merge_sha}...${sdk_sha}")
+          jq -e --arg merged "${sdk_merge_sha}" '
+            ((.status == "ahead") or (.status == "identical"))
+            and (.merge_base_commit.sha == $merged)
+          ' <<< "${compare}" >/dev/null || { echo "SDK merge commit is no longer on the trusted release branch" >&2; exit 1; }
+
+          runs=$(gh api -X GET \
+            "repos/${PROVIDER_REPOSITORY}/actions/workflows/${REQUIRED_WORKFLOW}/runs" \
+            -f event=pull_request \
+            -f head_sha="${head_sha}" \
+            -F per_page=100)
+          required_run=$(jq -c \
+            --arg head "${head_sha}" \
+            --arg path ".github/workflows/${REQUIRED_WORKFLOW}" \
+            --arg expected "$(jq -r '.required_run_id' "${manifest}")" \
+            --argjson pr "${PROVIDER_PR}" '
+              .workflow_runs
+              | map(select(
+                  .event == "pull_request"
+                  and .head_sha == $head
+                  and ((.path | split("@")[0]) == $path)
+                  and any((.pull_requests // [])[]?; .number == $pr)
+                ))
+              | sort_by(.id)
+              | last
+              | select(
+                  (.id | tostring) == $expected
+                  and .status == "completed"
+                  and .conclusion == "success"
+                )
+            ' <<< "${runs}")
+          [[ -n "${required_run}" && "${required_run}" != null ]] || { echo "The exact required-check run is no longer the latest successful run" >&2; exit 1; }
+          required_run_id=$(jq -r '.id' <<< "${required_run}")
+          required_attempt=$(jq -r '.run_attempt // 1' <<< "${required_run}")
+          jobs=$(gh api -X GET \
+            "repos/${PROVIDER_REPOSITORY}/actions/runs/${required_run_id}/attempts/${required_attempt}/jobs" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${jobs}") -le 100 ]] || { echo "Too many jobs while revalidating the required workflow" >&2; exit 1; }
+          required_jobs=$(jq -c --arg name "${REQUIRED_JOB}" '
+            [.jobs[] | select(.name == $name)]
+          ' <<< "${jobs}")
+          [[ $(jq 'length' <<< "${required_jobs}") -eq 1 ]] || { echo "Required job revalidation failed" >&2; exit 1; }
+          jq -e '.[0].status == "completed" and .[0].conclusion == "success"' <<< "${required_jobs}" >/dev/null || { echo "Required job is not successful" >&2; exit 1; }
+          required_job_id=$(jq -r '.[0].id' <<< "${required_jobs}")
+          check_id=$(jq -r '.[0].check_run_url | split("/") | last' <<< "${required_jobs}")
+          check=$(gh api "repos/${PROVIDER_REPOSITORY}/check-runs/${check_id}")
+          jq -e \
+            --arg name "${REQUIRED_JOB}" \
+            --arg head "${head_sha}" \
+            --arg app_id "${GITHUB_ACTIONS_APP_ID}" \
+            --arg details "https://github.com/${PROVIDER_REPOSITORY}/actions/runs/${required_run_id}/job/${required_job_id}" '
+              .name == $name
+              and .head_sha == $head
+              and ((.app.id | tostring) == $app_id)
+              and .status == "completed"
+              and .conclusion == "success"
+              and .details_url == $details
+            ' <<< "${check}" >/dev/null || { echo "Required check identity changed" >&2; exit 1; }
+
+          verify_repo="${RUNNER_TEMP}/provider-land.git"
+          git init --bare "${verify_repo}"
+          git -C "${verify_repo}" remote add origin "https://github.com/${PROVIDER_REPOSITORY}.git"
+          git -C "${verify_repo}" fetch --no-tags origin \
+            "+refs/heads/${PROVIDER_BRANCH}:refs/remotes/origin/${PROVIDER_BRANCH}" \
+            "+refs/pull/${PROVIDER_PR}/head:refs/remotes/origin/sdk-linked-pr"
+          [[ $(git -C "${verify_repo}" rev-parse "refs/remotes/origin/${PROVIDER_BRANCH}") == "${base_sha}" ]] || { echo "Fetched provider base does not match manifest" >&2; exit 1; }
+          [[ $(git -C "${verify_repo}" rev-parse refs/remotes/origin/sdk-linked-pr) == "${head_sha}" ]] || { echo "Fetched provider head does not match manifest" >&2; exit 1; }
+
+          git -C "${verify_repo}" bundle verify "${bundle}"
+          git -C "${verify_repo}" fetch "${bundle}" \
+            refs/sdk-linked-land/candidate:refs/sdk-linked-land/candidate
+          [[ $(git -C "${verify_repo}" rev-parse refs/sdk-linked-land/candidate) == "${candidate_commit}" ]] || { echo "Candidate commit mismatch" >&2; exit 1; }
+          git -C "${verify_repo}" fsck --strict --no-dangling
+
+          read -r commit parent_one parent_two extra <<< "$(git -C "${verify_repo}" rev-list --parents -n 1 "${candidate_commit}")"
+          [[ "${commit}" == "${candidate_commit}" && "${parent_one}" == "${base_sha}" && "${parent_two}" == "${head_sha}" && -z "${extra:-}" ]] || { echo "Candidate must have exactly the tested base and PR head as parents" >&2; exit 1; }
+          [[ $(git -C "${verify_repo}" show -s --format=%T "${candidate_commit}") == "${candidate_tree}" ]] || { echo "Candidate tree mismatch" >&2; exit 1; }
+          expected_message=$(printf 'Merge SDK-linked provider pull request #%s\n\nPin aws-sdk-go to %s (%s)' \
+            "${PROVIDER_PR}" "${sdk_version}" "${sdk_sha}")
+          [[ $(git -C "${verify_repo}" show -s --format=%B "${candidate_commit}") == "${expected_message}" ]] || { echo "Candidate commit message mismatch" >&2; exit 1; }
+          [[ $(git -C "${verify_repo}" show -s --format='%an <%ae>' "${candidate_commit}") == 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' ]] || { echo "Candidate author identity mismatch" >&2; exit 1; }
+          [[ $(git -C "${verify_repo}" show -s --format='%cn <%ce>' "${candidate_commit}") == 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' ]] || { echo "Candidate committer identity mismatch" >&2; exit 1; }
+
+          expected_baseline=$(git -C "${verify_repo}" merge-tree --write-tree "${base_sha}" "${head_sha}")
+          [[ "${expected_baseline}" =~ ^[0-9a-f]{40}$ && "${expected_baseline}" == "${baseline_tree}" ]] || { echo "Candidate baseline is not the deterministic merge of current base and PR head" >&2; exit 1; }
+          mapfile -d '' generated < <(git -C "${verify_repo}" diff --name-only -z "${baseline_tree}" "${candidate_tree}")
+          [[ "${#generated[@]}" -ge 1 && "${#generated[@]}" -le 2 ]] || { echo "Unexpected generated candidate paths" >&2; exit 1; }
+          saw_go_mod=false
+          for path in "${generated[@]}"; do
+            [[ "${path}" == go.mod || "${path}" == go.sum ]] || { echo "Candidate changes an untrusted generated path: ${path}" >&2; exit 1; }
+            [[ "${path}" == go.mod ]] && saw_go_mod=true
+          done
+          [[ "${saw_go_mod}" == true ]] || { echo "Candidate is missing generated go.mod" >&2; exit 1; }
+
+          while IFS= read -r -d '' path; do
+            [[ ! "${path}" =~ [[:cntrl:]] ]] || { echo "Control character in provider path" >&2; exit 1; }
+            [[ "${path}" =~ ${ELIGIBLE_PROVIDER_PATH_RE} ]] || {
+              echo "Provider path is outside the positive landing allowlist: ${path}" >&2
+              exit 1
+            }
+            if [[ "${path}" =~ (^|/)(go\.mod|go\.sum|go\.work|go\.work\.sum|GNUmakefile|Makefile|makefile)$ ]]; then
+              echo "Provider PR changed a bot-owned dependency or build path: ${path}" >&2
+              exit 1
+            fi
+            mode=$(git -C "${verify_repo}" ls-tree "${head_sha}" -- "${path}" | awk 'NR == 1 { print $1 }')
+            [[ "${mode}" != 120000 && "${mode}" != 160000 ]] || { echo "Symlink or submodule found during final verification" >&2; exit 1; }
+          done < <(git -C "${verify_repo}" diff --no-renames --name-only -z "${base_sha}...${head_sha}")
+
+          mod_dir=$(mktemp -d "${RUNNER_TEMP}/verify-mod.XXXXXX")
+          git -C "${verify_repo}" show "${baseline_tree}:go.mod" > "${mod_dir}/baseline.mod"
+          git -C "${verify_repo}" show "${candidate_tree}:go.mod" > "${mod_dir}/candidate.mod"
+          baseline_mod=$(go mod edit -json -modfile="${mod_dir}/baseline.mod")
+          candidate_mod=$(go mod edit -json -modfile="${mod_dir}/candidate.mod")
+          jq -e --arg old "${ORIGINAL_SDK_MODULE}" --arg new "${SDK_MODULE}" '
+            ([.Replace[]? | select(.Old.Path == $old and ((.Old.Version // "") == ""))] | length) == 1
+            and ([.Replace[]? | select(.Old.Path == $old)][0].New.Path == $new)
+            and (([.Replace[]? | select(.Old.Path == $old)][0].New.Version // "") != "")
+          ' <<< "${baseline_mod}" >/dev/null || { echo "Baseline SDK replace directive is not canonical" >&2; exit 1; }
+          jq -e --arg old "${ORIGINAL_SDK_MODULE}" --arg new "${SDK_MODULE}" --arg version "${sdk_version}" '
+            ([.Replace[]? | select(.Old.Path == $old and ((.Old.Version // "") == ""))] | length) == 1
+            and ([.Replace[]? | select(.Old.Path == $old)][0].New.Path == $new)
+            and ([.Replace[]? | select(.Old.Path == $old)][0].New.Version == $version)
+          ' <<< "${candidate_mod}" >/dev/null || { echo "Candidate SDK replace directive does not match the tested SDK" >&2; exit 1; }
+          jq -S --arg old "${ORIGINAL_SDK_MODULE}" '
+            .Replace |= map(if .Old.Path == $old and ((.Old.Version // "") == "") then (.New.Version = "<SDK_VERSION>") else . end)
+          ' <<< "${baseline_mod}" > "${mod_dir}/baseline.normalized.json"
+          jq -S --arg old "${ORIGINAL_SDK_MODULE}" '
+            .Replace |= map(if .Old.Path == $old and ((.Old.Version // "") == "") then (.New.Version = "<SDK_VERSION>") else . end)
+          ' <<< "${candidate_mod}" > "${mod_dir}/candidate.normalized.json"
+          cmp "${mod_dir}/baseline.normalized.json" "${mod_dir}/candidate.normalized.json" || { echo "go.mod contains changes beyond the exact SDK pin" >&2; exit 1; }
+
+          [[ $(git -C "${verify_repo}" cat-file -s "${candidate_tree}:go.sum") -le 5242880 ]] || { echo "Generated go.sum is unexpectedly large" >&2; exit 1; }
+          git -C "${verify_repo}" show "${candidate_tree}:go.sum" | grep -Iq . || { echo "Generated go.sum is not text" >&2; exit 1; }
+
+          module=$(GOMODCACHE="${RUNNER_TEMP}/land-gomodcache" GO111MODULE=on GOPROXY=https://proxy.golang.org,direct \
+            go list -m -json "${SDK_MODULE}@${sdk_version}")
+          [[ $(jq -r '.Origin.Hash // empty' <<< "${module}") == "${sdk_sha}" ]] || { echo "SDK version no longer resolves to the tested SDK commit" >&2; exit 1; }
+
+          echo "base_sha=${base_sha}" >> "${GITHUB_OUTPUT}"
+          echo "candidate_tree=${candidate_tree}" >> "${GITHUB_OUTPUT}"
+          echo "head_sha=${head_sha}" >> "${GITHUB_OUTPUT}"
+          echo "required_run_id=${required_run_id}" >> "${GITHUB_OUTPUT}"
+          echo "sdk_required_run_id=${expected_sdk_required_run_id}" >> "${GITHUB_OUTPUT}"
+          echo "sdk_sha=${sdk_sha}" >> "${GITHUB_OUTPUT}"
+          echo "sdk_version=${sdk_version}" >> "${GITHUB_OUTPUT}"
+          echo "verify_repo=${verify_repo}" >> "${GITHUB_OUTPUT}"
+
+      - name: Create provider-only landing token
+        id: land-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        with:
+          app-id: ${{ secrets.LAND_APP_ID }}
+          private-key: ${{ secrets.LAND_APP_PEM }}
+          owner: ${{ env.PROVIDER_OWNER }}
+          repositories: ${{ env.PROVIDER_NAME }}
+          permission-contents: write
+
+      - name: Fast-forward the exact tested merge commit
+        id: push
+        env:
+          APP_SLUG: ${{ steps.land-token.outputs.app-slug }}
+          BASE_SHA: ${{ steps.verify.outputs.base_sha }}
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ steps.verify.outputs.head_sha }}
+          EXPECTED_REQUIRED_RUN_ID: ${{ needs.test.outputs.required_run_id }}
+          EXPECTED_SDK_REQUIRED_RUN_ID: ${{ steps.verify.outputs.sdk_required_run_id }}
+          LAND_TOKEN: ${{ steps.land-token.outputs.token }}
+          PROVIDER_PR: ${{ inputs.provider_pr }}
+          SDK_SHA: ${{ steps.verify.outputs.sdk_sha }}
+          SDK_VERSION: ${{ steps.verify.outputs.sdk_version }}
+          VERIFY_REPO: ${{ steps.verify.outputs.verify_repo }}
+        run: |
+          set -euo pipefail
+
+          # Close the last meaningful TOCTOU window before the write. The push
+          # itself is non-force, so GitHub also rejects it if develop moves.
+          current_provider=$(git ls-remote "https://github.com/${PROVIDER_REPOSITORY}.git" "refs/heads/${PROVIDER_BRANCH}" | awk 'NR == 1 { print $1 }')
+          current_sdk=$(git ls-remote "https://github.com/${SDK_REPOSITORY}.git" "refs/heads/${SDK_BRANCH}" | awk 'NR == 1 { print $1 }')
+          [[ "${current_provider}" == "${BASE_SHA}" ]] || { echo "Provider develop moved before push; rerun the workflow" >&2; exit 1; }
+          [[ "${current_sdk}" == "${SDK_SHA}" ]] || { echo "SDK release branch moved before push; rerun the workflow" >&2; exit 1; }
+
+          approval=$(gh api graphql \
+            -f query='query($owner:String!, $name:String!, $number:Int!) {
+              repository(owner:$owner, name:$name) {
+                pullRequest(number:$number) {
+                  state isDraft baseRefName headRefOid reviewDecision
+                  labels(first:100) { totalCount nodes { name } }
+                  reviewThreads(first:100) { totalCount nodes { isResolved } }
+                  reviews(first:100, states:[APPROVED]) { totalCount nodes { commit { oid } } }
+                }
+              }
+            }' \
+            -f owner="${PROVIDER_OWNER}" \
+            -f name="${PROVIDER_NAME}" \
+            -F number="${PROVIDER_PR}")
+          jq -e --arg branch "${PROVIDER_BRANCH}" --arg head "${HEAD_SHA}" '
+            .data.repository.pullRequest as $pr
+            | $pr.state == "OPEN"
+              and $pr.isDraft == false
+              and $pr.baseRefName == $branch
+              and $pr.headRefOid == $head
+              and $pr.reviewDecision == "APPROVED"
+              and ($pr.labels.totalCount <= 100)
+              and any($pr.labels.nodes[]?; .name == "NeedSDK")
+              and ($pr.reviewThreads.totalCount <= 100)
+              and all($pr.reviewThreads.nodes[]?; .isResolved)
+              and ($pr.reviews.totalCount <= 100)
+              and any($pr.reviews.nodes[]?; .commit.oid == $head)
+          ' <<< "${approval}" >/dev/null || { echo "Provider approval changed immediately before push" >&2; exit 1; }
+          current_head_approvers=$(jq -r --arg head "${HEAD_SHA}" '
+            [.data.repository.pullRequest.reviews.nodes[]?
+              | select(.commit.oid == $head)
+              | .author.login]
+            | unique
+            | length
+          ' <<< "${approval}")
+          [[ "${current_head_approvers}" -ge 2 ]] || {
+            echo "SDK-linked bypass requires two distinct approvals on the current provider head" >&2
+            exit 1
+          }
+
+          # Revalidate the latest exact-head CI identity immediately before the
+          # bypass push. A relabel/edit/rerun that starts after testing blocks
+          # the write instead of being hidden by the landing App bypass.
+          runs=$(gh api -X GET \
+            "repos/${PROVIDER_REPOSITORY}/actions/workflows/${REQUIRED_WORKFLOW}/runs" \
+            -f event=pull_request \
+            -f head_sha="${HEAD_SHA}" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${runs}") -le 100 ]] || { echo "Too many final required-check runs" >&2; exit 1; }
+          required_run=$(jq -c \
+            --arg head "${HEAD_SHA}" \
+            --arg path ".github/workflows/${REQUIRED_WORKFLOW}" \
+            --arg expected "${EXPECTED_REQUIRED_RUN_ID}" \
+            --argjson pr "${PROVIDER_PR}" '
+              .workflow_runs
+              | map(select(
+                  .event == "pull_request"
+                  and .head_sha == $head
+                  and ((.path | split("@")[0]) == $path)
+                  and any((.pull_requests // [])[]?; .number == $pr)
+                ))
+              | sort_by(.id)
+              | last
+              | select(
+                  (.id | tostring) == $expected
+                  and .status == "completed"
+                  and .conclusion == "success"
+                )
+            ' <<< "${runs}")
+          [[ -n "${required_run}" && "${required_run}" != null ]] || { echo "The authorized provider CI run is no longer the latest successful run" >&2; exit 1; }
+          required_run_id=$(jq -r '.id' <<< "${required_run}")
+          required_attempt=$(jq -r '.run_attempt // 1' <<< "${required_run}")
+          jobs=$(gh api -X GET \
+            "repos/${PROVIDER_REPOSITORY}/actions/runs/${required_run_id}/attempts/${required_attempt}/jobs" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${jobs}") -le 100 ]] || { echo "Too many jobs in final required workflow" >&2; exit 1; }
+          required_jobs=$(jq -c --arg name "${REQUIRED_JOB}" '[.jobs[] | select(.name == $name)]' <<< "${jobs}")
+          [[ $(jq 'length' <<< "${required_jobs}") -eq 1 ]] || { echo "Final required job identity is ambiguous" >&2; exit 1; }
+          jq -e '.[0].status == "completed" and .[0].conclusion == "success"' <<< "${required_jobs}" >/dev/null || { echo "Final required job is not successful" >&2; exit 1; }
+          required_job_id=$(jq -r '.[0].id' <<< "${required_jobs}")
+          check_id=$(jq -r '.[0].check_run_url | split("/") | last' <<< "${required_jobs}")
+          [[ "${check_id}" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid final check-run URL" >&2; exit 1; }
+          check=$(gh api "repos/${PROVIDER_REPOSITORY}/check-runs/${check_id}")
+          jq -e \
+            --arg name "${REQUIRED_JOB}" \
+            --arg head "${HEAD_SHA}" \
+            --arg app_id "${GITHUB_ACTIONS_APP_ID}" \
+            --arg details "https://github.com/${PROVIDER_REPOSITORY}/actions/runs/${required_run_id}/job/${required_job_id}" '
+              .name == $name
+              and .head_sha == $head
+              and ((.app.id | tostring) == $app_id)
+              and .status == "completed"
+              and .conclusion == "success"
+              and .details_url == $details
+            ' <<< "${check}" >/dev/null || { echo "Final required check identity validation failed" >&2; exit 1; }
+
+          sdk_runs=$(gh api -X GET \
+            "repos/${SDK_REPOSITORY}/actions/workflows/${SDK_REQUIRED_WORKFLOW}/runs" \
+            -f event=push \
+            -f branch="${SDK_BRANCH}" \
+            -f head_sha="${SDK_SHA}" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${sdk_runs}") -le 100 ]] || { echo "Too many final SDK required-check runs" >&2; exit 1; }
+          sdk_required_run=$(jq -c \
+            --arg head "${SDK_SHA}" \
+            --arg branch "${SDK_BRANCH}" \
+            --arg path ".github/workflows/${SDK_REQUIRED_WORKFLOW}" \
+            --arg expected "${EXPECTED_SDK_REQUIRED_RUN_ID}" '
+              .workflow_runs
+              | map(select(
+                  .event == "push"
+                  and .head_sha == $head
+                  and .head_branch == $branch
+                  and ((.path | split("@")[0]) == $path)
+                ))
+              | sort_by(.id)
+              | last
+              | select(
+                  (.id | tostring) == $expected
+                  and .status == "completed"
+                  and .conclusion == "success"
+                )
+            ' <<< "${sdk_runs}")
+          [[ -n "${sdk_required_run}" && "${sdk_required_run}" != null ]] || { echo "The authorized SDK CI run is no longer the latest successful run" >&2; exit 1; }
+          sdk_required_run_id=$(jq -r '.id' <<< "${sdk_required_run}")
+          sdk_required_attempt=$(jq -r '.run_attempt // 1' <<< "${sdk_required_run}")
+          sdk_jobs=$(gh api -X GET \
+            "repos/${SDK_REPOSITORY}/actions/runs/${sdk_required_run_id}/attempts/${sdk_required_attempt}/jobs" \
+            -F per_page=100)
+          [[ $(jq -r '.total_count' <<< "${sdk_jobs}") -le 100 ]] || { echo "Too many jobs in final SDK required workflow" >&2; exit 1; }
+          sdk_required_jobs=$(jq -c --arg name "${SDK_REQUIRED_JOB}" '[.jobs[] | select(.name == $name)]' <<< "${sdk_jobs}")
+          [[ $(jq 'length' <<< "${sdk_required_jobs}") -eq 1 ]] || { echo "Final SDK required job identity is ambiguous" >&2; exit 1; }
+          jq -e '.[0].status == "completed" and .[0].conclusion == "success"' <<< "${sdk_required_jobs}" >/dev/null || { echo "Final SDK required job is not successful" >&2; exit 1; }
+          sdk_required_job_id=$(jq -r '.[0].id' <<< "${sdk_required_jobs}")
+          sdk_check_id=$(jq -r '.[0].check_run_url | split("/") | last' <<< "${sdk_required_jobs}")
+          [[ "${sdk_check_id}" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid final SDK check-run URL" >&2; exit 1; }
+          sdk_check=$(gh api "repos/${SDK_REPOSITORY}/check-runs/${sdk_check_id}")
+          jq -e \
+            --arg name "${SDK_REQUIRED_JOB}" \
+            --arg head "${SDK_SHA}" \
+            --arg app_id "${GITHUB_ACTIONS_APP_ID}" \
+            --arg details "https://github.com/${SDK_REPOSITORY}/actions/runs/${sdk_required_run_id}/job/${sdk_required_job_id}" '
+              .name == $name
+              and .head_sha == $head
+              and ((.app.id | tostring) == $app_id)
+              and .status == "completed"
+              and .conclusion == "success"
+              and .details_url == $details
+            ' <<< "${sdk_check}" >/dev/null || { echo "Final SDK required check identity validation failed" >&2; exit 1; }
+
+          current_head=$(git ls-remote "https://github.com/${PROVIDER_REPOSITORY}.git" "refs/pull/${PROVIDER_PR}/head" | awk 'NR == 1 { print $1 }')
+          [[ "${current_head}" == "${HEAD_SHA}" ]] || { echo "Provider PR head moved immediately before push" >&2; exit 1; }
+
+          [[ "${APP_SLUG}" =~ ^[A-Za-z0-9-]+$ ]] || { echo "Invalid GitHub App slug" >&2; exit 1; }
+          final_commit=$(git -C "${VERIFY_REPO}" rev-parse refs/sdk-linked-land/candidate)
+          [[ $(git -C "${VERIFY_REPO}" rev-list --parents -n 1 "${final_commit}") == "${final_commit} ${BASE_SHA} ${HEAD_SHA}" ]] || { echo "Tested commit parent mismatch" >&2; exit 1; }
+
+          cleanup() {
+            git -C "${VERIFY_REPO}" config --unset-all \
+              "url.https://x-access-token:${LAND_TOKEN}@github.com/.insteadOf" || true
+          }
+          trap cleanup EXIT
+          git -C "${VERIFY_REPO}" config \
+            "url.https://x-access-token:${LAND_TOKEN}@github.com/.insteadOf" \
+            "https://github.com/"
+          git -C "${VERIFY_REPO}" push origin \
+            "${final_commit}:refs/heads/${PROVIDER_BRANCH}"
+          echo "final_commit=${final_commit}" >> "${GITHUB_OUTPUT}"
+
+      - name: Write landing summary
+        env:
+          FINAL_COMMIT: ${{ steps.push.outputs.final_commit }}
+          PROVIDER_PR: ${{ inputs.provider_pr }}
+          SDK_PR: ${{ inputs.sdk_pr }}
+        run: |
+          {
+            echo "## SDK-linked provider PR landed"
+            echo ""
+            echo "- Provider PR: #${PROVIDER_PR}"
+            echo "- SDK PR: #${SDK_PR}"
+            echo "- One merge commit: ${FINAL_COMMIT}"
+            echo "- Developers did not need to edit go.mod or go.sum"
+          } >> "${GITHUB_STEP_SUMMARY}"

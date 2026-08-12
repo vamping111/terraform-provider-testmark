@@ -31,6 +31,9 @@ terraform-provider-rockitcloud
 aws/testdata/service/cloudformation/examplecompany-exampleservice-exampleresource/bin/handler
 .venv/
 
+# Private signing and GitHub App keys must never enter the repository.
+*.private-key.pem
+
 # Test exclusions
 !command/test-fixtures/**/*.tfstate
 !command/test-fixtures/**/.terraform/

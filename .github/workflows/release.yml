@@ -204,15 +204,17 @@ jobs:
         if: steps.versions.outputs.release_sdk == 'true'
         run: |
           set -euo pipefail
-          backup_dir=$(mktemp -d)
+          work_dir=$(mktemp -d "${RUNNER_TEMP}/provider-sdk-test.XXXXXX")
+          sdk_dir="${work_dir}/aws-sdk-go"
           cleanup() {
-            cp "${backup_dir}/go.mod" go.mod
-            cp "${backup_dir}/go.sum" go.sum
-            rm -rf "${backup_dir}"
+            cp "${work_dir}/go.mod" go.mod
+            cp "${work_dir}/go.sum" go.sum
+            rm -rf "${work_dir}"
           }
           trap cleanup EXIT
-          cp go.mod go.sum "${backup_dir}/"
-          go mod edit -replace github.com/aws/aws-sdk-go=./.release/aws-sdk-go
+          cp go.mod go.sum "${work_dir}/"
+          mv -- .release/aws-sdk-go "${sdk_dir}"
+          go mod edit -replace "github.com/aws/aws-sdk-go=${sdk_dir}"
           go mod tidy
           make tools
           make test

@@ -9,7 +9,7 @@ on:
         type: string
 
 concurrency:
-  group: provider-public-release
+  group: repository-write
   cancel-in-progress: false
 
 permissions:
@@ -17,21 +17,36 @@ permissions:
 
 jobs:
   public-release:
-    if: github.repository == 'C2Devel/terraform-provider-rockitcloud'
+    if: github.repository == 'vamping111/terraform-provider-testmark'
     environment: provider-release
-    runs-on: ubuntu-22.04-large
+    runs-on: ubuntu-22.04
     steps:
-    - name: Create GitHub App token
+    - name: Validate provider tag
+      id: release-tag
+      env:
+        TAG_INPUT: ${{ inputs.tag }}
+      run: |
+        set -euo pipefail
+        if [[ ! "${TAG_INPUT}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "tag must look like v25.6.0" >&2
+          exit 1
+        fi
+        echo "tag=${TAG_INPUT}" >> "${GITHUB_OUTPUT}"
+
+    - name: Create read-only GitHub App token
       uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
-      id: app-token
+      id: read-token
       with:
         app-id: ${{ secrets.APP_ID }}
         private-key: ${{ secrets.APP_PEM }}
+        owner: vamping111
+        repositories: terraform-provider-testmark
+        permission-contents: read
 
     - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       with:
-        ref: ${{ inputs.tag }}
-        token: ${{ steps.app-token.outputs.token }}
+        ref: refs/tags/${{ steps.release-tag.outputs.tag }}
+        token: ${{ steps.read-token.outputs.token }}
         persist-credentials: false
         clean: true
         fetch-depth: 0
@@ -42,14 +57,17 @@ jobs:
         go-version: 1.21.x
 
     - name: Verify tag is on develop branch
+      env:
+        TAG: ${{ steps.release-tag.outputs.tag }}
       run: |
-        TAG_COMMIT=$(git rev-list -n 1 "${{ inputs.tag }}")
-        echo "Tag commit: $TAG_COMMIT"
-        
-        DEVELOP_COMMIT=$(git rev-parse origin/develop)
-        echo "Develop commit: $DEVELOP_COMMIT"
-        
-        if git merge-base --is-ancestor $TAG_COMMIT $DEVELOP_COMMIT; then
+        set -euo pipefail
+        tag_commit=$(git rev-parse --verify "refs/tags/${TAG}^{commit}")
+        develop_commit=$(git rev-parse --verify origin/develop)
+        head_commit=$(git rev-parse HEAD)
+        echo "Tag commit: ${tag_commit}"
+        echo "Develop commit: ${develop_commit}"
+        [[ "${head_commit}" == "${tag_commit}" ]] || { echo "Checkout is not the requested tag" >&2; exit 1; }
+        if git merge-base --is-ancestor "${tag_commit}" "${develop_commit}"; then
           echo "Tag is on develop branch"
         else
           echo "Tag commit is not on develop branch"
@@ -62,11 +80,21 @@ jobs:
       with:
         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
 
+    - name: Create fresh release token
+      uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      id: release-token
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.APP_PEM }}
+        owner: vamping111
+        repositories: terraform-provider-testmark
+        permission-contents: write
+
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
       with:
         version: '~> v1'
         args: release --clean --timeout 180m
       env:
-        GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        GITHUB_TOKEN: ${{ steps.release-token.outputs.token }}
         GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}

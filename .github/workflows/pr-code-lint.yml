@@ -9,6 +9,9 @@ on:
       - opened
       - synchronize
 
+permissions:
+  contents: read
+
 jobs:
   code-linter:
     runs-on: ubuntu-22.04
@@ -21,6 +24,7 @@ jobs:
     - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       with:
         ref: ${{ github.event.pull_request.head.sha }}
+        persist-credentials: false
 
     - name: Install tools
       run: make tools
@@ -47,18 +51,32 @@ jobs:
         else
           BRANCH="${PR_HEAD_REF}"
         fi
-        echo "AWS_SDK_GO_BRANCH=$BRANCH" >> $GITHUB_ENV
+        if [[ ! "${BRANCH}" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]*$ ]] || ! git check-ref-format "refs/heads/${BRANCH}" >/dev/null; then
+          echo "Invalid SDK branch name" >&2
+          exit 1
+        fi
+        echo "AWS_SDK_GO_BRANCH=${BRANCH}" >> "$GITHUB_ENV"
 
     - name: Define last commit of the fork
       if: contains(github.event.pull_request.labels.*.name, 'NeedSDK')
+      env:
+        FORK_OWNER: ${{ env.FORK_OWNER }}
+        SDK_BRANCH: ${{ env.AWS_SDK_GO_BRANCH }}
       run: |
-        echo "FORK_COMMIT=$(git ls-remote https://github.com/${{ env.FORK_OWNER }}/aws-sdk-go.git ${{ env.AWS_SDK_GO_BRANCH }} |\
-        cut -c1-7)">> $GITHUB_ENV
+        FORK_COMMIT=$(git ls-remote "https://github.com/${FORK_OWNER}/testmark-sdk-go.git" "refs/heads/${SDK_BRANCH}" | awk 'NR == 1 { print $1 }')
+        if [[ ! "${FORK_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "Unable to resolve an immutable SDK commit" >&2
+          exit 1
+        fi
+        echo "FORK_COMMIT=${FORK_COMMIT}" >> "$GITHUB_ENV"
 
     - name: Bump version in go.mod
       if: contains(github.event.pull_request.labels.*.name, 'NeedSDK')
+      env:
+        FORK_COMMIT: ${{ env.FORK_COMMIT }}
+        FORK_OWNER: ${{ env.FORK_OWNER }}
       run: |
-        go mod edit -replace github.com/aws/aws-sdk-go=github.com/${{ env.FORK_OWNER }}/aws-sdk-go@${{ env.FORK_COMMIT }}
+        go mod edit -replace "github.com/aws/aws-sdk-go=github.com/${FORK_OWNER}/testmark-sdk-go@${FORK_COMMIT}"
 
     - name: Apply dependencies
       run: go mod tidy

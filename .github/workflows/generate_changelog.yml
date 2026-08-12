@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   GenerateChangelog:
-    if: github.ref == 'refs/heads/develop'
+    if: github.repository == 'vamping111/terraform-provider-testmark' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
@@ -24,6 +24,9 @@ jobs:
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PEM }}
+          owner: vamping111
+          repositories: terraform-provider-testmark
+          permission-contents: write
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0

@@ -6,9 +6,10 @@
 set -euo pipefail
 
 TF_REGISTRY_URL=${TF_REGISTRY_URL:-"https://registry.terraform.io/"}
-S3_REGISTRY_URL=${S3_REGISTRY_URL:-"https://hc-registry.website.k2.cloud/"}
-S3_BUCKET_NAME=${S3_BUCKET_NAME:-"hc-registry"}
-PROVIDER_NAME=${PROVIDER_NAME:-"c2devel/rockitcloud"}
+: "${S3_REGISTRY_URL:?Set S3_REGISTRY_URL to a dedicated test registry URL}"
+: "${S3_BUCKET_NAME:?Set S3_BUCKET_NAME to a dedicated test bucket}"
+: "${RELEASE_MIRROR_URL:?Set RELEASE_MIRROR_URL to a dedicated test release mirror}"
+PROVIDER_NAME=${PROVIDER_NAME:-"vamping111/testmark"}
 
 S3_BACKUP_DIR=${S3_BACKUP_DIR:-"./s3_backup"}
 TMP_DIR="/tmp/"
@@ -53,6 +54,13 @@ echo "Start updating s3 registry"
 
 
 echo "Check env variables"
+
+if [[ "${S3_REGISTRY_URL}" == *"hc-registry.website.k2.cloud"* \
+  || "${S3_BUCKET_NAME}" == "hc-registry" \
+  || "${RELEASE_MIRROR_URL}" == *"hc-releases.website.k2.cloud"* ]]; then
+  echo "  Production registry targets are forbidden by the sandbox workflow" >&2
+  exit 1
+fi
 
 if [[ -z "${S3_REGISTRY_URL}" || -z "${S3_BUCKET_NAME}" ]]; then
   echo "  S3_REGISTRY_URL and S3_BUCKET_NAME must not be empty"
@@ -152,7 +160,10 @@ for version in $tf_provider_versions; do
       "${TF_REGISTRY_URL}/${tf_provider_prefix}/${PROVIDER_NAME}/${version}/download/${os}/${arch}" \
       "${TMP_DIR}/${version}_${os}_${arch}.json"
 
-    sed -i 's|https://releases.hashicorp.com|https://hc-releases.website.k2.cloud|g' "${TMP_DIR}/${version}_${os}_${arch}.json"
+    jq --arg mirror "$(trim_slashes "${RELEASE_MIRROR_URL}")" \
+      'walk(if type == "string" then sub("^https://releases[.]hashicorp[.]com"; $mirror) else . end)' \
+      "${TMP_DIR}/${version}_${os}_${arch}.json" > "${TMP_DIR}/${version}_${os}_${arch}.tmp.json"
+    mv "${TMP_DIR}/${version}_${os}_${arch}.tmp.json" "${TMP_DIR}/${version}_${os}_${arch}.json"
 
     s3cmd put --config=$S3_CMD_CFG_LOCATION --quiet --acl-public --content-type=application/json "${TMP_DIR}/${version}_${os}_${arch}.json" \
       "s3://${S3_BUCKET_NAME}/${s3_provider_prefix}/${PROVIDER_NAME}/${version}/download/${os}/${arch}/index.json"

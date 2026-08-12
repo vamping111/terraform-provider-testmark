@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Path of the directory with the documentation
 SOURCE_DIR="site/"
 S3_CMD_CFG_LOCATION=${S3_CMD_CFG_LOCATION:-"$HOME/.s3cfg"}
-S3_DOCS_BUCKET_NAME=${S3_DOCS_BUCKET_NAME:-"docs.tf.k2.cloud"}
+S3_DOCS_BUCKET_NAME=${S3_DOCS_BUCKET_NAME:-}
 
 help () {
     echo "
@@ -15,9 +17,7 @@ help () {
 
 tools () {
   python3 -m venv .venv
-  source .venv/bin/activate
-  pip3 install mkdocs mkdocs-material mkdocs-awesome-pages-plugin || pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin
-  deactivate
+  .venv/bin/python -m pip install mkdocs mkdocs-material mkdocs-awesome-pages-plugin
 }
 
 # Copying of configuration for the documentatiion to the website folder
@@ -29,18 +29,14 @@ copy () {
 
 # Generation of the documentation
 build () {
-  source .venv/bin/activate
   echo "Generation of the documentation"
-  mkdocs build -f ./mkdocs.yml -d $SOURCE_DIR --clean
-  deactivate
+  .venv/bin/mkdocs build -f ./mkdocs.yml -d "$SOURCE_DIR" --clean
 }
 
 # Run the documentation locally
 run_local () {
-  source .venv/bin/activate
   echo "Run the documentation locally"
-  mkdocs serve -f ./mkdocs.yml
-  deactivate
+  .venv/bin/mkdocs serve -f ./mkdocs.yml
 }
 
 # Function to upload the documentation files to the bucket
@@ -71,25 +67,28 @@ cleanup () {
 
 # Uploading of the documentation to the S3 bucket
 
-if [[ "$1" == "--push" ]]; then
-    if [[ -n $S3_DOCS_BUCKET_NAME ]]; then
+if [[ "${1:-}" == "--push" ]]; then
+    if [[ "$S3_DOCS_BUCKET_NAME" == "docs.tf.k2.cloud" ]]; then
+        echo "Production documentation bucket is forbidden by the sandbox workflow" >&2
+        exit 1
+    elif [[ -n $S3_DOCS_BUCKET_NAME ]]; then
         copy
+        trap cleanup EXIT
         build
         upload_other_files
         upload_css_files
         upload_js_files
-        cleanup
     else
         echo "Define S3_DOCS_BUCKET_NAME environment variable."
         exit 1
     fi
-elif [[ "$1" == "--local" ]]; then
+elif [[ "${1:-}" == "--local" ]]; then
     copy
+    trap cleanup EXIT
     run_local
-    cleanup
-elif [[ "$1" == "--tools" ]]; then
+elif [[ "${1:-}" == "--tools" ]]; then
     tools
-elif [[ "$1" == "--help" ]]; then
+elif [[ "${1:-}" == "--help" ]]; then
     help
 else
     echo "Choose one of the options: --push, --local, --tools or --help"

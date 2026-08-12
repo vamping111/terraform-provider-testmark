@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       provider_version:
-        description: 'Provider version without v prefix (for example 25.6.0)'
-        required: true
+        description: 'Optional override; by default read from the first CHANGELOG.md entry'
+        required: false
         type: string
       release_sdk:
-        description: 'Release accumulated aws-sdk-go changes'
+        description: 'Release accumulated testmark-sdk-go changes'
         required: true
         default: auto
         type: choice
@@ -17,13 +17,18 @@ on:
           - always
           - never
       sdk_version:
-        description: 'Optional SDK tag override (for example v1.44.10-ROCKIT24)'
+        description: 'SDK tag override; required for the first SDK release'
         required: false
         type: string
       dry_run:
-        description: 'Run all preflight tests without commits, tags, releases, or registry updates'
+        description: 'Run read-only preflight tests without creating anything'
         required: true
         default: true
+        type: boolean
+      publish_registries:
+        description: 'Wait for public Registry and allow the separately gated test S3 update'
+        required: true
+        default: false
         type: boolean
 
 concurrency:
@@ -34,38 +39,48 @@ permissions:
   contents: read
 
 jobs:
-  release:
-    if: github.repository == 'C2Devel/terraform-provider-rockitcloud' && github.ref == 'refs/heads/develop'
-    environment: provider-release
-    runs-on: ubuntu-22.04-large
-    timeout-minutes: 240
+  preflight:
+    if: github.repository == 'vamping111/terraform-provider-testmark' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    outputs:
+      provider_version: ${{ steps.versions.outputs.provider_version }}
+      next_provider_version: ${{ steps.versions.outputs.next_provider_version }}
+      sdk_version: ${{ steps.versions.outputs.sdk_version }}
+      release_sdk: ${{ steps.versions.outputs.release_sdk }}
+      sdk_changes: ${{ steps.versions.outputs.sdk_changes }}
+      provider_sha: ${{ steps.refs.outputs.provider_sha }}
+      sdk_sha: ${{ steps.refs.outputs.sdk_sha }}
     steps:
-      - name: Create GitHub App token for both repositories
+      - name: Create read-only GitHub App token
         uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
-        id: app-token
+        id: read-token
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PEM }}
-          owner: C2Devel
+          owner: vamping111
           repositories: |
-            terraform-provider-rockitcloud
-            aws-sdk-go
+            terraform-provider-testmark
+            testmark-sdk-go
+          permission-contents: read
 
       - name: Checkout provider develop
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           ref: develop
           fetch-depth: 0
-          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+          token: ${{ steps.read-token.outputs.token }}
 
-      - name: Checkout SDK develop
+      - name: Checkout SDK test release branch
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          repository: C2Devel/aws-sdk-go
-          ref: develop
+          repository: vamping111/testmark-sdk-go
+          ref: codex/release-automation
           path: .release/aws-sdk-go
           fetch-depth: 0
-          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+          token: ${{ steps.read-token.outputs.token }}
 
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
@@ -74,37 +89,63 @@ jobs:
             go.sum
             .release/aws-sdk-go/go.sum
 
+      - name: Record immutable source revisions
+        id: refs
+        run: |
+          echo "provider_sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
+          echo "sdk_sha=$(git -C .release/aws-sdk-go rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
+
       - name: Resolve and validate release versions
         id: versions
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          GH_TOKEN: ${{ steps.read-token.outputs.token }}
           PROVIDER_VERSION_INPUT: ${{ inputs.provider_version }}
           RELEASE_SDK_INPUT: ${{ inputs.release_sdk }}
           SDK_VERSION_INPUT: ${{ inputs.sdk_version }}
+          SDK_SHA: ${{ steps.refs.outputs.sdk_sha }}
         run: |
           set -euo pipefail
 
+          changelog_header=$(head -n 1 CHANGELOG.md)
+          if [[ ! "${changelog_header}" =~ ^##\ ([0-9]+\.[0-9]+\.[0-9]+)\ \(Unreleased\)$ ]]; then
+            echo "The first CHANGELOG.md entry must look like '## 25.6.0 (Unreleased)'" >&2
+            exit 1
+          fi
+          changelog_version="${BASH_REMATCH[1]}"
           provider_version="${PROVIDER_VERSION_INPUT#v}"
+          provider_version="${provider_version:-${changelog_version}}"
           if [[ ! "${provider_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "provider_version must be a semantic version such as 25.6.0" >&2
             exit 1
           fi
-          if ! head -n 1 CHANGELOG.md | grep -Fxq "## ${provider_version} (Unreleased)"; then
-            echo "The first CHANGELOG.md entry must be '## ${provider_version} (Unreleased)'" >&2
+          if [[ "${provider_version}" != "${changelog_version}" ]]; then
+            echo "provider_version ${provider_version} does not match CHANGELOG.md version ${changelog_version}" >&2
             exit 1
           fi
-          if git rev-parse "v${provider_version}" >/dev/null 2>&1; then
-            echo "Provider tag v${provider_version} already exists" >&2
+          IFS=. read -r provider_major provider_minor _ <<< "${provider_version}"
+          next_provider_version="${provider_major}.$((10#${provider_minor} + 1)).0"
+          if git rev-parse --verify --quiet "refs/tags/v${provider_version}" >/dev/null; then
+            echo "Provider tag v${provider_version} already exists; use the recovery workflow" >&2
             exit 1
           fi
 
-          latest_sdk_tag=$(gh release view --repo C2Devel/aws-sdk-go --json tagName --jq .tagName)
-          if [[ -z "${latest_sdk_tag}" ]]; then
-            echo "Unable to determine the latest SDK release" >&2
-            exit 1
+          latest_sdk_tag=$(gh release view --repo vamping111/testmark-sdk-go --json tagName --jq .tagName 2>/dev/null || true)
+          if [[ -n "${latest_sdk_tag}" ]]; then
+            if [[ ! "${latest_sdk_tag}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
+              echo "The latest SDK release has an invalid tag: ${latest_sdk_tag}" >&2
+              exit 1
+            fi
+            git -C .release/aws-sdk-go fetch --force origin "refs/tags/${latest_sdk_tag}:refs/tags/${latest_sdk_tag}"
+            latest_sdk_sha=$(git -C .release/aws-sdk-go rev-parse "refs/tags/${latest_sdk_tag}^{commit}")
+            if ! git -C .release/aws-sdk-go merge-base --is-ancestor "${latest_sdk_sha}" "${SDK_SHA}"; then
+              echo "The latest SDK release ${latest_sdk_tag} is not an ancestor of the tested SDK branch" >&2
+              exit 1
+            fi
+            sdk_changes=$(git -C .release/aws-sdk-go rev-list --count "${latest_sdk_tag}..${SDK_SHA}")
+          else
+            sdk_changes=$(git -C .release/aws-sdk-go rev-list --count "${SDK_SHA}")
           fi
-          git -C .release/aws-sdk-go fetch --force origin "refs/tags/${latest_sdk_tag}:refs/tags/${latest_sdk_tag}"
-          sdk_changes=$(git -C .release/aws-sdk-go rev-list --count "${latest_sdk_tag}..develop")
 
           should_release_sdk=false
           case "${RELEASE_SDK_INPUT}" in
@@ -117,19 +158,32 @@ jobs:
           if [[ "${should_release_sdk}" == true ]]; then
             if [[ -n "${SDK_VERSION_INPUT}" ]]; then
               sdk_version="${SDK_VERSION_INPUT}"
-            elif [[ "${latest_sdk_tag}" =~ ^(v[0-9]+\.[0-9]+\.[0-9]+-ROCKIT)([0-9]+)$ ]]; then
+            elif [[ "${latest_sdk_tag}" =~ ^(v[0-9]+\.[0-9]+\.[0-9]+-TESTMARK)([0-9]+)$ ]]; then
               sdk_version="${BASH_REMATCH[1]}$((BASH_REMATCH[2] + 1))"
             else
-              echo "Cannot calculate the next SDK tag from ${latest_sdk_tag}; provide sdk_version" >&2
+              echo "Cannot calculate the next SDK tag from '${latest_sdk_tag:-no release}'; provide sdk_version" >&2
               exit 1
             fi
-            if git -C .release/aws-sdk-go rev-parse "${sdk_version}" >/dev/null 2>&1; then
-              echo "SDK tag ${sdk_version} already exists" >&2
+          elif [[ -z "${sdk_version}" && "${DRY_RUN}" != "true" ]]; then
+            echo "No SDK release exists. Select release_sdk=always and provide sdk_version." >&2
+            exit 1
+          fi
+
+          if [[ -n "${sdk_version}" && ! "${sdk_version}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
+            echo "Invalid SDK tag: ${sdk_version}" >&2
+            exit 1
+          fi
+
+          if [[ "${should_release_sdk}" == true ]] && git -C .release/aws-sdk-go rev-parse --verify --quiet "refs/tags/${sdk_version}^{commit}" >/dev/null; then
+            existing_sdk_sha=$(git -C .release/aws-sdk-go rev-parse "refs/tags/${sdk_version}^{commit}")
+            if [[ "${existing_sdk_sha}" != "${SDK_SHA}" ]]; then
+              echo "SDK tag ${sdk_version} already points to ${existing_sdk_sha}, not ${SDK_SHA}" >&2
               exit 1
             fi
           fi
 
           echo "provider_version=${provider_version}" >> "${GITHUB_OUTPUT}"
+          echo "next_provider_version=${next_provider_version}" >> "${GITHUB_OUTPUT}"
           echo "sdk_version=${sdk_version}" >> "${GITHUB_OUTPUT}"
           echo "release_sdk=${should_release_sdk}" >> "${GITHUB_OUTPUT}"
           echo "sdk_changes=${sdk_changes}" >> "${GITHUB_OUTPUT}"
@@ -139,8 +193,12 @@ jobs:
         working-directory: .release/aws-sdk-go
         run: |
           make install-deps-verify
-          make all
-          git diff --exit-code
+          make unit
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "SDK verification changed the release tree:" >&2
+            git status --short >&2
+            exit 1
+          fi
 
       - name: Test provider against SDK release candidate
         if: steps.versions.outputs.release_sdk == 'true'
@@ -160,85 +218,238 @@ jobs:
           make test
           make lint
 
-      - name: Publish SDK release
-        if: steps.versions.outputs.release_sdk == 'true' && !inputs.dry_run
+      - name: Test provider with its current SDK pin
+        if: steps.versions.outputs.release_sdk != 'true'
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_TOKEN: ${{ steps.read-token.outputs.token }}
+          GOPRIVATE: github.com/vamping111/*
+          GONOSUMDB: github.com/vamping111/*
+        run: |
+          set -euo pipefail
+          cleanup() {
+            git config --global --unset-all url."https://x-access-token:${APP_TOKEN}@github.com/".insteadOf || true
+          }
+          trap cleanup EXIT
+          git config --global url."https://x-access-token:${APP_TOKEN}@github.com/".insteadOf "https://github.com/"
+          make tools
+          make test
+          make lint
+
+      - name: Validate GoReleaser configuration
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
+        with:
+          version: '~> v1'
+          args: check
+
+      - name: Write preflight summary
+        env:
+          PROVIDER_SHA: ${{ steps.refs.outputs.provider_sha }}
+          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
+          NEXT_PROVIDER_VERSION: ${{ steps.versions.outputs.next_provider_version }}
+          SDK_CHANGES: ${{ steps.versions.outputs.sdk_changes }}
+          SDK_RELEASED: ${{ steps.versions.outputs.release_sdk }}
+          SDK_SHA: ${{ steps.refs.outputs.sdk_sha }}
           SDK_VERSION: ${{ steps.versions.outputs.sdk_version }}
+        run: |
+          {
+            echo "## Release preflight passed"
+            echo ""
+            echo "- Provider: v${PROVIDER_VERSION} from ${PROVIDER_SHA}"
+            echo "- Next changelog section: ${NEXT_PROVIDER_VERSION} (Unreleased)"
+            echo "- SDK candidate: ${SDK_VERSION:-not released} from ${SDK_SHA}"
+            echo "- SDK release required: ${SDK_RELEASED} (${SDK_CHANGES} commits since the latest release)"
+            echo "- Dry run: ${{ inputs.dry_run }}"
+            echo "- Registry publication requested: ${{ inputs.publish_registries }}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  publish:
+    if: needs.preflight.result == 'success' && !inputs.dry_run
+    needs: preflight
+    environment: provider-release
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    steps:
+      - name: Create read-only GitHub App token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: read-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+          owner: vamping111
+          repositories: |
+            terraform-provider-testmark
+            testmark-sdk-go
+          permission-contents: read
+
+      - name: Checkout tested provider revision
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ needs.preflight.outputs.provider_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+          token: ${{ steps.read-token.outputs.token }}
+
+      - name: Checkout tested SDK revision
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          repository: vamping111/testmark-sdk-go
+          ref: ${{ needs.preflight.outputs.sdk_sha }}
+          path: .release/aws-sdk-go
+          fetch-depth: 0
+          persist-credentials: false
+          token: ${{ steps.read-token.outputs.token }}
+
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.21.x'
+          cache-dependency-path: |
+            go.sum
+            .release/aws-sdk-go/go.sum
+
+      - name: Verify tested revisions are still branch heads
+        env:
+          EXPECTED_PROVIDER_SHA: ${{ needs.preflight.outputs.provider_sha }}
+          EXPECTED_SDK_SHA: ${{ needs.preflight.outputs.sdk_sha }}
+          GH_TOKEN: ${{ steps.read-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          provider_sha=$(gh api repos/vamping111/terraform-provider-testmark/git/ref/heads/develop --jq .object.sha)
+          sdk_sha=$(gh api repos/vamping111/testmark-sdk-go/git/ref/heads/codex/release-automation --jq .object.sha)
+          [[ "${provider_sha}" == "${EXPECTED_PROVIDER_SHA}" ]] || { echo "Provider develop changed after preflight" >&2; exit 1; }
+          [[ "${sdk_sha}" == "${EXPECTED_SDK_SHA}" ]] || { echo "SDK release branch changed after preflight" >&2; exit 1; }
+
+      - name: Create SDK write token
+        if: needs.preflight.outputs.release_sdk == 'true'
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: sdk-write-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+          owner: vamping111
+          repositories: testmark-sdk-go
+          permission-contents: write
+
+      - name: Publish SDK release idempotently
+        if: needs.preflight.outputs.release_sdk == 'true'
+        env:
+          APP_SLUG: ${{ steps.sdk-write-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.sdk-write-token.outputs.token }}
+          SDK_SHA: ${{ needs.preflight.outputs.sdk_sha }}
+          SDK_VERSION: ${{ needs.preflight.outputs.sdk_version }}
         working-directory: .release/aws-sdk-go
         run: |
           set -euo pipefail
-          git tag -a "${SDK_VERSION}" -m "Release ${SDK_VERSION}" develop
-          git push origin "${SDK_VERSION}"
-          gh release create "${SDK_VERSION}" \
-            --repo C2Devel/aws-sdk-go \
-            --title "${SDK_VERSION}" \
-            --generate-notes \
-            --verify-tag
+          cleanup() {
+            git config --global --unset-all url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf || true
+          }
+          trap cleanup EXIT
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          bot_id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          git config user.name "${APP_SLUG}[bot]"
+          git fetch --force --tags origin
+          if git rev-parse --verify --quiet "refs/tags/${SDK_VERSION}^{commit}" >/dev/null; then
+            existing_sha=$(git rev-parse "refs/tags/${SDK_VERSION}^{commit}")
+            [[ "${existing_sha}" == "${SDK_SHA}" ]] || { echo "SDK tag points to ${existing_sha}, not ${SDK_SHA}" >&2; exit 1; }
+          else
+            git tag -a "${SDK_VERSION}" -m "Release ${SDK_VERSION}" "${SDK_SHA}"
+            git push origin "refs/tags/${SDK_VERSION}"
+          fi
+          if ! gh release view "${SDK_VERSION}" --repo vamping111/testmark-sdk-go >/dev/null 2>&1; then
+            gh release create "${SDK_VERSION}" \
+              --repo vamping111/testmark-sdk-go \
+              --title "${SDK_VERSION}" \
+              --generate-notes \
+              --verify-tag
+          fi
 
       - name: Pin provider to released SDK
-        if: ${{ !inputs.dry_run }}
         env:
-          SDK_VERSION: ${{ steps.versions.outputs.sdk_version }}
+          APP_TOKEN: ${{ steps.read-token.outputs.token }}
+          SDK_VERSION: ${{ needs.preflight.outputs.sdk_version }}
+          GOPRIVATE: github.com/vamping111/*
+          GONOSUMDB: github.com/vamping111/*
         run: |
-          go mod edit -replace "github.com/aws/aws-sdk-go=github.com/C2Devel/aws-sdk-go@${SDK_VERSION}"
+          git config --global url."https://x-access-token:${APP_TOKEN}@github.com/".insteadOf "https://github.com/"
+          go mod edit -replace "github.com/aws/aws-sdk-go=github.com/vamping111/testmark-sdk-go@${SDK_VERSION}"
           go mod tidy
 
+      - name: Remove SDK checkout from provider release tree
+        run: rm -rf -- .release/aws-sdk-go
+
       - name: Finalize provider changelog
-        if: ${{ !inputs.dry_run }}
         env:
-          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
+          PROVIDER_VERSION: ${{ needs.preflight.outputs.provider_version }}
         run: |
+          set -euo pipefail
           release_date=$(date -u '+%B %d, %Y')
           sed -i "1s/^## ${PROVIDER_VERSION} (Unreleased)$/## ${PROVIDER_VERSION} (${release_date})/" CHANGELOG.md
 
-      - name: Test provider release candidate
-        if: ${{ !inputs.dry_run }}
+      - name: Test final provider release tree
         run: |
           make tools
           make test
           make lint
 
-      - name: Test provider without SDK changes in dry-run
-        if: inputs.dry_run && steps.versions.outputs.release_sdk != 'true'
-        run: |
-          make tools
-          make test
-          make lint
+      - name: Create fresh provider write token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: provider-write-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+          owner: vamping111
+          repositories: terraform-provider-testmark
+          permission-contents: write
 
-      - name: Commit and tag provider release
-        if: ${{ !inputs.dry_run }}
+      - name: Commit and atomically push provider release
         env:
-          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
+          APP_SLUG: ${{ steps.provider-write-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.provider-write-token.outputs.token }}
+          PROVIDER_VERSION: ${{ needs.preflight.outputs.provider_version }}
+          NEXT_PROVIDER_VERSION: ${{ needs.preflight.outputs.next_provider_version }}
+          READ_TOKEN: ${{ steps.read-token.outputs.token }}
         run: |
           set -euo pipefail
-          git config user.email "${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
-          git config user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
+          git config --global --unset-all url."https://x-access-token:${READ_TOKEN}@github.com/".insteadOf || true
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          bot_id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          git config user.name "${APP_SLUG}[bot]"
           git add CHANGELOG.md go.mod go.sum
           git commit -m "chore: release v${PROVIDER_VERSION}"
-          git push origin HEAD:develop
+          release_sha=$(git rev-parse HEAD)
           git tag -a "v${PROVIDER_VERSION}" -m "Release v${PROVIDER_VERSION}"
-          git push origin "v${PROVIDER_VERSION}"
 
-      - name: Refresh GitHub App token for artifact upload
-        if: ${{ !inputs.dry_run }}
+          changelog_tmp=$(mktemp "${RUNNER_TEMP}/CHANGELOG.XXXXXX")
+          {
+            echo "## ${NEXT_PROVIDER_VERSION} (Unreleased)"
+            echo ""
+            cat CHANGELOG.md
+          } > "${changelog_tmp}"
+          mv "${changelog_tmp}" CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -m "chore: start v${NEXT_PROVIDER_VERSION}"
+
+          git push --atomic origin HEAD:develop "refs/tags/v${PROVIDER_VERSION}"
+          git checkout --detach "${release_sha}"
+
+      - name: Create fresh provider release token
         uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: release-token
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PEM }}
-          owner: C2Devel
-          repositories: terraform-provider-rockitcloud
+          owner: vamping111
+          repositories: terraform-provider-testmark
+          permission-contents: write
 
-      - name: Import GPG key
-        if: ${{ !inputs.dry_run }}
+      - name: Import test GPG key
         id: import-gpg
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Build and publish provider release
-        if: ${{ !inputs.dry_run }}
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
         with:
           version: '~> v1'
@@ -247,15 +458,24 @@ jobs:
           GITHUB_TOKEN: ${{ steps.release-token.outputs.token }}
           GPG_FINGERPRINT: ${{ steps.import-gpg.outputs.fingerprint }}
 
-      - name: Wait for the public Terraform Registry
-        if: ${{ !inputs.dry_run }}
+      - name: Remove temporary Git credentials
+        if: always()
         env:
-          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
+          PROVIDER_TOKEN: ${{ steps.provider-write-token.outputs.token }}
+          READ_TOKEN: ${{ steps.read-token.outputs.token }}
+        run: |
+          git config --global --unset-all url."https://x-access-token:${PROVIDER_TOKEN}@github.com/".insteadOf || true
+          git config --global --unset-all url."https://x-access-token:${READ_TOKEN}@github.com/".insteadOf || true
+
+      - name: Wait for the public Terraform Registry
+        if: inputs.publish_registries
+        env:
+          PROVIDER_VERSION: ${{ needs.preflight.outputs.provider_version }}
         run: |
           set -euo pipefail
           for attempt in $(seq 1 60); do
             if curl --fail --silent --show-error \
-              https://registry.terraform.io/v1/providers/c2devel/rockitcloud/versions \
+              https://registry.terraform.io/v1/providers/vamping111/testmark/versions \
               | jq -e --arg version "${PROVIDER_VERSION}" '.versions[] | select(.version == $version)' >/dev/null; then
               echo "Provider ${PROVIDER_VERSION} is available in the public registry"
               exit 0
@@ -267,19 +487,24 @@ jobs:
           exit 1
 
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        if: ${{ !inputs.dry_run }}
+        if: inputs.publish_registries && vars.ENABLE_TEST_REGISTRY_WRITE == 'true'
         with:
           python-version: '3.13'
 
       - name: Install private registry client
-        if: ${{ !inputs.dry_run }}
+        if: inputs.publish_registries && vars.ENABLE_TEST_REGISTRY_WRITE == 'true'
         run: python -m pip install s3cmd==2.4.0
 
-      - name: Update private registry
-        if: ${{ !inputs.dry_run }}
+      - name: Update private test registry
+        if: inputs.publish_registries && vars.ENABLE_TEST_REGISTRY_WRITE == 'true'
         id: private-registry
         env:
+          PROVIDER_NAME: vamping111/testmark
+          RELEASE_MIRROR_URL: ${{ vars.TEST_RELEASE_MIRROR_URL }}
+          S3_BUCKET_NAME: ${{ vars.TEST_S3_BUCKET_NAME }}
           S3_CMD_CFG_LOCATION: ./.s3cfg
+          S3_CONFIG: ${{ secrets.s3_config }}
+          S3_REGISTRY_URL: ${{ vars.TEST_S3_REGISTRY_URL }}
         run: |
           set -euo pipefail
           cleanup() {
@@ -287,31 +512,34 @@ jobs:
           }
           trap cleanup EXIT
           umask 077
-          printf '%s' "${{ secrets.s3_config }}" > .s3cfg
+          printf '%s' "${S3_CONFIG}" > .s3cfg
           ./scripts/update-s3-registry.sh
 
       - name: Upload private registry backup after failure
-        if: ${{ !inputs.dry_run && failure() && steps.private-registry.conclusion == 'failure' }}
+        if: inputs.publish_registries && vars.ENABLE_TEST_REGISTRY_WRITE == 'true' && failure() && steps.private-registry.conclusion == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: s3-backup-${{ steps.versions.outputs.provider_version }}
+          name: s3-backup-${{ needs.preflight.outputs.provider_version }}
           path: s3_backup/
+          retention-days: 1
 
       - name: Write release summary
         if: always()
         env:
-          PROVIDER_VERSION: ${{ steps.versions.outputs.provider_version }}
-          SDK_VERSION: ${{ steps.versions.outputs.sdk_version }}
-          SDK_RELEASED: ${{ steps.versions.outputs.release_sdk }}
-          SDK_CHANGES: ${{ steps.versions.outputs.sdk_changes }}
+          NEXT_PROVIDER_VERSION: ${{ needs.preflight.outputs.next_provider_version }}
+          PROVIDER_VERSION: ${{ needs.preflight.outputs.provider_version }}
+          SDK_VERSION: ${{ needs.preflight.outputs.sdk_version }}
+          SDK_RELEASED: ${{ needs.preflight.outputs.release_sdk }}
+          SDK_CHANGES: ${{ needs.preflight.outputs.sdk_changes }}
         run: |
           {
-            echo "## Release summary"
+            echo "## Test release summary"
             echo ""
             echo "- Provider: v${PROVIDER_VERSION}"
+            echo "- Next changelog section: ${NEXT_PROVIDER_VERSION} (Unreleased)"
             echo "- SDK version: ${SDK_VERSION}"
             echo "- SDK released: ${SDK_RELEASED} (${SDK_CHANGES} commits)"
-            echo "- Dry run: ${{ inputs.dry_run }}"
-            echo "- Public registry: https://registry.terraform.io/providers/c2devel/rockitcloud/${PROVIDER_VERSION}"
-            echo "- GitHub release: https://github.com/C2Devel/terraform-provider-rockitcloud/releases/tag/v${PROVIDER_VERSION}"
+            echo "- Registry publication requested: ${{ inputs.publish_registries }}"
+            echo "- Test S3 write gate: ${{ vars.ENABLE_TEST_REGISTRY_WRITE == 'true' }}"
+            echo "- GitHub release: https://github.com/vamping111/terraform-provider-testmark/releases/tag/v${PROVIDER_VERSION}"
           } >> "${GITHUB_STEP_SUMMARY}"

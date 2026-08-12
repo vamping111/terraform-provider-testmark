@@ -5,6 +5,9 @@ on:
     branches: 'develop'
     paths: 'docs/**'
 
+permissions:
+  contents: read
+
 jobs:
   dev-docs-linter:
     runs-on: ubuntu-22.04
@@ -17,6 +20,7 @@ jobs:
     - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       with:
         ref: ${{ github.event.pull_request.head.sha }}
+        persist-credentials: false
 
     - name: Install tools
       run: make tools
